@@ -1,0 +1,49 @@
+<section class="master-page master-page-inspections" data-page-code="MMMS-INSPECTIONS">
+  <header class="page-header">
+    <div>
+      <a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a>
+      <span class="kicker"><i class="bi" [ngClass]="page().icon"></i> MMMS-INSPECTIONS</span>
+      <h1>Inspections</h1>
+      <p>{{ page().description }}</p>
+    </div>
+    <button class="primary-action" type="button" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add {{ page().singular }}</button>
+  </header>
+  <section class="summary">
+    <div><span class="icon"><i class="bi" [ngClass]="page().icon"></i></span><div><strong>{{ records().length }}</strong><small>records in this workspace</small></div></div>
+    <label class="search"><i class="bi bi-search"></i><input #box [value]="query()" (input)="updateQuery(box.value)" placeholder="Search records"></label>
+  </section>
+  <section class="table-card">
+    <div class="table-scroll">
+      <table>
+        <thead><tr><th *ngFor="let field of fields">{{ field.label }}</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr *ngFor="let record of filtered">
+            <td *ngFor="let field of fields"><strong *ngIf="field === fields[0]">{{ value(record, field.key) }}</strong><span *ngIf="field !== fields[0]">{{ value(record, field.key) }}</span></td>
+            <td><span class="status">{{ record.status }}</span></td>
+            <td class="actions"><button type="button" (click)="openEdit(record)" aria-label="Edit"><i class="bi bi-pencil"></i></button><button type="button" (click)="remove(record)" aria-label="Delete"><i class="bi bi-trash3"></i></button></td>
+          </tr>
+          <tr *ngIf="!filtered.length"><td class="empty" [attr.colspan]="fields.length + 2">No records match your search.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <div class="editor-backdrop" *ngIf="editorOpen()" (click)="closeEditor()">
+    <form class="editor" (submit)="$event.preventDefault(); save()" (click)="$event.stopPropagation()">
+      <header><div><span class="kicker">{{ editingId() ? 'EDIT' : 'NEW' }} {{ page().singular | uppercase }}</span><h2>{{ editingId() ? 'Update record' : 'Add record' }}</h2></div><button type="button" class="close" (click)="closeEditor()"><i class="bi bi-x-lg"></i></button></header>
+      <div class="form-grid">
+        <label *ngFor="let field of fields">{{ field.label }}
+          <ng-container *ngIf="field.type === 'relation'; else staticField">
+            <input *ngIf="optionsFor(field).length > 8" #relationSearchBox type="search" placeholder="Search options" [value]="relationSearch()[field.key] || ''" (input)="updateRelationSearch(field.key, relationSearchBox.value)">
+            <select [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"><option value="">Select...</option><option *ngFor="let option of filteredOptions(field)" [value]="option">{{ option }}</option></select>
+          </ng-container>
+          <ng-template #staticField>
+            <select *ngIf="field.type === 'select'; else inputField" [(ngModel)]="draft[field.key]" [name]="field.key"><option value="">Select...</option><option *ngFor="let option of optionsFor(field)" [value]="option">{{ option }}</option></select>
+            <ng-template #inputField><input [type]="field.type || 'text'" [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"></ng-template>
+          </ng-template>
+        </label>
+        <label>Status<select [(ngModel)]="draft.status" name="status"><option>Active</option><option>Planned</option><option>In progress</option><option>Approved</option><option>Valid</option><option>Expired</option></select></label>
+      </div>
+      <footer><button type="button" class="secondary" (click)="closeEditor()">Cancel</button><button type="submit" class="primary-action">Save record</button></footer>
+    </form>
+  </div>
+</section>

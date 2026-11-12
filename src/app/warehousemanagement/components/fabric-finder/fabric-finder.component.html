@@ -1,0 +1,274 @@
+<form [formGroup]="form" *ngIf="showFilters">
+  <div class="row">
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="wareHouseId">WareHouse</label>
+        <select
+          id="wareHouseId"
+          class="form-control"
+          formControlName="wareHouseId"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if(authService.hasPermission(warehouse.wareHouseName)){
+            <option value="{{ warehouse.id }}">
+              {{ warehouse.wareHouseName }}
+            </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">From Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="fromDate"
+            formControlName="fromDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">To Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="toDate"
+            formControlName="toDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">Style</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="styleName"
+            formControlName="styleName"
+            class="form-control"
+            placeholder="Enter styleName"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">Fab Ref</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="fabricRef"
+            formControlName="fabricRef"
+            class="form-control"
+            placeholder="Enter fabricRef"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">Supplier</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="supplierName"
+            formControlName="supplierName"
+            class="form-control"
+            placeholder="Enter supplierName"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="status">Status</label>
+        <select class="form-control" formControlName="status" id="status">
+          <option value="" [defaultSelected]="true">All</option>
+          <option value="Quarantine">Quarantine</option>
+          <option value="Allocated to Inspection">
+            Allocated to Inspection
+          </option>
+
+          <option value="Inspection Pending">Inspection Pending</option>
+
+          <option value="Issued">Issued</option>
+
+          <option value="Pass">Pass</option>
+          <option value="Reject">Reject</option>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">Invoice No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="invoiceNo"
+            formControlName="invoiceNo"
+            class="form-control"
+            placeholder="Enter invoiceNo"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="ocNo">Oc No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="ocNo"
+            formControlName="ocNo"
+            class="form-control"
+            placeholder="Enter OcNo"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="shadeLot">Lot No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="shadeLot"
+            formControlName="shadeLot"
+            class="form-control"
+            placeholder="Enter shadeLot"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+<button
+  *ngIf="!showFilters"
+  class="btn-sm btn-primary"
+  type="button"
+  (click)="showFilters = !showFilters"
+>
+  Filters
+  <span class="material-icons">filter_list</span>
+</button>
+<button
+  *ngIf="showFilters"
+  class="btn-sm btn-primary"
+  type="button"
+  (click)="fetchFabricCollections()"
+>
+  <span class="material-icons">filter_list</span>
+</button>
+<button
+  *ngIf="this.fabrics.length > 0"
+  type="button"
+  class="btn-sm btn-secondary"
+  (click)="exportTable()"
+>
+  <span class="material-icons">download</span>
+</button>
+@if(fabrics().length>0){
+<div class="table-responsive mt-3">
+  <div class="table-scroll-container">
+    <table class="table table-bordered" id="downloadReport">
+      <thead>
+        <tr>
+          <th>Location</th>
+          <th>FabricRef</th>
+          <th>ColorName</th>
+          <th>StyleName</th>
+          <th>supplierName</th>
+
+          <th>Status</th>
+          <th>Balance Qty</th>
+          <th>Total Qty</th>
+          <th>shadeLot</th>
+          <th>ocNo</th>
+          <th>poNo</th>
+          <th>invoiceNo</th>
+          <!-- <th>Action</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of fabrics()">
+          <td>{{ row?.location }}</td>
+          <td>{{ row?.fabricRef }}</td>
+          <td>{{ row?.colorName }}</td>
+          <td>{{ row?.styleName }}</td>
+          <td>{{ row?.supplierName }}</td>
+
+          <td>
+            <select
+              [disabled]="!row?.editEnabled"
+              class="form-control"
+              [(ngModel)]="row.status"
+              name="status-{{ row?.fabricRef }}"
+            >
+              <option value="Quarantine">Quarantine</option>
+              <option value="Allocated to Inspection">
+                Allocated to Inspection
+              </option>
+              <option value="Inspection Pending">Inspection Pending</option>
+              <option value="Issued">Issued</option>
+              <option value="Pass">Pass</option>
+              <option value="Reject">Reject</option>
+            </select>
+          </td>
+
+          <td>
+            <input
+              [disabled]="!row?.editEnabled"
+              class="form-control"
+              type="text"
+              [(ngModel)]="row.balanceQty"
+              name="balanceQty-{{ row?.fabricRef }}"
+            />
+          </td>
+
+          <td>
+            <input
+              [disabled]="!row?.editEnabled"
+              class="form-control"
+              type="text"
+              [(ngModel)]="row.totalQty"
+              name="totalQty-{{ row?.fabricRef }}"
+            />
+          </td>
+
+          <td>{{ row?.shadeLot }}</td>
+          <td>{{ row?.ocNo }}</td>
+          <td>{{ row?.poNo }}</td>
+          <td>{{ row?.invoiceNo }}</td>
+
+          <!-- <td>
+            <button
+              class="btn-sm p-2"
+              *ngIf="!row?.editEnabled"
+              (click)="row.editEnabled = true"
+            >
+              Edit
+            </button>
+
+            <button
+              class="btn-sm p-2"
+              *ngIf="row.editEnabled"
+              (click)="updateCollection(row)"
+            >
+              Update
+            </button>
+          </td> -->
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+}

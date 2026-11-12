@@ -1,0 +1,11 @@
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-8 col-lg-6 col-xl-5">
+      <zxing-scanner
+        [formats]="formats"
+        (scanSuccess)="onScanSuccess($event)"
+        class="w-100"
+      ></zxing-scanner>
+    </div>
+  </div>
+</div>

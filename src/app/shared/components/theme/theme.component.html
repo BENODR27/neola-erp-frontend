@@ -1,0 +1,66 @@
+<div class="theme-container container mt-4">
+  <h3 class="text-center mb-4">Theme Customization</h3>
+
+  <div class="row mb-3">
+    <div class="col-12 col-md-6">
+      <label for="secondaryColor" class="form-label">Sidebar Color:</label>
+      <input
+        id="secondaryColor"
+        type="color"
+        class="form-control form-control-color"
+        [(ngModel)]="colors.secondary"
+        (input)="updateColor('secondary', colors.secondary)"
+      />
+    </div>
+    <div class="col-12 col-md-6">
+      <label for="textColor" class="form-label">Sidebar Text Color:</label>
+      <input
+        id="textColor"
+        type="color"
+        class="form-control form-control-color"
+        [(ngModel)]="colors.sidebartextcolor"
+        (input)="updateColor('sidebartextcolor', colors.sidebartextcolor)"
+      />
+    </div>
+  </div>
+
+  <div class="row mb-3">
+    <div class="col-12 col-md-6">
+      <label for="backgroundColor" class="form-label">Background Color:</label>
+      <input
+        id="backgroundColor"
+        type="color"
+        class="form-control form-control-color"
+        [(ngModel)]="colors.background"
+        (input)="updateColor('background', colors.background)"
+      />
+    </div>
+    <div class="col-12 col-md-6">
+      <label for="textColor" class="form-label">Body Text Color:</label>
+      <input
+        id="textColor"
+        type="color"
+        class="form-control form-control-color"
+        [(ngModel)]="colors.bodytextcolor"
+        (input)="updateColor('bodytextcolor', colors.bodytextcolor)"
+      />
+    </div>
+    <div class="col-12 col-md-6">
+      <label for="primaryColor" class="form-label">Primary Color:</label>
+      <input
+        id="primaryColor"
+        type="color"
+        class="form-control form-control-color"
+        [(ngModel)]="colors.primary"
+        (input)="updateColor('primary', colors.primary)"
+      />
+    </div>
+  </div>
+
+  <div>
+    <button class="btn btn-primary" (click)="themeService.fetchColorsFromApi()">
+      Reset to Default
+    </button>
+    <button class="btn btn-success ms-2">Save</button>
+  </div>
+</div>

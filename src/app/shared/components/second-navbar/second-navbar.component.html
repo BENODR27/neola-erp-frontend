@@ -1,0 +1,16 @@
+<nav class="second-nav" aria-label="Workspace sections">
+  <a
+    [routerLink]="['/adminv2/welcome']"
+    class="nav-link"
+    [class.active]="isActive('/adminv2/welcome')"
+    >Home</a
+  >
+  <a
+    [routerLink]="['/adminv2/applications']"
+    class="nav-link"
+    [class.active]="isActive('/adminv2/applications')"
+    >Applications</a
+  >
+  <!-- <a class="nav-link col">Reports</a>
+  <a class="nav-link col">Dashboards</a> -->
+</nav>

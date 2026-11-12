@@ -1,0 +1,73 @@
+<div>
+  <form class="forms-sample" (ngSubmit)="fetchSourcingAsnDetails()">
+    <div class="form-group">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="invoiceId"
+          name="invoiceId"
+          placeholder="Enter Invoice No"
+        />
+        <button class="btn-sm btn-outline-secondary" type="submit">
+          <span class="material-icons">search</span>
+        </button>
+        <button
+          class="btn-sm btn-outline-secondary"
+          type="button"
+          (click)="printDiv()"
+        >
+          <span class="material-icons">download</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  <div id="print-container">
+    <div
+      *ngFor="let row of sourcingAsnDetails()"
+      class="page-break content-container"
+    >
+      <div class="qr-container">
+        <qrcode
+          [elementType]="'img'"
+          *ngIf="row.InvoiceNo"
+          [qrdata]="
+            row.ShadeLot +
+            '#$@' +
+            row.OCNo +
+            '#$@' +
+            row.InvoiceNo +
+            '#$@' +
+            row.SupplierName +
+            '#$@' +
+            row.OrderNo +
+            '#$@' +
+            row.ArticleCode +
+            '#$@' +
+            row.StyleName +
+            '#$@' +
+            row.ColorName +
+            '#$@' +
+            row.Qty
+          "
+          [width]="300"
+          [errorCorrectionLevel]="'L'"
+        ></qrcode>
+      </div>
+
+      <div class="details-container">
+        <p><strong>Shade Lot:</strong> {{ row.ShadeLot }}</p>
+        <p><strong>OC:</strong> {{ row.OCNo }}</p>
+        <p><strong>Invoice No:</strong> {{ row.InvoiceNo }}</p>
+        <p class="sname"><strong>SN:</strong> {{ row.SupplierName }}</p>
+        <p><strong>PO:</strong> {{ row.OrderNo }}</p>
+        <p><strong>REF:</strong> {{ row.ArticleCode }}</p>
+        <p><strong>Style:</strong> {{ row.StyleName }}</p>
+        <p><strong>Color:</strong> {{ row.ColorName }}</p>
+        <p><strong>Quantity:</strong> {{ row.Qty }}</p>
+        <p><strong>UOM:</strong> {{ row.UOM }}</p>
+      </div>
+    </div>
+  </div>
+</div>

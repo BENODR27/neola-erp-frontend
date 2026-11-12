@@ -1,0 +1,73 @@
+<main class="home-page">
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="hero-glow" aria-hidden="true"></div>
+
+    <div class="hero-copy">
+      <span class="hero-eyebrow">
+        <span class="eyebrow-mark"><i class="bi bi-stars" aria-hidden="true"></i></span>
+        IAM CONTROL PLANE
+      </span>
+      <h1 id="home-title">
+        Welcome to <span>IAM</span>
+        <small>Identity, access, and application control.</small>
+      </h1>
+      <p>
+        Your identity and access workspace for managing applications, subscriptions, permissions,
+        and secure customer boundaries.
+      </p>
+      <a class="explore-link" [routerLink]="['/adminv2/applications']">
+        Explore applications
+        <i class="bi bi-arrow-right" aria-hidden="true"></i>
+      </a>
+    </div>
+
+    <div class="workspace-art" aria-hidden="true">
+      <div class="art-orbit"></div>
+      <div class="art-card">
+        <div class="art-card-header">
+          <span class="art-logo">S</span>
+          <span class="art-header-line"></span>
+          <span class="art-menu"><i class="bi bi-three-dots"></i></span>
+        </div>
+        <div class="art-card-body">
+          <span class="art-label"></span>
+          <div class="art-module-grid">
+            <span><i class="bi bi-people"></i></span>
+            <span><i class="bi bi-shield-check"></i></span>
+            <span><i class="bi bi-sliders"></i></span>
+            <span><i class="bi bi-graph-up-arrow"></i></span>
+          </div>
+          <div class="art-status">
+            <span class="art-status-icon"><i class="bi bi-check2"></i></span>
+            <span class="art-status-line"></span>
+            <span class="art-status-dot"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="home-highlights" aria-label="Workspace highlights">
+    <article>
+      <span class="highlight-icon"><i class="bi bi-grid-1x2"></i></span>
+      <div>
+        <h2>Tools, organized</h2>
+        <p>Move between your applications from one workspace.</p>
+      </div>
+    </article>
+    <article>
+      <span class="highlight-icon highlight-violet"><i class="bi bi-shield-lock"></i></span>
+      <div>
+        <h2>Secure by design</h2>
+        <p>Access is shaped around your assigned permissions.</p>
+      </div>
+    </article>
+    <article>
+      <span class="highlight-icon highlight-teal"><i class="bi bi-compass"></i></span>
+      <div>
+        <h2>Easy to navigate</h2>
+        <p>Find the right destination without unnecessary friction.</p>
+      </div>
+    </article>
+  </section>
+</main>

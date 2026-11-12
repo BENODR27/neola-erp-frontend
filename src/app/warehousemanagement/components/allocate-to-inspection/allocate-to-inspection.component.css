@@ -1,0 +1,16 @@
+.table-scroll-container {
+    overflow-x: auto; /* Enables horizontal scrolling */
+    overflow-y: auto; /* Enables vertical scrolling */
+    max-height: 400px; /* Adjust the height as needed */
+    max-width: 100%; /* Ensures the table doesn't overflow parent */
+    display: block; /* Ensures the container behaves as a block element */
+  }
+  .form-check-input {
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .form-check-input:checked {
+    transform: scale(1.2);
+    box-shadow: 0 0 5px rgba(0, 255, 0, 0.6);
+  }
+  

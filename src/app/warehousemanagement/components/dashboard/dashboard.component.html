@@ -1,0 +1,233 @@
+<div class="row dashpg animate__animated animate__fadeIn">
+  <form [formGroup]="form" class="mb-4">
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <label for="wareHouseId" class="fw-semibold">Select Warehouse</label>
+        <div class="input-group">
+          <select
+            id="wareHouseId"
+            class="form-control"
+            formControlName="wareHouseId"
+            (change)="fetchRackDatas()"
+          >
+            <ng-container *ngFor="let warehouse of warehouses()">
+              @if(authService.hasPermission(warehouse.wareHouseName)){
+              <option value="{{ warehouse.id }}">
+                {{ warehouse.wareHouseName }}
+              </option>
+              }
+            </ng-container>
+          </select>
+        </div>
+      </div>
+    </div>
+  </form>
+  <div class="dashboard">
+    @if(rackStatistics()){
+    <div class="p-3 animate__animated animate__fadeInUp">
+      <div class="row g-4">
+        <div class="col">
+          <div
+            class="card text-center card-racks shadow-lg animate__animated animate__bounceIn"
+          >
+            <div class="card-header border-0 bg-transparent"></div>
+            <div class="card-body">
+              <h5 class="card-title fs-5 fw-bold text-secondary">Racks</h5>
+              <h1 class="display-4 fw-bold text-primary">{{ racks().length }}</h1>
+            </div>
+            <div class="card-footer border-0 bg-transparent"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div
+            class="card text-center card-bays shadow-lg animate__animated animate__bounceIn animate__delay-1s"
+          >
+            <div class="card-header border-0 bg-transparent"></div>
+            <div class="card-body">
+              <h5 class="card-title fs-5 fw-bold text-secondary">Bays</h5>
+              <h1 class="display-4 fw-bold text-info">{{ noOfBays }}</h1>
+            </div>
+            <div class="card-footer border-0 bg-transparent"></div>
+          </div>
+        </div>
+        <div class="col">
+          <div
+            class="card text-center card-bins shadow-lg animate__animated animate__bounceIn animate__delay-2s"
+          >
+            <div class="card-header border-0 bg-transparent"></div>
+            <div class="card-body">
+              <h5 class="card-title fs-5 fw-bold text-secondary">Bins</h5>
+              <h1 class="display-4 fw-bold text-success">
+                {{
+                  fullOrEmpty.chartData[1] +
+                    "/" +
+                    (fullOrEmpty.chartData[0] + fullOrEmpty.chartData[1])
+                }}
+              </h1>
+            </div>
+            <div class="card-footer border-0 bg-transparent"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <ng-container *ngFor="let item of rackStatistics(); let i = index">
+      <!-- Toggle Button -->
+      <div
+        data-bs-toggle="collapse"
+        [attr.data-bs-target]="'#collapseExample' + i"
+        aria-expanded="false"
+        [attr.aria-controls]="'collapseExample' + i"
+        class="animate__animated animate__fadeInUp animate__delay-1s"
+        style="cursor: pointer"
+      >
+        <div
+          class="statcard mb-2 shadow-sm hover-shadow animate__animated animate__pulse"
+          style="background-color: #f8f9fa"
+        >
+          <div
+            class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap"
+          >
+            <h3 class="fw-bold text-dark">{{ item?.rackNumber }}</h3>
+            <h2 class="fw-bold" style="color: #0d6efd">
+              {{ item?.binsWithPalletId + "/" + item?.binsWithoutPalletId }}
+            </h2>
+          </div>
+          <div class="progress progress-md" style="height: 18px">
+            <div
+              class="progress-bar"
+              role="progressbar"
+              [style.width.%]="item.fullPercentage"
+              [style.backgroundColor]="'#198754'"
+              aria-valuenow="item.fullPercentage"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            ></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Collapsible Content -->
+      <div class="collapse" [id]="'collapseExample' + i">
+        <div
+          class="card card-body animate__animated animate__fadeIn"
+          style="background-color: #f4f6f8"
+        >
+          <ul class="list-unstyled">
+            <li *ngFor="let bay of item.bayStatistics" class="mb-3">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1 max-width-progress-wrap"
+              >
+                <h3 class="fw-semibold" style="color: #495057">
+                  Bay {{ bay.bayNumber }}
+                </h3>
+                <h2 class="fw-bold" style="color: #6610f2">
+                  {{ bay?.binsWithPalletId + "/" + bay?.binsWithoutPalletId }}
+                </h2>
+              </div>
+              <div class="progress progress-sm mt-2" style="height: 12px">
+                <div
+                  class="progress-bar"
+                  role="progressbar"
+                  [style.width.%]="bay.emptyPercentage"
+                  [style.backgroundColor]="'#6c757d'"
+                  aria-valuenow="bay.fullPercentage"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </ng-container>
+    }
+  </div>
+
+  <!-- <div class="chart">
+    <p-chart type="bar" [data]="data" [options]="options" class="h-[30rem]" />
+  </div> -->
+  <!-- <div class="col-md-6 col-lg-6 grid-margin stretch-card">
+    <div class="card card-rounded">
+      <div class="card-body">
+        <div class="d-flex align-items-center justify-content-between mb-3">
+          <h4 class="card-title card-title-dash">Activities</h4>
+          <p class="mb-0">20 finished, 5 remaining</p>
+        </div>
+        <ul class="bullet-line-list">
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Ben Tossell</span>
+                assign you a task
+              </div>
+              <p>Just now</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Oliver Noah</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Jack William</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Leo Lucas</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Thomas Henry</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Ben Tossell</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+          <li>
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="text-light-green">Ben Tossell</span>
+                assign you a task
+              </div>
+              <p>1h</p>
+            </div>
+          </li>
+        </ul>
+        <div class="list align-items-center pt-3">
+          <div class="wrapper w-100">
+            <p class="mb-0">
+              <a href="#" class="fw-bold text-primary"
+                >Show all <i class="mdi mdi-arrow-right ms-2"></i
+              ></a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

@@ -1,0 +1,177 @@
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-md-12 col-lg-2 mb-1">
+      <div class="form-group">
+        <label for="ocNo">From Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="fromDate"
+            formControlName="fromDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2 mb-1">
+      <div class="form-group">
+        <label for="ocNo">To Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="toDate"
+            formControlName="toDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2 mb-1">
+      <div class="form-group">
+        <label for="wareHouseId">Select wareHouse</label>
+        <select
+          class="form-control"
+          id="wareHouseId"
+          formControlName="wareHouseId"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if(authService.hasPermission(warehouse.wareHouseName)){
+            <option value="{{ warehouse.wareHouseName }}">
+              {{ warehouse.wareHouseName }}
+            </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-3 mb-1">
+      <div class="form-group">
+        <label for="factoryId">Select Factory</label>
+        <select class="form-control" id="factoryId" formControlName="factoryId">
+          <ng-container *ngFor="let factory of factories()">
+            <!-- @if(authService.hasPermission(factory.name )){ -->
+            <option value="{{ factory.name }}">
+              {{ factory.name }}
+            </option>
+            <!-- } -->
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-3 mb-1">
+      <div class="form-group">
+        <label for="status">Select Status</label>
+        <select
+          class="form-control"
+          id="status"
+          formControlName="status"
+          (change)="fetchFabricCollections()"
+        >
+          <ng-container
+            *ngFor="let status of ['Pending', 'Accepted', 'Rejected']"
+          >
+            <option value="{{ status }}">
+              {{ status }}
+            </option>
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <button
+      class="btn-sm btn-success"
+      type="button"
+      (click)="fetchFabricCollections()"
+    >
+      Filter
+    </button>
+  </div>
+</form>
+@if(fabrics().length>0){ @if(fabrics().length>0){
+<div class="table-responsive mt-3">
+  <div class="table-scroll-container">
+    <table id="sourcingAsnTable" class="table table-bordered">
+      <thead>
+        <tr>
+          <!-- <th>fabricCollectionId</th> -->
+          <th>palletId</th>
+
+          <th>facility</th>
+          <th>requestedBy</th>
+          <th>warehouseName</th>
+          <th>issuedDate</th>
+          <th>issuedOn</th>
+          <th>colour</th>
+
+          <th>shadeLot</th>
+          <th>ocNo</th>
+          <th>poNo</th>
+          <th>invoiceNo</th>
+          <th>issuedQty</th>
+          <th>issuedBy</th>
+          <!-- <th>remarks</th> -->
+          <th>status</th>
+          <th *ngIf="form.get('status')?.value == 'Pending'">Actions</th>
+          <!-- <th *ngIf="form.get('status')?.value == 'Accepted'">Request</th> -->
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of fabrics()">
+          <td>{{ row?.fabricCollection?.palletId }}</td>
+          <td>{{ row.facility }}</td>
+          <td>{{ row.requestedBy }}</td>
+          <td>{{ row.warehouseName }}</td>
+          <td>{{ row.issuedDate }}</td>
+          <td>{{ row.createdAt }}</td>
+          <td>{{ row?.fabricCollection?.colorName }}</td>
+
+          <td>{{ row?.shadeLot }}</td>
+          <td>{{ row?.ocNo }}</td>
+          <td>{{ row?.poNo }}</td>
+          <td>{{ row?.invoiceNo }}</td>
+          <td>{{ row?.issueQty }}</td>
+
+          <td>{{ row.issuedBy }}</td>
+          <!-- <td>{{ row.remarks }}</td> -->
+          <td>
+            <span *ngIf="form.get('status')?.value != 'Pending'">
+              {{ row.status }}
+            </span>
+            <select
+              *ngIf="form.get('status')?.value == 'Pending'"
+              class="form-control"
+              [(ngModel)]="row.updatedStatus"
+            >
+              <option value="Pending">Pending</option>
+              <option
+                value="Accepted"
+                *ngIf="form.get('status')?.value == 'Pending'"
+              >
+                Accepted
+              </option>
+              <option
+                value="Rejected"
+                *ngIf="form.get('status')?.value == 'Pending'"
+              >
+                Rejected
+              </option>
+            </select>
+          </td>
+          <td *ngIf="row.updatedStatus && row.updatedStatus != 'Pending'">
+            <button
+              class="btn btn-sm btn-success mt-1"
+              (click)="submitAction(row)"
+            >
+              Save
+            </button>
+          </td>
+          <!-- <td *ngIf="form.get('status')?.value == 'Accepted'">
+            <button class="btn btn-danger mt-1">
+              Cancel
+            </button>
+          </td> -->
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+} }

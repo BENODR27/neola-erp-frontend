@@ -1,0 +1,39 @@
+<div class="table-responsive tablesettings">
+  <table class="table" id="downloadReport">
+    <thead>
+      <tr>
+        <th
+          *ngFor="let header of headers; let i = index"
+          class="position-relative"
+        >
+          <span (click)="toggleFilter(fields[i])" class="header-filter">
+            {{ header }} ▾
+          </span>
+
+          <!-- Dropdown Filter -->
+          <div class="dropdown-filter" *ngIf="activeFilter === fields[i]">
+            <div class="dropdown-item" (click)="clearFilter()">
+              🔄 Clear Filter
+            </div>
+
+            <div
+              class="dropdown-item"
+              *ngFor="let value of columnValues[fields[i]]"
+              (click)="applyFilter(fields[i], value)"
+            >
+              {{ value }}
+            </div>
+          </div>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr *ngFor="let row of filteredRows()">
+        <td *ngFor="let field of fields">
+          {{ row[field] }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

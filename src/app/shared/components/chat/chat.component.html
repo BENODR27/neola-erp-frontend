@@ -1,0 +1,74 @@
+<button
+  type="button"
+  class="chat-launcher"
+  [class.is-open]="isOpen()"
+  [attr.aria-expanded]="isOpen()"
+  [attr.aria-label]="isOpen() ? 'Close chat' : 'Open chat'"
+  (click)="toggleChat()"
+>
+  <span class="chat-launcher-icon material-icons" aria-hidden="true">
+    {{ isOpen() ? "close" : "forum" }}
+  </span>
+</button>
+
+<section
+  class="chat-window"
+  *ngIf="isOpen()"
+  aria-label="Chat assistant"
+>
+  <header class="chat-header">
+    <div class="assistant-avatar material-icons" aria-hidden="true">
+      smart_toy
+    </div>
+    <div class="assistant-details">
+      <h2>Chat</h2>
+      <span><i></i> Your Styx AI assistant</span>
+    </div>
+    <button
+      type="button"
+      class="close-btn"
+      aria-label="Close chat"
+      (click)="toggleChat()"
+    >
+      ×
+    </button>
+  </header>
+
+  <div class="chat-body" aria-live="polite" aria-relevant="additions text">
+    <div
+      *ngFor="let msg of chatHistory"
+      class="message"
+      [ngClass]="msg.sender"
+      [class.pending]="msg.isPending"
+    >
+      {{ msg.message }}
+    </div>
+  </div>
+
+  <div class="quick-commands" *ngIf="!isSending()">
+    <button type="button" (click)="sendMessage('FG REPORT TODAY')">
+      FG report today
+    </button>
+    <button type="button" (click)="sendMessage('HELP')">Help</button>
+  </div>
+
+  <form class="chat-input" (ngSubmit)="onSubmit($event)">
+    <label class="visually-hidden" for="chat-message">Message chat assistant</label>
+    <input
+      id="chat-message"
+      name="message"
+      type="text"
+      [(ngModel)]="inputText"
+      placeholder="Type a message..."
+      autocomplete="off"
+      [disabled]="isSending()"
+    />
+    <button
+      type="submit"
+      aria-label="Send message"
+      [disabled]="isSending() || !inputText.trim()"
+    >
+      <span aria-hidden="true">➤</span>
+    </button>
+  </form>
+</section>

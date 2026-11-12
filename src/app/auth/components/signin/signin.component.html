@@ -1,0 +1,52 @@
+<div class="signin-shell">
+  <div class="signin-backdrop"></div>
+  <div class="signin-layout">
+    <aside class="signin-visual">
+      <div class="brand-block">
+        <div class="brand-badge">ERP</div>
+        <img src="/assets/cflogo.png" alt="CF admin" class="brand-logo-lg" />
+      </div>
+      <div class="visual-copy">
+        <p class="eyebrow">Intelligent operations</p>
+        <h2>Empowering Garment Excellence Through Digital Innovation.</h2>
+        <p>Connect people, production, and compliance in one unified operational workspace.</p>
+      </div>
+      <div class="production-scene" aria-label="Apparel production workflow">
+        <div class="production-flow">
+          <div class="production-step"><span class="scene-icon">⌁</span><span>Pattern</span></div>
+          <div class="production-step"><span class="scene-icon">✂</span><span>Cut</span></div>
+          <div class="production-step"><span class="scene-icon">⌁</span><span>Trim</span></div>
+          <div class="production-step"><span class="scene-icon">⌑</span><span>Stitch</span></div>
+          <div class="production-step"><span class="scene-icon">□</span><span>Pack</span></div>
+        </div>
+      </div>
+    </aside>
+    <main class="signin-panel">
+      <div class="signin-card">
+        <div class="brand-header"><img [src]="appConfig.logo" [alt]="appConfig.name" class="brand-logo-sm" /></div>
+        <div class="welcome-copy">
+          <p class="eyebrow dark">Welcome back</p>
+          <h1>Sign in to your workspace</h1>
+        </div>
+        <form [formGroup]="form" (ngSubmit)="submit()" class="signin-form" novalidate>
+          <div class="field-group">
+            <label for="employeeCode">Employee code</label>
+            <input id="employeeCode" formControlName="employeeCode" type="text" autocomplete="username" placeholder="Enter employee code" />
+            <small *ngIf="form.controls.employeeCode.touched && form.controls.employeeCode.invalid">Employee code is required.</small>
+          </div>
+          <div class="field-group">
+            <label for="authCode">Security code</label>
+            <input id="authCode" formControlName="authCode" type="password" autocomplete="current-password" placeholder="Enter security code" />
+            <small *ngIf="form.controls.authCode.touched && form.controls.authCode.invalid">Security code is required.</small>
+          </div>
+          <div class="form-meta">
+            <label class="remember-me"><input type="checkbox" /> <span>Remember me</span></label>
+            <a routerLink="/auth/login">V1 Login</a>
+          </div>
+          <p class="error" *ngIf="errorMessage()" role="alert">{{ errorMessage() }}</p>
+          <button type="submit" [disabled]="isSubmitting()" class="login-button">{{ isSubmitting() ? 'Signing in…' : 'Sign in' }}</button>
+        </form>
+      </div>
+    </main>
+  </div>
+</div>

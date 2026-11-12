@@ -1,0 +1,354 @@
+<main class="sticker-page">
+  <header class="page-heading">
+    <div>
+      <p class="eyebrow">WAREHOUSE MANAGEMENT</p>
+      <h1>Create fabric roll stickers</h1>
+      <p class="description">
+        Enter shared details, then adjust any roll individually in the table.
+        Every roll receives a unique ID based on the shade lot.
+      </p>
+    </div>
+    <div class="heading-actions">
+      <button
+        *ngIf="!isTableView()"
+        class="btn btn-primary"
+        type="button"
+        (click)="generateTable()"
+      >
+        <span class="material-icons align-middle me-1">table_view</span>
+        Generate roll table
+      </button>
+      <ng-container *ngIf="isTableView()">
+        <button
+          class="btn btn-primary"
+          type="button"
+          (click)="downloadStickers()"
+          [disabled]="isDownloading()"
+        >
+          <span class="material-icons align-middle me-1">download</span>
+          {{ isDownloading() ? "Preparing..." : "Download 4 × 4 stickers" }}
+        </button>
+      </ng-container>
+    </div>
+  </header>
+
+  <form *ngIf="!isTableView()" class="details-card" [formGroup]="form">
+    <div class="card-heading">
+      <span class="material-icons">edit_note</span>
+      <div>
+        <h2>Default roll details</h2>
+        <p>Fields are shared across rolls by default. Uncheck “Same for all” to edit a field per roll below.</p>
+      </div>
+    </div>
+
+    <div class="details-grid">
+      <div class="field">
+        <label for="shadeLot">Shade lot / roll ID prefix <span>*</span></label>
+        <input
+          id="shadeLot"
+          class="form-control"
+          formControlName="shadeLot"
+          placeholder="e.g. LOT-100"
+        />
+        <small>Generated IDs: {{ form.get("shadeLot")?.value || "LOT" }}-R1, -R2, ...</small>
+      </div>
+      <div class="field">
+        <label for="numberOfRolls">Number of rolls <span>*</span></label>
+        <input
+          id="numberOfRolls"
+          class="form-control"
+          type="number"
+          min="1"
+          step="1"
+          formControlName="numberOfRolls"
+          (change)="onRollCountChange()"
+        />
+      </div>
+      <div class="field">
+        <label for="invoiceNo">Invoice <span>*</span></label>
+        <input
+          id="invoiceNo"
+          class="form-control"
+          formControlName="invoiceNo"
+          placeholder="Invoice number"
+        />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.invoiceNo"
+            (change)="setSameForAll('invoiceNo', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="supplierName">Supplier</label>
+        <input
+          id="supplierName"
+          class="form-control"
+          formControlName="supplierName"
+          placeholder="Supplier name"
+        />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.supplierName"
+            (change)="setSameForAll('supplierName', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="ocNo">OC</label>
+        <input id="ocNo" class="form-control" formControlName="ocNo" />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.ocNo"
+            (change)="setSameForAll('ocNo', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="poNo">PO</label>
+        <input id="poNo" class="form-control" formControlName="poNo" />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.poNo"
+            (change)="setSameForAll('poNo', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="fabricRef">Fabric reference</label>
+        <input
+          id="fabricRef"
+          class="form-control"
+          formControlName="fabricRef"
+        />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.fabricRef"
+            (change)="setSameForAll('fabricRef', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="styleName">Style</label>
+        <input id="styleName" class="form-control" formControlName="styleName" />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.styleName"
+            (change)="setSameForAll('styleName', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="colorName">Color</label>
+        <input id="colorName" class="form-control" formControlName="colorName" />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.colorName"
+            (change)="setSameForAll('colorName', $any($event.target).checked)"
+          />
+          Same for all rolls
+        </label>
+      </div>
+      <div class="field">
+        <label for="totalQty">Quantity per roll <span>*</span></label>
+        <input
+          id="totalQty"
+          class="form-control"
+          type="number"
+          min="0.01"
+          step="any"
+          formControlName="totalQty"
+        />
+        <label class="same-toggle">
+          <input
+            type="checkbox"
+            [checked]="sameForAll.totalQty"
+            (change)="setSameForAll('totalQty', $any($event.target).checked)"
+          />
+          Same quantity for all rolls
+        </label>
+      </div>
+    </div>
+  </form>
+
+  <section *ngIf="isTableView()" class="table-section">
+    <div class="preview-heading">
+      <div>
+        <h2>Roll-by-roll details</h2>
+        <p>Enter quantities and any details that differ between rolls.</p>
+      </div>
+      <div class="table-actions">
+        <span class="roll-count">{{ rollRows().length }} rolls</span>
+        <button
+          class="edit-details-button"
+          type="button"
+          (click)="editDetails()"
+        >
+          <span class="material-icons" aria-hidden="true">edit</span>
+          <span>Edit details</span>
+        </button>
+      </div>
+    </div>
+    <div class="table-responsive">
+      <table class="table roll-details-table">
+        <thead>
+          <tr>
+            <th scope="col">Roll ID</th>
+            <th scope="col">Invoice</th>
+            <th scope="col">Supplier</th>
+            <th scope="col">OC</th>
+            <th scope="col">PO</th>
+            <th scope="col">Fabric ref</th>
+            <th scope="col">Style</th>
+            <th scope="col">Color</th>
+            <th scope="col">Quantity</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of rollRows(); let i = index">
+            <th scope="row" class="roll-id">
+              {{ form.get("shadeLot")?.value || "LOT" }}-R{{ row.rollIndex }}
+            </th>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'invoiceNo')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.invoiceNo"
+                (ngModelChange)="updateRollField(i, 'invoiceNo', $event)"
+                aria-label="Invoice"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'supplierName')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.supplierName"
+                (ngModelChange)="updateRollField(i, 'supplierName', $event)"
+                aria-label="Supplier"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'ocNo')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.ocNo"
+                (ngModelChange)="updateRollField(i, 'ocNo', $event)"
+                aria-label="OC"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'poNo')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.poNo"
+                (ngModelChange)="updateRollField(i, 'poNo', $event)"
+                aria-label="PO"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'fabricRef')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.fabricRef"
+                (ngModelChange)="updateRollField(i, 'fabricRef', $event)"
+                aria-label="Fabric reference"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'styleName')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.styleName"
+                (ngModelChange)="updateRollField(i, 'styleName', $event)"
+                aria-label="Style"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control"
+                [ngModel]="rollFieldValue(i, 'colorName')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.colorName"
+                (ngModelChange)="updateRollField(i, 'colorName', $event)"
+                aria-label="Color"
+              />
+            </td>
+            <td>
+              <input
+                class="form-control quantity-input"
+                type="number"
+                min="0.01"
+                step="any"
+                [ngModel]="rollFieldValue(i, 'totalQty')"
+                [ngModelOptions]="{ standalone: true }"
+                [disabled]="sameForAll.totalQty"
+                (ngModelChange)="updateRollField(i, 'totalQty', $event)"
+                aria-label="Quantity"
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section *ngIf="isTableView()" class="preview-section">
+    <div class="preview-heading">
+      <div>
+        <h2>Sticker preview</h2>
+        <p>{{ stickers.length }} unique sticker{{ stickers.length === 1 ? "" : "s" }}</p>
+      </div>
+    </div>
+    <div
+      *ngIf="stickers.length > 0"
+      id="roll-sticker-preview"
+      class="sticker-grid"
+    >
+      <article
+        class="sticker-card"
+        *ngFor="let sticker of stickers; trackBy: trackByRollIndex"
+      >
+        <div class="sticker-topline">
+          <span>FABRIC ROLL</span>
+          <span>{{ sticker.rollId }}</span>
+        </div>
+        <div class="sticker-main">
+          <qrcode
+            [elementType]="'img'"
+            [qrdata]="sticker.qrData"
+            [width]="140"
+            [errorCorrectionLevel]="'L'"
+          ></qrcode>
+          <div class="sticker-details">
+            <h3>{{ sticker.rollId }}</h3>
+            <p><strong>Invoice</strong><span>{{ sticker.invoiceNo || "-" }}</span></p>
+            <p><strong>Supplier</strong><span>{{ sticker.supplierName || "-" }}</span></p>
+            <p><strong>OC / PO</strong><span>{{ sticker.ocNo || "-" }} / {{ sticker.poNo || "-" }}</span></p>
+            <p><strong>Reference</strong><span>{{ sticker.fabricRef || "-" }}</span></p>
+            <p><strong>Style / Color</strong><span>{{ sticker.styleName || "-" }} / {{ sticker.colorName || "-" }}</span></p>
+            <p class="quantity"><strong>Quantity</strong><span>{{ sticker.totalQty ?? "-" }}</span></p>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</main>

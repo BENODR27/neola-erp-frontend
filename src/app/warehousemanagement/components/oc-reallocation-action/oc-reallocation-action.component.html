@@ -1,0 +1,84 @@
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-md-12 col-lg-4 mb-1">
+      <div class="form-group">
+        <label for="ocNo">From Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="fromDate"
+            formControlName="fromDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-4 mb-1">
+      <div class="form-group">
+        <label for="ocNo">To Date</label>
+        <div class="input-group">
+          <input
+            type="date"
+            id="toDate"
+            formControlName="toDate"
+            class="form-control"
+          />
+        </div>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-4 mb-1">
+      <div class="form-group">
+        <label for="wareHouseName">Select wareHouse</label>
+        <select
+          class="form-control"
+          id="wareHouseName"
+          formControlName="wareHouseName"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if(authService.hasPermission(warehouse.wareHouseName)){
+            <option value="{{ warehouse.wareHouseName }}">
+              {{ warehouse.wareHouseName }}
+            </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+
+    <button
+      class="btn-sm btn-success"
+      type="button"
+      (click)="fetchFabricCollections()"
+    >
+      Filter
+    </button>
+  </div>
+</form>
+@if(fabrics().length>0){ @if(fabrics().length>0){
+<div class="table-responsive mt-3">
+  <div class="table-scroll-container">
+    <table id="sourcingAsnTable" class="table table-bordered">
+      <thead>
+        <tr>
+          <th>From Fabric Collection ID</th>
+          <th>To Fabric Collection ID</th>
+          <th>Qty To Allocate</th>
+          <th>Warehouse Name</th>
+          <th>Requested By</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of fabrics()">
+          <td>{{ row.fromFabricCollectionId }}</td>
+          <td>{{ row.toFabricCollectionId }}</td>
+          <td>{{ row.qtyToAllocate }}</td>
+          <td>{{ row.wareHouseName }}</td>
+          <td>{{ row.requestedBy }}</td>
+          <td>{{ row.status }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+} }

@@ -1,0 +1,431 @@
+:host {
+  display: block;
+  min-height: 100%;
+  background: #f5f7fb;
+}
+
+.issue-page {
+  max-width: 1500px;
+  margin: 0 auto;
+  padding: 30px clamp(16px, 3vw, 40px) 48px;
+  color: #25364d;
+}
+
+.page-header,
+.inventory-heading,
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+
+.page-eyebrow {
+  margin: 0 0 6px;
+  color: #4773ae;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.page-header h1 {
+  margin: 0;
+  color: #162b49;
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 750;
+}
+
+.page-description,
+.section-title p,
+.inventory-heading p {
+  margin: 6px 0 0;
+  color: #718096;
+  font-size: 0.9rem;
+}
+
+.full-issue-badge,
+.roll-count {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 13px;
+  border: 1px solid #c9ddf5;
+  border-radius: 999px;
+  background: #edf5ff;
+  color: #285b94;
+  font-size: 0.82rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.full-issue-badge .material-icons {
+  font-size: 18px;
+}
+
+.filter-card,
+.inventory-card {
+  overflow: hidden;
+  border: 1px solid #e5eaf1;
+  border-radius: 15px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(24, 47, 78, 0.05);
+}
+
+.facility-issues-card {
+  margin-top: 22px;
+}
+
+.facility-issues-card .table-responsive {
+  max-height: 340px;
+  overflow: auto;
+}
+
+.facility-issues-card .issue-table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.filter-card {
+  margin-bottom: 22px;
+  padding: 20px;
+}
+
+.section-title {
+  justify-content: flex-start;
+  margin-bottom: 18px;
+}
+
+.section-title > .material-icons {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  background: #edf5ff;
+  color: #35699f;
+}
+
+.section-title h2,
+.inventory-heading h2 {
+  margin: 0;
+  color: #203550;
+  font-size: 1.1rem;
+  font-weight: 750;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr)) auto;
+  align-items: end;
+  gap: 14px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 7px;
+  color: #384b64;
+  font-size: 0.83rem;
+  font-weight: 700;
+}
+
+.form-group label > span {
+  color: #c43f3f;
+}
+
+.form-group label small {
+  margin-left: 5px;
+  color: #8996a8;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.form-control {
+  min-height: 42px;
+  border-color: #d9e1eb;
+  border-radius: 8px;
+  color: #2d4059;
+}
+
+.form-control:focus {
+  border-color: #6c9bd0;
+  box-shadow: 0 0 0 3px rgba(65, 127, 190, 0.13);
+}
+
+.filter-action .btn,
+.issue-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+.filter-action .btn {
+  min-height: 42px;
+  padding: 0 18px;
+  white-space: nowrap;
+}
+
+.filter-action .material-icons,
+.issue-button .material-icons {
+  font-size: 18px;
+}
+
+.inventory-heading {
+  padding: 18px 20px;
+  border-bottom: 1px solid #e9edf3;
+}
+
+.roll-count {
+  padding: 6px 11px;
+  border-color: #e1e8f0;
+  background: #f7f9fc;
+  color: #596d86;
+}
+
+.request-heading-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.refresh-button {
+  display: inline-grid;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  place-items: center;
+  border-color: #dce4ed;
+  border-radius: 8px;
+}
+
+.refresh-button .material-icons {
+  font-size: 19px;
+}
+
+.issue-table {
+  min-width: 990px;
+  margin: 0;
+}
+
+.issue-table thead th {
+  padding: 13px 14px;
+  background: #f5f7fa;
+  color: #607189;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.045em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.issue-table tbody td {
+  padding: 14px;
+  border-color: #edf0f4;
+  color: #52647b;
+  font-size: 0.86rem;
+  vertical-align: middle;
+}
+
+.lot-name {
+  color: #203b5c;
+}
+
+.balance-pill {
+  display: inline-block;
+  min-width: 42px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #eaf6ef;
+  color: #287449;
+  font-weight: 750;
+  text-align: center;
+}
+
+.quantity-issued {
+  color: #203b5c;
+  font-size: 0.95rem;
+}
+
+.status-pill {
+  display: inline-block;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: #fff4d8;
+  color: #8a5c00;
+  font-size: 0.75rem;
+  font-weight: 750;
+  text-transform: capitalize;
+}
+
+.status-accepted {
+  background: #eaf6ef;
+  color: #287449;
+}
+
+.status-rejected {
+  background: #fff0ef;
+  color: #a3332b;
+}
+
+.action-column {
+  text-align: right;
+}
+
+.issue-button {
+  padding: 7px 11px;
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
+.issue-page .btn-primary {
+  border-color: #285f9e;
+  background: #285f9e;
+  color: #fff !important;
+}
+
+.issue-page .btn-primary:hover:not(:disabled) {
+  border-color: #1f4d83;
+  background: #1f4d83;
+  color: #fff !important;
+}
+
+.issue-page .btn-outline-secondary {
+  color: #50627a !important;
+}
+
+.empty-state {
+  display: flex;
+  min-height: 200px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 24px;
+  color: #7c8ba0;
+  text-align: center;
+}
+
+.empty-state .material-icons {
+  margin-bottom: 3px;
+  color: #91a2b8;
+  font-size: 36px;
+}
+
+.empty-state strong {
+  color: #344a65;
+  font-size: 0.95rem;
+}
+
+.empty-state span:last-child {
+  font-size: 0.83rem;
+}
+
+.compact-empty-state {
+  min-height: 150px;
+}
+
+.spin-icon {
+  animation: issue-page-spin 1s linear infinite;
+}
+
+@keyframes issue-page-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 900px) {
+  .filter-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .filter-action .btn {
+    width: 100%;
+  }
+}
+
+@media (max-width: 600px) {
+  .issue-page {
+    padding: 14px 9px 24px;
+  }
+
+  .page-header {
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+
+  .page-eyebrow,
+  .page-description {
+    display: none;
+  }
+
+  .page-header h1 {
+    font-size: 1.45rem;
+  }
+
+  .full-issue-badge {
+    gap: 4px;
+    padding: 7px 9px;
+    font-size: 0.7rem;
+  }
+
+  .filter-card {
+    margin-bottom: 14px;
+    padding: 14px 12px;
+  }
+
+  .section-title {
+    margin-bottom: 12px;
+  }
+
+  .section-title > .material-icons {
+    width: 36px;
+    height: 36px;
+  }
+
+  .section-title h2,
+  .inventory-heading h2 {
+    font-size: 0.98rem;
+  }
+
+  .section-title p,
+  .inventory-heading p {
+    font-size: 0.78rem;
+  }
+
+  .filter-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 11px;
+  }
+
+  .form-group label {
+    margin-bottom: 5px;
+  }
+
+  .inventory-heading {
+    padding: 13px 12px;
+  }
+
+  .roll-count {
+    padding: 5px 8px;
+    font-size: 0.72rem;
+  }
+
+  .facility-issues-card {
+    margin-top: 14px;
+  }
+
+  .request-heading-actions {
+    gap: 5px;
+  }
+
+  .refresh-button {
+    width: 32px;
+    height: 32px;
+  }
+}

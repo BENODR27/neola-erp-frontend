@@ -1,0 +1,130 @@
+<main class="applications-page">
+  <section class="applications-intro" aria-labelledby="applications-title">
+    <div class="intro-copy">
+      <span class="eyebrow">
+        <i class="bi bi-grid-1x2" aria-hidden="true"></i>
+        APPLICATION WORKSPACE
+      </span>
+      <h2 id="applications-title">Your applications</h2>
+      <p>Choose a workspace to get started with your daily work.</p>
+    </div>
+
+    <div class="application-count" aria-live="polite">
+      <span class="count-value">{{ visibleApplications().length + (authService.hasPermission('superadmin') && matchesSearch('IAM') ? 1 : 0) }}</span>
+      <span class="count-label">available</span>
+    </div>
+  </section>
+
+  <section class="application-library" aria-label="Available applications">
+    <div class="library-toolbar">
+      <div>
+        <h3>All applications</h3>
+        <p>Workspaces available to your account</p>
+      </div>
+
+      <button
+        *ngIf="authService.hasPermission('applications:manage')"
+        type="button"
+        class="application-create-button"
+        (click)="openApplicationManagement()"
+      >
+        <i class="bi bi-plus-lg" aria-hidden="true"></i>
+        Create application
+      </button>
+
+      <label class="application-search">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <span class="visually-hidden">Search applications</span>
+        <input
+          type="search"
+          placeholder="Search applications"
+          [value]="applicationSearch()"
+          (input)="onApplicationSearch($event)"
+        />
+        <kbd>/</kbd>
+      </label>
+    </div>
+
+    <div class="application-grid">
+      <button
+        class="application-card"
+        [class.animate-entry]="!hasSearched()"
+        type="button"
+        *ngIf="authService.hasPermission('superadmin') && matchesSearch('IAM')"
+        (click)="openAdminV2Workspace()"
+        [@cardAnim]="getCardState('superadminv2')"
+        (mouseenter)="setCardState('superadminv2', 'hover')"
+        (mouseleave)="setCardState('superadminv2', 'normal')"
+      >
+        <span class="application-icon admin-icon">
+          <i class="bi bi-shield-check" aria-hidden="true"></i>
+        </span>
+        <span class="application-details">
+        <span class="application-name">IAM</span>
+        <span class="application-description">Identity and access control plane</span>
+        </span>
+        <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
+      </button>
+
+      <ng-container *ngFor="let app of visibleApplications(); trackBy: trackApplicationById">
+        <article
+          class="application-card"
+          [class.animate-entry]="!hasSearched()"
+          (click)="onApplicationClick(app.name)"
+          (keydown.enter)="onApplicationClick(app.name)"
+          (keydown.space)="$event.preventDefault(); onApplicationClick(app.name)"
+          role="button"
+          tabindex="0"
+          [@cardAnim]="getCardState(app.name)"
+          (mouseenter)="setCardState(app.name, 'hover')"
+          (mouseleave)="setCardState(app.name, 'normal')"
+        >
+          <span class="application-icon">
+            <i class="bi" [ngClass]="app.icon" aria-hidden="true"></i>
+          </span>
+          <span class="application-details">
+            <span class="application-name">{{ app.name }}</span>
+            <span class="application-description">Open workspace</span>
+          </span>
+          <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
+          <button
+            *ngIf="authService.hasPermission('applications:manage')"
+            type="button"
+            class="application-delete-button"
+            [disabled]="deletingApplicationId() !== null"
+            [attr.aria-label]="'Delete ' + app.name"
+            (click)="deleteApplication($event, app)"
+          >
+            <i class="bi bi-trash" aria-hidden="true"></i>
+          </button>
+        </article>
+      </ng-container>
+    </div>
+
+    <div class="empty-state" *ngIf="isLoadingApplications()" role="status">
+      <h3>Loading applications</h3>
+      <p>Retrieving the application catalog.</p>
+    </div>
+
+    <div class="empty-state" *ngIf="applicationLoadError()" role="alert">
+      <h3>Applications could not be loaded</h3>
+      <p>Please refresh the page or try again later.</p>
+    </div>
+
+    <div
+      class="empty-state"
+      *ngIf="
+        !isLoadingApplications() &&
+        !applicationLoadError() &&
+        visibleApplications().length + (authService.hasPermission('superadmin') && matchesSearch('IAM') ? 1 : 0) === 0
+      "
+      role="status"
+    >
+      <span class="empty-state-icon">
+        <i class="bi bi-search" aria-hidden="true"></i>
+      </span>
+      <h3>No applications found</h3>
+      <p>Try a different search term.</p>
+    </div>
+  </section>
+</main>

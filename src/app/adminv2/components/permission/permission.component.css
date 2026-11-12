@@ -1,0 +1,12 @@
+.permission-application-heading th {
+  padding-top: 1rem;
+  padding-bottom: 0.75rem;
+  background: var(--bs-tertiary-bg, #f8f9fa);
+}
+
+.permission-group-count {
+  margin-left: 0.65rem;
+  color: var(--bs-secondary-color, #6c757d);
+  font-size: 0.875rem;
+  font-weight: 400;
+}

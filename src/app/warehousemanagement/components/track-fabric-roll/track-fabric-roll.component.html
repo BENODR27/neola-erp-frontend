@@ -1,0 +1,270 @@
+<!-- Add this at the top of your file for Angular animations support -->
+<!-- You may need to import BrowserAnimationsModule in your app.module.ts -->
+
+<div
+  *ngIf="isScannerActive()"
+  class="scanner-container animate__animated animate__fadeInDown animate__faster"
+>
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<button
+  class="btn-primary btn-sm scan-btn animate__animated animate__pulse animate__infinite"
+  type="button"
+  (click)="toggleScanner('fabricId')"
+>
+  <span class="material-icons">qr_code_scanner</span>
+  <span class="scan-text">Scan Fabric QR</span>
+</button>
+
+<div
+  *ngIf="fabric() && objectKeys(fabric()).length > 0"
+  class="fabric()-details card p-3 mt-3 animate__animated animate__fadeInUp animate__faster"
+>
+  <h2 class="section-title">FABRIC DETAIL</h2>
+  <ul class="details-list">
+    <li *ngFor="let key of objectKeys(fabric())" class="detail-row">
+      <strong>{{ key }}</strong>
+      <span class="detail-value animate__animated animate__fadeInRight">{{
+        fabric()[key]
+      }}</span>
+    </li>
+  </ul>
+</div>
+
+<div
+  *ngIf="fabric() && objectKeys(fabric()).length > 0"
+  class="fabric()-details card p-3 mt-3 animate__animated animate__fadeInUp animate__fast"
+>
+  <h3 class="section-title">INSPECTION DETAIL</h3>
+  <ng-container
+    *ngIf="
+      inspectionData() && objectKeys(inspectionData()).length > 0;
+      else noInspectionData
+    "
+  >
+    <ul class="details-list">
+      <li *ngFor="let key of objectKeys(inspectionData())" class="detail-row">
+        <strong>{{ key }}</strong
+        >:
+        <span class="detail-value animate__animated animate__fadeInRight">{{
+          inspectionData()[key]
+        }}</span>
+      </li>
+    </ul>
+  </ng-container>
+  <ng-template #noInspectionData>
+    <div class="text-muted animate__animated animate__fadeIn animate__delay-1s">
+      No data
+    </div>
+  </ng-template>
+</div>
+
+@if(issuedFabrics().length>0){
+<div
+  class="table-responsive animate__animated animate__fadeInUp animate__delay-1s"
+>
+  <h2 class="section-title">ISSUED DETAILS</h2>
+  <div class="table-scroll-container">
+    <table id="sourcingAsnTable" class="table table-bordered issued-table">
+      <thead>
+        <tr>
+          <th>WareHouse</th>
+          <th>Factory</th>
+          <th>Issued Qty</th>
+          <th>status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let row of issuedFabrics()"
+          class="issued-row animate__animated animate__fadeInLeft"
+        >
+          <td>{{ row?.warehouseName }}</td>
+          <td>{{ row?.facility }}</td>
+          <td>{{ row.issueQty }}</td>
+          <td>
+            <span [ngClass]="{'badge bg-success': row.status === 'Accepted', 'badge bg-danger': row.status === 'Rejected'}">{{ row.status }}</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+}
+
+<!-- Add this style block at the bottom or in your component's CSS file -->
+<style>
+  @import "https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css";
+
+  body {
+    background: linear-gradient(120deg, #f4f7fa 0%, #e3e9f6 100%);
+  }
+
+  .card {
+    border-radius: 18px;
+    box-shadow: 0 6px 32px rgba(25, 118, 210, 0.1);
+    background: #fff;
+    transition: box-shadow 0.3s, transform 0.3s;
+    border: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card:hover {
+    box-shadow: 0 12px 48px rgba(25, 118, 210, 0.18);
+    transform: translateY(-4px) scale(1.01);
+  }
+
+  .section-title {
+    font-weight: 800;
+    color: #1976d2;
+    margin-bottom: 18px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    font-size: 1.25rem;
+    position: relative;
+    padding-left: 8px;
+  }
+
+  .section-title::before {
+    content: "";
+    display: inline-block;
+    width: 5px;
+    height: 22px;
+    background: linear-gradient(180deg, #1976d2 0%, #42a5f5 100%);
+    border-radius: 2px;
+    margin-right: 10px;
+    vertical-align: middle;
+  }
+
+  .details-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .detail-row {
+    padding: 10px 0;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1.08rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: background 0.2s;
+  }
+
+  .detail-row:hover {
+    background: #f5faff;
+  }
+
+  .detail-value {
+    color: #1976d2;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    transition: color 0.2s;
+  }
+
+  .scan-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 18px 0;
+    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    color: #fff;
+    border: none;
+    border-radius: 28px;
+    padding: 12px 28px;
+    font-size: 1.08rem;
+    box-shadow: 0 2px 12px rgba(25, 118, 210, 0.13);
+    transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+    cursor: pointer;
+    outline: none;
+  }
+
+  .scan-btn:hover,
+  .scan-btn:focus {
+    background: linear-gradient(90deg, #1565c0 0%, #64b5f6 100%);
+    box-shadow: 0 4px 18px rgba(25, 118, 210, 0.18);
+    transform: scale(1.03);
+  }
+
+  .scan-text {
+    font-weight: 600;
+    letter-spacing: 0.7px;
+  }
+
+  .issued-table {
+    background: #fff;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(44, 62, 80, 0.09);
+    margin-top: 12px;
+  }
+
+  .issued-table th,
+  .issued-table td {
+    text-align: center;
+    padding: 14px 10px;
+    font-size: 1.05rem;
+  }
+
+  .issued-table th {
+    background: linear-gradient(90deg, #1976d2 0%, #42a5f5 100%);
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    border: none;
+  }
+
+  .issued-table tr:nth-child(even) {
+    background: #f4f7fa;
+  }
+
+  .issued-row {
+    transition: background 0.2s;
+  }
+
+  .issued-row:hover {
+    background: #e3f2fd;
+  }
+
+  .table-scroll-container {
+    max-height: 320px;
+    overflow-y: auto;
+    border-radius: 14px;
+    box-shadow: 0 1px 4px rgba(25, 118, 210, 0.06);
+  }
+
+  .scanner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 18px;
+    min-height: 120px;
+  }
+
+  .text-muted {
+    color: #b0b8c1;
+    font-style: italic;
+    text-align: center;
+    margin-top: 12px;
+  }
+
+  @media (max-width: 768px) {
+    .card,
+    .issued-table {
+      font-size: 0.97rem;
+      padding: 10px;
+    }
+    .scan-btn {
+      width: 100%;
+      justify-content: center;
+      font-size: 1rem;
+      padding: 12px 0;
+    }
+    .section-title {
+      font-size: 1.08rem;
+    }
+  }
+</style>

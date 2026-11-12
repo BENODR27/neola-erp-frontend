@@ -1,0 +1,378 @@
+.sticker-page {
+  max-width: 1380px;
+  margin: 0 auto;
+  padding: 28px clamp(16px, 3vw, 38px) 56px;
+  color: #172b4d;
+}
+
+.page-heading,
+.card-heading,
+.preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.page-heading {
+  align-items: flex-start;
+  margin-bottom: 22px;
+}
+
+.heading-actions,
+.table-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.edit-details-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 14px;
+  border: 1px solid #1d5f91;
+  border-radius: 8px;
+  background: #1d5f91;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: background-color 140ms ease, border-color 140ms ease;
+}
+
+.edit-details-button:hover {
+  border-color: #174b73;
+  background: #174b73;
+}
+
+.edit-details-button:focus-visible {
+  outline: 3px solid rgba(29, 95, 145, 0.3);
+  outline-offset: 2px;
+}
+
+.edit-details-button .material-icons {
+  font-size: 19px;
+  line-height: 1;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: #4773ae;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.13em;
+}
+
+.page-heading h1 {
+  margin: 0;
+  color: #132746;
+  font-size: clamp(1.7rem, 3vw, 2.25rem);
+  font-weight: 750;
+}
+
+.description,
+.card-heading p,
+.preview-heading p {
+  margin: 7px 0 0;
+  color: #65758b;
+}
+
+.details-card,
+.table-section,
+.preview-section {
+  padding: clamp(18px, 3vw, 28px);
+  border: 1px solid #e3eaf2;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(24, 47, 78, 0.06);
+}
+
+.card-heading {
+  justify-content: flex-start;
+  margin-bottom: 22px;
+}
+
+.card-heading > .material-icons {
+  display: grid;
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 13px;
+  background: #edf5fc;
+  color: #28689e;
+  font-size: 25px;
+}
+
+.card-heading h2,
+.preview-heading h2 {
+  margin: 0;
+  color: #1d3557;
+  font-size: 1.12rem;
+  font-weight: 750;
+}
+
+.card-heading p,
+.preview-heading p {
+  font-size: 0.88rem;
+}
+
+.details-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.field {
+  min-width: 0;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 7px;
+  color: #344660;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.field label span {
+  color: #bd3c46;
+}
+
+.field .form-control {
+  min-height: 43px;
+  border-color: #d8e1eb;
+}
+
+.field .form-control:focus {
+  border-color: #79a9d0;
+  box-shadow: 0 0 0 0.2rem rgba(49, 95, 158, 0.12);
+}
+
+.field small {
+  display: block;
+  margin-top: 6px;
+  color: #728198;
+  font-size: 0.76rem;
+}
+
+.same-toggle {
+  display: flex !important;
+  align-items: center;
+  gap: 7px;
+  margin: 8px 0 0 !important;
+  color: #65758b !important;
+  font-size: 0.76rem !important;
+  font-weight: 500 !important;
+  cursor: pointer;
+}
+
+.same-toggle input {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: #315f9e;
+}
+
+.table-section {
+  margin-top: 20px;
+  overflow: hidden;
+}
+
+.roll-count {
+  flex: 0 0 auto;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #edf5fc;
+  color: #28689e;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.roll-details-table {
+  min-width: 1180px;
+  margin: 0;
+}
+
+.roll-details-table thead th {
+  padding: 11px 10px;
+  background: #f4f7fb;
+  color: #42546d;
+  font-size: 0.78rem;
+  white-space: nowrap;
+}
+
+.roll-details-table tbody td,
+.roll-details-table tbody th {
+  padding: 9px 8px;
+  vertical-align: middle;
+}
+
+.roll-details-table .form-control {
+  min-width: 105px;
+  min-height: 38px;
+  font-size: 0.84rem;
+}
+
+.roll-details-table .quantity-input {
+  min-width: 90px;
+  width: 110px;
+}
+
+.roll-details-table .form-control:disabled {
+  border-color: transparent;
+  background: #f8fafc;
+  color: #344660;
+  opacity: 1;
+}
+
+.roll-id {
+  color: #1d3557;
+  white-space: nowrap;
+}
+
+.preview-section {
+  margin-top: 20px;
+}
+
+.preview-heading {
+  margin-bottom: 16px;
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+  gap: 14px;
+}
+
+.sticker-card {
+  min-width: 0;
+  padding: 16px;
+  border: 1px dashed #aebdd0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.sticker-topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding-bottom: 9px;
+  border-bottom: 1px solid #e9edf3;
+  color: #61748d;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+
+.sticker-topline span:last-child {
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.sticker-main {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-top: 12px;
+}
+
+.sticker-main qrcode,
+.sticker-main qrcode img {
+  display: block;
+  width: 140px;
+  height: 140px;
+}
+
+.sticker-main qrcode {
+  flex: 0 0 140px;
+}
+
+.sticker-details {
+  min-width: 0;
+  flex: 1;
+}
+
+.sticker-details h3 {
+  margin: 0 0 8px;
+  color: #1d3557;
+  font-size: 1.05rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.sticker-details p {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin: 4px 0;
+  color: #53647b;
+  font-size: 0.76rem;
+}
+
+.sticker-details p strong {
+  flex: 0 0 auto;
+  color: #354a65;
+}
+
+.sticker-details p span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.sticker-details .quantity {
+  margin-top: 8px;
+  padding-top: 7px;
+  border-top: 1px solid #e9edf3;
+}
+
+@media (max-width: 850px) {
+  .details-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .page-heading {
+    flex-direction: column;
+  }
+
+  .heading-actions {
+    width: 100%;
+  }
+
+  .heading-actions > button,
+  .table-actions {
+    width: 100%;
+  }
+
+  .table-actions {
+    justify-content: space-between;
+  }
+
+  .details-grid {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+
+  .table-section {
+    padding: 16px;
+  }
+
+  .sticker-main {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .sticker-main qrcode {
+    align-self: center;
+  }
+}

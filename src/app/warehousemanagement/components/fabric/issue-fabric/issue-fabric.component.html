@@ -1,0 +1,458 @@
+<main class="issue-page">
+  <header class="page-header">
+    <div>
+      <p class="page-eyebrow">WAREHOUSE MANAGEMENT</p>
+      <h1>Issue Fabric</h1>
+      <p class="page-description">
+        Request a full issue of a fabric roll to the selected factory.
+      </p>
+    </div>
+    <div class="full-issue-badge">
+      <span class="material-icons">inventory</span>
+      Full roll issue only
+    </div>
+  </header>
+
+  <section class="filter-card">
+    <div class="section-title">
+      <span class="material-icons">tune</span>
+      <div>
+        <h2>Find available rolls</h2>
+        <p>Choose a warehouse and factory. A pallet ID is optional.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="fetchFabricCollections()">
+      <div class="filter-grid">
+        <div class="form-group">
+          <label for="warehouseId">Warehouse <span>*</span></label>
+          <select
+            id="warehouseId"
+            class="form-control"
+            formControlName="warehouseId"
+            (change)="onWarehouseChange($event)"
+          >
+            <option value="" disabled>Select warehouse</option>
+            <option *ngFor="let warehouse of warehouses()" [value]="warehouse.id">
+              {{ warehouse.wareHouseName }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="facility">Factory <span>*</span></label>
+          <select
+            id="facility"
+            class="form-control"
+            formControlName="facility"
+            (change)="onFacilityChange()"
+          >
+            <option value="" disabled>Select factory</option>
+            <option *ngFor="let factory of factories()" [value]="factory.name">
+              {{ factory.name }}
+            </option>
+          </select>
+        </div>
+
+        <div class="form-group pallet-filter">
+          <label for="palletId">Pallet ID <small>Optional</small></label>
+          <div class="input-group">
+            <input
+              type="text"
+              id="palletId"
+              formControlName="palletId"
+              class="form-control"
+              placeholder="All pallets"
+            />
+            <button
+              class="btn btn-outline-secondary"
+              type="button"
+              (click)="toggleScanner('palletId')"
+              aria-label="Scan pallet ID"
+              title="Scan pallet ID"
+            >
+              <span class="material-icons">qr_code_scanner</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="filter-action">
+          <button
+            class="btn btn-primary load-button"
+            type="submit"
+            [disabled]="form.get('warehouseId')?.invalid"
+          >
+            <span class="material-icons">search</span>
+            Find rolls
+          </button>
+        </div>
+      </div>
+    </form>
+  </section>
+
+  <div *ngIf="isScannerActive()" class="scanner-container">
+    <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+  </div>
+
+  <section class="inventory-card">
+    <div class="inventory-heading">
+      <div>
+        <h2>Available fabric rolls</h2>
+        <p>Only full-balance issue requests are available.</p>
+      </div>
+      <span class="roll-count">{{ fabrics().length }} rolls</span>
+    </div>
+
+    <div *ngIf="fabrics().length > 0" class="table-responsive">
+      <table class="table issue-table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Invoice</th>
+            <th>Style / Color</th>
+            <th>OC / PO</th>
+            <th>Fabric ref</th>
+            <th>Total</th>
+            <th>Available</th>
+            <th class="action-column">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of fabrics()">
+            <td>
+              <strong class="lot-name">{{ row.shadeLot || "-" }}</strong>
+            </td>
+            <td>{{ row.invoiceNo || "-" }}</td>
+            <td>{{ row.styleName || "-" }} / {{ row.colorName || "-" }}</td>
+            <td>{{ row.ocNo || "-" }} / {{ row.poNo || "-" }}</td>
+            <td>{{ row.fabricRef || "-" }}</td>
+            <td>{{ row.totalQty ?? "-" }}</td>
+            <td>
+              <span class="balance-pill">{{ row.balanceQty ?? 0 }}</span>
+            </td>
+            <td class="action-column">
+              <button
+                class="btn btn-primary issue-button"
+                type="button"
+                [disabled]="
+                  !row.balanceQty ||
+                  row.balanceQty <= 0 ||
+                  form.get('facility')?.invalid
+                "
+                (click)="onissueFabaricToFactory(row.id, row)"
+              >
+                <span class="material-icons">outbox</span>
+                Issue full roll
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div *ngIf="fabrics().length === 0" class="empty-state">
+      <span class="material-icons">inventory_2</span>
+      <strong>{{
+        dataFetched() ? "No available rolls found" : "Search to view rolls"
+      }}</strong>
+      <span>
+        {{
+          dataFetched()
+            ? "Try another warehouse or pallet ID."
+            : "Available rolls will appear here after you search."
+        }}
+      </span>
+    </div>
+  </section>
+
+  <section class="inventory-card facility-issues-card">
+    <div class="inventory-heading">
+      <div>
+        <h2>Today's quantity summary</h2>
+        <p>
+          Quantities grouped by invoice, style/color, OC/PO, and fabric
+          reference.
+        </p>
+      </div>
+      <div class="request-heading-actions">
+        <span class="roll-count">
+          {{ facilityIssueRequests().length }}
+          {{ facilityIssueRequests().length === 1 ? "request" : "requests" }}
+        </span>
+        <button
+          class="btn btn-outline-secondary refresh-button"
+          type="button"
+          (click)="fetchFacilityIssueRequests()"
+          [disabled]="isLoadingFacilityIssues() || !form.get('facility')?.value"
+          aria-label="Refresh facility issue requests"
+          title="Refresh"
+        >
+          <span class="material-icons">refresh</span>
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="isLoadingFacilityIssues()" class="empty-state">
+      <span class="material-icons spin-icon">sync</span>
+      <strong>Loading issue requests...</strong>
+    </div>
+
+    <div
+      *ngIf="!isLoadingFacilityIssues() && facilityIssueSummary.length > 0"
+      class="table-responsive"
+    >
+      <table class="table issue-table facility-issue-table">
+        <thead>
+          <tr>
+            <th>Invoice</th>
+            <th>Style / Color</th>
+            <th>OC / PO</th>
+            <th>Fabric Ref</th>
+            <th class="action-column">Quantity Issued</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of facilityIssueSummary">
+            <td>{{ row.invoiceNo }}</td>
+            <td>{{ row.styleColor }}</td>
+            <td>{{ row.ocPo }}</td>
+            <td>{{ row.fabricRef }}</td>
+            <td class="action-column">
+              <strong class="quantity-issued">{{ row.quantityIssued }}</strong>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="
+        !isLoadingFacilityIssues() &&
+        form.get('facility')?.value &&
+        facilityIssueSummary.length === 0
+      "
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">outbox</span>
+      <strong>No issues recorded today</strong>
+      <span>The summary will appear after issue requests are submitted.</span>
+    </div>
+
+    <div
+      *ngIf="!form.get('facility')?.value"
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">factory</span>
+      <strong>Select a factory</strong>
+      <span>Choose a factory above to view its issue requests.</span>
+    </div>
+  </section>
+
+  <section class="inventory-card facility-issues-card">
+    <div class="inventory-heading">
+      <div>
+        <h2>My issue requests today</h2>
+        <p>
+          Requests I submitted for
+          {{ form.get("facility")?.value || "the selected facility" }}.
+        </p>
+      </div>
+      <span class="roll-count">
+        {{ myFacilityIssueRequests.length }}
+        {{ myFacilityIssueRequests.length === 1 ? "request" : "requests" }}
+      </span>
+    </div>
+
+    <div
+      *ngIf="!isLoadingFacilityIssues() && myFacilityIssueRequests.length > 0"
+      class="table-responsive"
+    >
+      <table class="table issue-table facility-issue-table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Invoice</th>
+            <th>Style / Color</th>
+            <th>OC / PO</th>
+            <th>Fabric Ref</th>
+            <th>Quantity Issued</th>
+            <th>Warehouse</th>
+            <th>Status</th>
+            <th>Requested At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of myFacilityIssueRequests">
+            <td>
+              <strong class="lot-name">{{ request.shadeLot || "-" }}</strong>
+            </td>
+            <td>{{ request.invoiceNo || "-" }}</td>
+            <td>
+              {{ request.fabricCollection?.styleName || "-" }} /
+              {{ request.fabricCollection?.colorName || "-" }}
+            </td>
+            <td>{{ request.ocNo || "-" }} / {{ request.poNo || "-" }}</td>
+            <td>{{ request.fabricCollection?.fabricRef || "-" }}</td>
+            <td>
+              <strong class="quantity-issued">{{
+                request.issueQty ?? "-"
+              }}</strong>
+            </td>
+            <td>{{ request.warehouseName || "-" }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [ngClass]="
+                  'status-' + (request.status || 'pending').toLowerCase()
+                "
+              >
+                {{ request.status || "Pending" }}
+              </span>
+            </td>
+            <td>
+              {{
+                request.issuedDate || request.createdAt
+                  ? (request.issuedDate || request.createdAt | date: "short")
+                  : "-"
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="isLoadingFacilityIssues()"
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons spin-icon">sync</span>
+      <strong>Loading today's requests...</strong>
+    </div>
+
+    <div
+      *ngIf="
+        !isLoadingFacilityIssues() &&
+        form.get('facility')?.value &&
+        myFacilityIssueRequests.length === 0
+      "
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">outbox</span>
+      <strong>No requests submitted by you today</strong>
+      <span>Your issue requests for this facility will appear here.</span>
+    </div>
+
+    <div
+      *ngIf="!form.get('facility')?.value"
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">factory</span>
+      <strong>Select a factory</strong>
+      <span>Choose a factory above to view your requests and summary.</span>
+    </div>
+  </section>
+
+  <section class="inventory-card facility-issues-card">
+    <div class="inventory-heading">
+      <div>
+        <h2>All facility issue requests today</h2>
+        <p>
+          Individual requests for
+          {{ form.get("facility")?.value || "the selected facility" }}.
+        </p>
+      </div>
+      <span class="roll-count">
+        {{ facilityIssueRequests().length }}
+        {{ facilityIssueRequests().length === 1 ? "request" : "requests" }}
+      </span>
+    </div>
+
+    <div
+      *ngIf="!isLoadingFacilityIssues() && facilityIssueRequests().length > 0"
+      class="table-responsive"
+    >
+      <table class="table issue-table facility-issue-table">
+        <thead>
+          <tr>
+            <th>Roll</th>
+            <th>Invoice</th>
+            <th>Style / Color</th>
+            <th>OC / PO</th>
+            <th>Fabric Ref</th>
+            <th>Quantity Issued</th>
+            <th>Warehouse</th>
+            <th>Status</th>
+            <th>Requested At</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let request of facilityIssueRequests()">
+            <td>
+              <strong class="lot-name">{{ request.shadeLot || "-" }}</strong>
+            </td>
+            <td>{{ request.invoiceNo || "-" }}</td>
+            <td>
+              {{ request.fabricCollection?.styleName || "-" }} /
+              {{ request.fabricCollection?.colorName || "-" }}
+            </td>
+            <td>{{ request.ocNo || "-" }} / {{ request.poNo || "-" }}</td>
+            <td>{{ request.fabricCollection?.fabricRef || "-" }}</td>
+            <td>
+              <strong class="quantity-issued">{{
+                request.issueQty ?? "-"
+              }}</strong>
+            </td>
+            <td>{{ request.warehouseName || "-" }}</td>
+            <td>
+              <span
+                class="status-pill"
+                [ngClass]="
+                  'status-' + (request.status || 'pending').toLowerCase()
+                "
+              >
+                {{ request.status || "Pending" }}
+              </span>
+            </td>
+            <td>
+              {{
+                request.issuedDate || request.createdAt
+                  ? (request.issuedDate || request.createdAt | date: "short")
+                  : "-"
+              }}
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div
+      *ngIf="isLoadingFacilityIssues()"
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons spin-icon">sync</span>
+      <strong>Loading today's requests...</strong>
+    </div>
+
+    <div
+      *ngIf="
+        !isLoadingFacilityIssues() &&
+        form.get('facility')?.value &&
+        facilityIssueRequests().length === 0
+      "
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">outbox</span>
+      <strong>No issue requests for this facility today</strong>
+      <span>Requests submitted today will appear here.</span>
+    </div>
+
+    <div
+      *ngIf="!form.get('facility')?.value"
+      class="empty-state compact-empty-state"
+    >
+      <span class="material-icons">factory</span>
+      <strong>Select a factory</strong>
+      <span>Choose a factory above to view the facility request list.</span>
+    </div>
+  </section>
+</main>

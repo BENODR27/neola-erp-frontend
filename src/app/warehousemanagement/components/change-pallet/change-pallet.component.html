@@ -1,0 +1,183 @@
+<!-- QR Scanner -->
+<div *ngIf="isScannerActive()" class="scanner-container">
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <div class="form-group">
+          <label for="wareHouseId">wareHouse</label>
+          <select
+            id="wareHouseId"
+            class="form-control"
+            formControlName="wareHouseId"
+          >
+            <ng-container *ngFor="let warehouse of warehouses()">
+              @if(authService.hasPermission(warehouse.wareHouseName)){
+              <option value="{{ warehouse.id }}">
+                {{ warehouse.wareHouseName }}
+              </option>
+              }
+            </ng-container>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <label for="fromPalletId">From Pallet ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="fromPalletId"
+            formControlName="fromPalletId"
+            class="form-control"
+            placeholder="Enter Pallet ID"
+          />
+          <button
+            class="btn-sm btn-primary"
+            type="button"
+            (click)="toggleScanner('fromPalletId')"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <button
+            class="btn-sm btn-success btn-sm"
+            type="button"
+            (click)="fetchFabricCollections('fromPalletId')"
+          >
+            <span class="material-icons">search</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    @if(fromFabrics().length>0){
+
+    <div class="table-responsive table-scroll-container-mini">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>
+              <div>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [checked]="isAllSelected()"
+                  (change)="toggleSelectAll()"
+                />
+              </div>
+            </th>
+            <th>Bin Number</th>
+            <th>fabric Ref</th>
+            <th>color Name</th>
+            <th>Status</th>
+            <th>Invoice</th>
+            <th>Style</th>
+            <th>OC</th>
+            <th>Lot</th>
+            <th>Total Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fabric of fromFabrics()">
+            <td>
+              <div>
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  [checked]="selectedIds.has(fabric.id)"
+                  (change)="toggleSelect(fabric.id)"
+                />
+              </div>
+            </td>
+            <td>{{ fabric?.fbin?.BinNo }}</td>
+            <th>{{ fabric.fabricRef }}</th>
+            <th>{{ fabric.colorName }}</th>
+            <td>{{ fabric.status }}</td>
+            <td>{{ fabric.invoiceNo }}</td>
+            <td>{{ fabric.styleName }}</td>
+            <td>{{ fabric.ocNo }}</td>
+            <td>{{ fabric.shadeLot }}</td>
+            <td>{{ fabric.totalQty }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    }
+    <div class="col-12 mb-1" [hidden]="selectedIds.size == 0">
+      <div class="form-group">
+        <label for="toPalletId">To Pallet ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="toPalletId"
+            formControlName="toPalletId"
+            class="form-control"
+            placeholder="Enter Pallet ID"
+          />
+          <button
+            class="btn-sm btn-primary"
+            type="button"
+            (click)="toggleScanner('toPalletId')"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <button
+            class="btn-success btn-sm"
+            type="button"
+            (click)="fetchFabricCollections('toPalletId')"
+          >
+            <span class="material-icons">search</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    @if(selectedIds.size != 0){
+
+    <div class="table-responsive table-scroll-container-mini">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Bin Number</th>
+            <th>fabric Ref</th>
+            <th>color Name</th>
+            <th>Status</th>
+            <th>Invoice</th>
+            <th>Style</th>
+            <th>OC</th>
+            <th>Lot</th>
+            <th>Total Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fabric of toFabrics()">
+            <td>{{ fabric?.fbin?.BinNo }}</td>
+            <th>{{ fabric.fabricRef }}</th>
+            <th>{{ fabric.colorName }}</th>
+            <td>{{ fabric.status }}</td>
+            <td>{{ fabric.invoiceNo }}</td>
+            <td>{{ fabric.styleName }}</td>
+            <td>{{ fabric.ocNo }}</td>
+            <td>{{ fabric.shadeLot }}</td>
+            <td>{{ fabric.totalQty }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    }
+  </div>
+</form>
+
+<button
+  class="btn btn-success m-2"
+  [hidden]="hidechangepallet()"
+  (click)="issueSelectedItems()"
+>
+  CHANGE PALLET
+</button>

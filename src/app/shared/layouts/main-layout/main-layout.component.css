@@ -1,0 +1,34 @@
+:host {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  --shell-primary: #4565c5;
+  --shell-primary-strong: #3454b8;
+  --shell-primary-soft: #edf2ff;
+  --shell-ink: #263650;
+  --shell-muted: #74819a;
+  --shell-border: #e5eaf3;
+  --shell-background: #f4f7fc;
+  --shell-sidebar: #17243d;
+  background: var(--shell-background);
+}
+
+.app-shell {
+  width: 100%;
+  min-width: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: clip;
+  color: var(--shell-ink);
+  background:
+    radial-gradient(ellipse at 75% 0, rgba(211, 222, 255, 0.2), transparent 36%),
+    var(--shell-background);
+}
+
+@media (max-width: 767.98px) {
+  .app-shell {
+    min-height: 100%;
+  }
+}

@@ -1,0 +1,170 @@
+<section class="adminv2-page">
+  <header class="adminv2-page-header">
+    <div>
+      <span class="adminv2-eyebrow"><i class="bi bi-person-vcard"></i> PEOPLE DIRECTORY</span>
+      <h1>Employees</h1>
+      <p>Review employee records and manage authentication enrollment.</p>
+    </div>
+    <div class="adminv2-header-meta">
+      <span class="adminv2-count">{{ datas().length }}</span>
+      <span class="adminv2-count-label">employees</span>
+    </div>
+  </header>
+
+  <section class="adminv2-panel" aria-label="Employee directory">
+    <div class="adminv2-panel-heading">
+      <div>
+        <h2>Employee directory</h2>
+        <p>Sensitive authentication codes are not shown in the directory.</p>
+      </div>
+      <button
+        class="btn btn-primary adminv2-primary-button"
+        data-bs-toggle="modal"
+        data-bs-target="#createEmployeeModal"
+      >
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> Add employee
+      </button>
+    </div>
+    <div class="table-responsive adminv2-table-wrap">
+  <table class="table adminv2-table">
+    <thead>
+      <tr>
+        <th>Employee</th>
+        <th>Department</th>
+        <th>Designation</th>
+        <th>Gender</th>
+        <th>Authentication</th>
+        <th>Created</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of datas()">
+        <td>
+          <div class="adminv2-person">
+            <span class="adminv2-avatar"><i class="bi bi-person"></i></span>
+            <span><strong>{{ data.employeeName || data.employeeCode }}</strong><small>{{ data.employeeCode }}</small></span>
+          </div>
+        </td>
+        <td>{{ data.department }}</td>
+        <td>{{ data.designation }}</td>
+        <td>{{ data.gender }}</td>
+        <td>
+          <span class="adminv2-status" [class.is-enabled]="data.isAuthOn" [class.is-disabled]="!data.isAuthOn">
+            <span></span>{{ data.isAuthOn ? 'Enabled' : 'Off' }}
+          </span>
+        </td>
+        <td>{{ data.createdAt | date : "short" }}</td>
+      </tr>
+      <tr *ngIf="datas().length === 0">
+        <td colspan="6">
+          <div class="adminv2-empty-state">
+            <span><i class="bi bi-person-vcard"></i></span>
+            <strong>No employee records</strong>
+            <p>Employee records will appear here when available.</p>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  </section>
+</section>
+
+<!-- Modal for creating employees -->
+<div
+  class="modal fade"
+  id="createEmployeeModal"
+  tabindex="-1"
+  aria-labelledby="createEmployeeModalLabel"
+  aria-hidden="true"
+>
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content adminv2-modal-content">
+      <div class="modal-header">
+        <div>
+          <span class="adminv2-eyebrow">PEOPLE DIRECTORY</span>
+          <h2 class="modal-title" id="createEmployeeModalLabel">Add employee</h2>
+        </div>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          <div class="mb-3">
+            <label for="employeeCode" class="form-label">Employee Code:</label>
+            <input
+              id="employeeCode"
+              formControlName="employeeCode"
+              type="text"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="employeeName" class="form-label">Employee Name:</label>
+            <input
+              id="employeeName"
+              formControlName="employeeName"
+              type="text"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="department" class="form-label">Department:</label>
+            <input
+              id="department"
+              formControlName="department"
+              type="text"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="designation" class="form-label">Designation:</label>
+            <input
+              id="designation"
+              formControlName="designation"
+              type="text"
+              class="form-control"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="gender" class="form-label">Gender:</label>
+            <select id="gender" formControlName="gender" class="form-control">
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+            </select>
+          </div>
+          <div class="mb-3">
+            <label for="isAuthOn" class="form-label">Is Auth On:</label>
+            <input
+              id="isAuthOn"
+              formControlName="isAuthOn"
+              type="checkbox"
+              class="form-check-input"
+            />
+          </div>
+          <div class="mb-3">
+            <label for="authCode" class="form-label">Authentication code:</label>
+            <input
+              id="authCode"
+              formControlName="authCode"
+              type="password"
+              autocomplete="new-password"
+              class="form-control"
+            />
+          </div>
+          <button
+            type="submit"
+            class="btn btn-primary adminv2-primary-button"
+            data-bs-dismiss="modal"
+          >
+            Add employee
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

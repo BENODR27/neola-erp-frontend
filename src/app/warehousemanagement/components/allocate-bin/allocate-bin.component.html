@@ -1,0 +1,200 @@
+<!-- QR Scanner -->
+
+<form [formGroup]="form">
+  <div class="row">
+    <!-- rack() ID -->
+    <div class="col-12 mb-1">
+      <div class="form-group" [hidden]="!isCustomBayActive()">
+        <div class="form-group">
+          <label for="wareHouseId">wareHouse</label>
+          <select
+            id="wareHouseId"
+            class="form-control"
+            formControlName="wareHouseId"
+          >
+            <ng-container *ngFor="let warehouse of warehouses()">
+              @if(authService.hasPermission(warehouse.wareHouseName)){
+              <option value="{{ warehouse.id }}">
+                {{ warehouse.wareHouseName }}
+              </option>
+              }
+            </ng-container>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="rackNumber">rackNumber</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="rackNumber"
+            id="rackNumber"
+            placeholder="rackNumber"
+          />
+        </div>
+        <div class="form-group">
+          <label for="bayNumber">bayNumber</label>
+          <input
+            type="text"
+            class="form-control"
+            formControlName="bayNumber"
+            id="bayNumber"
+            placeholder="bayNumber"
+          />
+        </div>
+      </div>
+      <div class="input-group mb-2">
+        <button
+          class="btn btn-warning btn-sm"
+          type="button"
+          (click)="toggleCustomBay()"
+        >
+          CUSTOMIZE
+        </button>
+        <button
+          class="btn-success btn-sm"
+          type="button"
+          (click)="fetchRackDatas()"
+        >
+          <span class="material-icons">search</span>
+        </button>
+        <button
+          class="btn-primary btn-sm"
+          type="button"
+          (click)="toggleScanner('bayScan')"
+        >
+          <span class="material-icons">qr_code_scanner</span>
+        </button>
+      </div>
+    </div>
+
+    @if(levels().length>0){
+    <div class="container responsive-container">
+      <div class="center">
+        <!-- <h2 class="text-dark">RACK 1</h2> -->
+      </div>
+      <div class="shelfs">
+        <div class="shelf-row">
+          <div class="shelf"></div>
+        </div>
+      </div>
+      <div class="fabriccase" id="fabriccase">
+        <div class="fabriccase-left-side fabriccase-side"></div>
+        <div class="fabriccase-right-side fabriccase-side"></div>
+        <div class="shelfs">
+          <!-- level -->
+          <div class="shelf-row" *ngFor="let level of levels()">
+            <div class="shelf"></div>
+            <div class="shelf-thickness"></div>
+            <div class="fabrics() flexbox-row">
+              <!-- Bin -->
+
+              <div class="fabric" *ngFor="let bin of level.bins">
+                @if(bin.palletId!=null){
+                <div
+                  class="image-container"
+                  (click)="fetchFabricCollections(bin.palletId)"
+                >
+                  <div class="red-box fabric-rolls">
+                    <div class="fabric-roll"></div>
+                    <div class="fabric-roll"></div>
+                    <div class="fabric-roll"></div>
+                  </div>
+                  <div class="text text-white">{{ bin.palletId }}</div>
+                </div>
+                }@else {
+
+                <div
+                  class="image-container"
+                  (click)="
+                    allocateBin(rack().id, bin.id, level.levelNumber, bin.BinNo)
+                  "
+                >
+                  <div class="green-box"></div>
+                </div>
+
+                }
+                <h5 class="text-box text-white text-center">
+                  {{ bin.BinNo }}
+                </h5>
+              </div>
+              <!-- bin end -->
+            </div>
+          </div>
+          <!-- level end -->
+        </div>
+      </div>
+    </div>
+    }
+    <div *ngIf="isScannerActive()" class="scanner-container">
+      <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+    </div>
+    <!-- Pallet ID -->
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <label for="palletId">Pallet ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="palletId"
+            formControlName="palletId"
+            class="form-control"
+            placeholder="Enter Pallet ID"
+          />
+          <button
+            class="btn-primary btn-sm"
+            type="button"
+            (click)="toggleScanner('palletId')"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <button
+            class="btn-success btn-sm"
+            type="button"
+            (click)="fetchFabricCollections()"
+          >
+            <span class="material-icons">filter_list</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>
+
+@if(fabrics().length>0){
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Bin Number</th>
+        <th>Location</th>
+        <th>Fabric Ref</th>
+        <th>ColorName</th>
+
+        <th>Status</th>
+        <th>Invoice</th>
+        <th>Style</th>
+        <th>OC</th>
+        <th>Lot</th>
+        <th>Total Qty</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let fabric of fabrics()">
+        <td>{{ fabric?.fbin?.BinNo }}</td>
+        <td>{{ fabric?.location }}</td>
+        <td>{{ fabric?.fabricRef }}</td>
+        <td>{{ fabric?.colorName }}</td>
+
+        <td>{{ fabric.status }}</td>
+        <td>{{ fabric.invoiceNo }}</td>
+        <td>{{ fabric.styleName }}</td>
+        <td>{{ fabric.ocNo }}</td>
+        <td>{{ fabric.shadeLot }}</td>
+        <td>{{ fabric.totalQty }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+}

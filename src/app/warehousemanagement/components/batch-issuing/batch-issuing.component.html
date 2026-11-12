@@ -1,0 +1,206 @@
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-lg-2">
+      <label>From Date</label>
+      <input type="date" class="form-control" formControlName="fromDate" />
+    </div>
+
+    <div class="col-lg-2">
+      <label>To Date</label>
+      <input type="date" class="form-control" formControlName="toDate" />
+    </div>
+
+    <div class="col-lg-2">
+      <label>Warehouse</label>
+      <select class="form-control" formControlName="wareHouseId">
+        <option value="">Select</option>
+        <option *ngFor="let wh of warehouses()" [value]="wh.wareHouseName">
+          {{ wh.wareHouseName }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-lg-3">
+      <label>Factory</label>
+      <select class="form-control" formControlName="factoryId">
+        <option value="">Select</option>
+        <option *ngFor="let f of factories()" [value]="f.name">
+          {{ f.name }}
+        </option>
+      </select>
+    </div>
+
+    <div class="col-lg-3">
+      <label>Status</label>
+      <select class="form-control" formControlName="status">
+        <option value="Pending">Pending</option>
+        <option value="Accepted">Accepted</option>
+        <option value="Rejected">Rejected</option>
+      </select>
+    </div>
+  </div>
+
+  <button
+    class="btn btn-success mt-2"
+    type="button"
+    (click)="fetchFabricCollections()"
+  >
+    Filter
+  </button>
+</form>
+
+<!-- TABLE -->
+<div class="table-responsive mt-3" *ngIf="fabrics().length">
+  <table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>
+          <input
+            type="checkbox"
+            [checked]="isAllSelected()"
+            (change)="toggleSelectAll()"
+          />
+        </th>
+        <th>#</th>
+        <th>Qty</th>
+        <th>Fabric Ref</th>
+        <th>Facility</th>
+        <th>Shade Lot</th>
+        <th>OC No</th>
+        <th>PO No</th>
+        <th>Invoice</th>
+        <th>Pallet</th>
+        <th>Requested By</th>
+        <th>Warehouse</th>
+        <th>Issued Date</th>
+        <th>Created On</th>
+        <th>Color</th>
+      </tr>
+      <tr>
+        <th></th>
+        <th></th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'issueQty')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'fabricRef')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'facility')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'shadeLot')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'ocNo')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'poNo')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'invoiceNo')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'palletId')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'requestedBy')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'warehouseName')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'issuedDate')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'createdAt')"
+          />
+        </th>
+        <th>
+          <input
+            class="form-control form-control-sm"
+            (input)="applyFilter($event, 'colorName')"
+          />
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of fabrics(); let i = index">
+        <td>
+          <input
+            type="checkbox"
+            [checked]="selectedIds.has(row.id)"
+            (change)="toggleSelect(row.id)"
+          />
+        </td>
+        <td>{{ i + 1 }}</td>
+        <td>{{ row.issueQty }}</td>
+        <td>{{ row.fabricCollection?.fabricRef }}</td>
+        <td>{{ row.facility }}</td>
+        <td>{{ row.shadeLot }}</td>
+        <td>{{ row.ocNo }}</td>
+        <td>{{ row.poNo }}</td>
+        <td>{{ row.invoiceNo }}</td>
+        <td>{{ row.fabricCollection?.palletId }}</td>
+        <td>{{ row.requestedBy }}</td>
+        <td>{{ row.warehouseName }}</td>
+        <td>{{ row.issuedDate }}</td>
+        <td>{{ row.createdAt }}</td>
+        <td>{{ row.fabricCollection?.colorName }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<h5>Selected Count: {{ selectedIds.size }}</h5>
+
+<div *ngIf="fabrics().length" class="d-flex align-items-center mt-2">
+  <input
+    type="number"
+    class="form-control me-2"
+    placeholder="Max 100"
+    [(ngModel)]="maxIssueCount"
+    (input)="selectFirstN()"
+    min="1"
+    max="100"
+  />
+  <button class="btn btn-danger" (click)="issueAll('Rejected')">REJECT</button>
+  <button class="btn btn-primary ms-2" (click)="issueAll('Accepted')">
+    ISSUE
+  </button>
+</div>

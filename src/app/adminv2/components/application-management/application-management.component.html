@@ -1,0 +1,167 @@
+<section class="adminv2-page">
+  <header class="adminv2-page-header">
+    <div>
+      <span class="adminv2-eyebrow"><i class="bi bi-grid"></i> ACCESS MANAGEMENT</span>
+      <h1>Applications</h1>
+      <p>Create applications before defining their permissions and roles.</p>
+    </div>
+    <a class="btn btn-outline-primary" routerLink="/adminv2/workspace-navigation">
+      <i class="bi bi-list-nested" aria-hidden="true"></i>
+      Workspace navigation
+    </a>
+    <div class="adminv2-header-meta">
+      <span class="adminv2-count">{{ isLoadingApplications() ? '…' : applications().length }}</span>
+      <span class="adminv2-count-label">applications</span>
+    </div>
+  </header>
+
+  <section class="adminv2-panel" aria-label="Applications">
+    <div class="adminv2-panel-heading">
+      <div>
+        <h2>Application directory</h2>
+        <p>Registered applications are available when creating permissions.</p>
+      </div>
+    </div>
+
+    <form [formGroup]="form" class="application-create-form" (ngSubmit)="save()">
+      <div class="application-name-field">
+        <label for="applicationName" class="form-label">Application name</label>
+        <input
+          id="applicationName"
+          type="text"
+          class="form-control"
+          formControlName="applicationName"
+          placeholder="Enter application name"
+          maxlength="255"
+        />
+      </div>
+      <div class="application-name-field">
+        <label for="applicationIcon" class="form-label">Bootstrap icon class</label>
+        <input
+          id="applicationIcon"
+          type="text"
+          class="form-control"
+          formControlName="applicationIcon"
+          placeholder="bi-app-indicator"
+          maxlength="255"
+        />
+      </div>
+      <div class="application-name-field">
+        <label for="requiredPermission" class="form-label">Required permission</label>
+        <input
+          id="requiredPermission"
+          type="text"
+          class="form-control"
+          formControlName="requiredPermission"
+          placeholder="Permission name required to open"
+          maxlength="255"
+        />
+      </div>
+      <button
+        type="submit"
+        class="btn btn-primary adminv2-primary-button"
+        [disabled]="form.invalid || isSaving()"
+      >
+        <span
+          *ngIf="isSaving()"
+          class="spinner-border spinner-border-sm me-1"
+          aria-hidden="true"
+        ></span>
+        <i
+          class="bi"
+          [ngClass]="selectedApplicationId() === null ? 'bi-plus-lg' : 'bi-check-lg'"
+          aria-hidden="true"
+        ></i>
+        {{
+          isSaving()
+            ? 'Saving…'
+            : selectedApplicationId() === null
+              ? 'Create application'
+              : 'Update application'
+        }}
+      </button>
+      <button
+        *ngIf="selectedApplicationId() !== null"
+        type="button"
+        class="btn btn-light"
+        (click)="cancelEdit()"
+      >
+        Cancel edit
+      </button>
+    </form>
+
+    <div class="table-responsive adminv2-table-wrap">
+      <table class="table adminv2-table">
+        <thead>
+          <tr>
+            <th>Application</th>
+            <th>Icon</th>
+            <th>Required permission</th>
+            <th>Application ID</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngIf="isLoadingApplications()">
+            <td colspan="5">
+              <div class="application-loading" role="status">
+                <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                Loading applications…
+              </div>
+            </td>
+          </tr>
+          <tr *ngFor="let application of applications()">
+            <td>
+              <div class="adminv2-person">
+                <span class="">
+                  <i class="bi" [ngClass]="application.applicationIcon || 'bi-app-indicator'"></i>
+                </span>
+                <strong>{{ application.applicationName }}</strong>
+              </div>
+            </td>
+            <td>
+              <code>{{ application.applicationIcon || 'bi-app-indicator' }}</code>
+            </td>
+            <td>{{ application.requiredPermission || 'Not configured' }}</td>
+            <td>{{ application.id }}</td>
+            <td class="text-end">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                (click)="edit(application)"
+              >
+                <i class="bi bi-pencil" aria-hidden="true"></i> Edit
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="loadingError()">
+            <td colspan="5">
+              <div class="adminv2-empty-state" role="alert">
+                <span><i class="bi bi-exclamation-circle"></i></span>
+                <strong>Could not load applications</strong>
+                <p>Check the API connection and try again.</p>
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="fetchApplications(true)"
+                  [disabled]="isLoadingApplications()"
+                >
+                  Retry
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!isLoadingApplications() && !loadingError() && applications().length === 0">
+            <td colspan="5">
+              <div class="adminv2-empty-state">
+                <span><i class="bi bi-grid"></i></span>
+                <strong>No applications found</strong>
+                <p>Create an application to start assigning permissions.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</section>

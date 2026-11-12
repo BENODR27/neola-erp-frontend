@@ -1,0 +1,120 @@
+<!-- <button
+        type="button"
+        class="btn btn-outline-primary mt-1"
+        (click)="printDiv()"
+      >
+        Print
+      </button> -->
+<div>
+  <form class="forms-sample" (ngSubmit)="fetchSourcingAsnDetails()">
+    <div class="form-group">
+      <div class="input-group">
+        <input
+          type="text"
+          class="form-control"
+          [(ngModel)]="invoiceId"
+          name="invoiceId"
+          placeholder="Enter Invoice No"
+        />
+        <button class="btn-sm btn-outline-secondary" type="submit">
+          <span class="material-icons">search</span>
+        </button>
+        <button
+          class="btn-sm btn-outline-secondary"
+          type="button"
+          (click)="exportTable()"
+        >
+          <span class="material-icons">download</span>
+        </button>
+      </div>
+    </div>
+  </form>
+
+  @if(sourcingAsnDetails().length>0){
+  <div class="table-responsive" *ngIf="dataFetched()">
+    <div class="table-scroll-container">
+      <table id="sourcingAsnTable" class="table table-bordered">
+        <thead>
+          <tr>
+            <th>INV NO:</th>
+            <th>Supp Name:</th>
+            <th>OC:</th>
+            <th>PO:</th>
+
+            <th>REF:</th>
+            <th>STYLE:</th>
+            <th>COLOR:</th>
+            <th>SHADELOT:</th>
+            <th>QTY:</th>
+            <th>QR CODE:</th>
+            <th>UOM:</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of sourcingAsnDetails()" class="print-container">
+            <td>{{ row.InvoiceNo }}</td>
+            <td>{{ row.SupplierName }}</td>
+            <td>{{ row.OCNo }}</td>
+            <td>{{ row.OrderNo }}</td>
+
+            <td>{{ row.ArticleCode }}</td>
+            <td>{{ row.StyleName }}</td>
+            <td>{{ row.ColorName }}</td>
+            <td>{{ row.ShadeLot }}</td>
+            <td>{{ row.Qty }}</td>
+            <td>
+              {{
+                row.ShadeLot +
+                  "#$@" +
+                  row.OCNo +
+                  "#$@" +
+                  row.InvoiceNo +
+                  "#$@" +
+                  row.SupplierName +
+                  "#$@" +
+                  row.OrderNo +
+                  "#$@" +
+                  row.ArticleCode +
+                  "#$@" +
+                  row.StyleName +
+                  "#$@" +
+                  row.ColorName +
+                  "#$@" +
+                  row.Qty
+              }}
+            </td>
+            <!-- <td>
+                    <qrcode
+                      *ngIf="row.InvoiceNo"
+                      [qrdata]="
+                        row.InvoiceNo +
+                        '#$@' +
+                        row.SupplierName +
+                        '#$@' +
+                        row.OCNo +
+                        '#$@' +
+                        row.OrderNo +
+                        '#$@' +
+                        row.ArticleCode +
+                        '#$@' +
+                        row.StyleName +
+                        '#$@' +
+                        row.ColorName +
+                        '#$@' +
+                        row.ShadeLot +
+                        '#$@' +
+                        row.Qty
+                      "
+                      [width]="256"
+                      [errorCorrectionLevel]="'H'"
+                    ></qrcode>
+                  </td> -->
+            <td>{{ row.UOM }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  }
+</div>

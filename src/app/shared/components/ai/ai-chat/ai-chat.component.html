@@ -1,0 +1,74 @@
+<div class="chat-wrapper">
+  <!-- Background AI Text -->
+  <div class="ai-background">
+    <span *ngFor="let word of ['AI', 'ADMIN', 'GPT', 'Chatbot', 'Neural', 'LLM']">{{ word }}</span>
+  </div>
+
+  <div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header">
+      <h1 class="logo">ADMIN <span>CHAT</span></h1>
+    </div>
+    <!-- Highlighted Notes -->
+    <div class="chat-notes">
+      <p>
+        ⚠️ We made it work slow so it won’t crash our server – Reason Multiple applications are LIVE
+        in that same server -one user can use this at a time (FIFO queue).
+      </p>
+      <p>🔒 Your data is not collected, everything is private 100%.</p>
+      <p>🔒 Image Processing under research.</p>
+    </div>
+    <!-- Chat Messages -->
+    <div class="messages" #scrollContainer>
+      <div
+        *ngFor="let msg of messages"
+        [ngClass]="{
+          'user-msg': msg.sender === 'user',
+          'bot-msg': msg.sender === 'bot',
+        }"
+        class="message"
+      >
+        <!-- <span class="message-text">{{ msg.text }}</span> -->
+        <div class="message-text" [innerHTML]="formatMarkdown(msg.text)"></div>
+
+        <button class="copy-btn" (click)="copyMessage(msg.text)" title="Copy">
+          <span
+            *ngIf="msg.sender === 'bot'"
+            class="material-icons"
+            style="margin-left: 3px; cursor: pointer"
+            (click)="copyMessage(msg.text)"
+            title="Copy"
+          >
+            content_copy
+          </span>
+        </button>
+      </div>
+
+      <!-- Typing Indicator -->
+      <div *ngIf="loading()" class="bot-msg typing-indicator">
+        <span class="dot"></span>
+        <span class="dot"></span>
+        <span class="dot"></span>
+      </div>
+    </div>
+
+    <!-- Input Box -->
+    <div class="input-box">
+      <select [(ngModel)]="modelName">
+        <option value="gpt-oss:20b">gpt-oss:20b</option>
+        <!--
+        <option value="gemma3:latest">Gemini</option>
+        <option value="qwen3:latest">Gwen 3.0 - Best</option> -->
+      </select>
+      <textarea
+        type="text"
+        [(ngModel)]="inputText"
+        (keydown.enter)="sendMessage()"
+        placeholder="Type a message"
+      ></textarea>
+      <button [disabled]="loading()" (click)="sendMessage()">
+        {{ loading() ? 'Waiting For Response' : 'Send' }}
+      </button>
+    </div>
+  </div>
+</div>

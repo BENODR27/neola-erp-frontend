@@ -1,0 +1,189 @@
+<main class="split-roll-list-page">
+  <header class="list-heading">
+    <div>
+      <p class="eyebrow">WAREHOUSE MANAGEMENT</p>
+      <h1>Created Split Rolls</h1>
+      <p class="description">
+        Select one or more rolls() to download individual 4 × 4 inch stickers.
+      </p>
+    </div>
+    <div class="heading-actions">
+      <button
+        class="btn btn-outline-secondary"
+        type="button"
+        (click)="loadSplitRolls()"
+        [disabled]="isLoading()"
+      >
+        <span class="material-icons align-middle me-1">refresh</span>
+        Refresh
+      </button>
+      <button
+        class="btn btn-primary"
+        type="button"
+        (click)="downloadSelectedStickers()"
+        [disabled]="selectedRollIds.size === 0 || isDownloading()"
+      >
+        <span class="material-icons align-middle me-1">download</span>
+        {{ isDownloading() ? "Preparing..." : "Download stickers (" + selectedRollIds.size + ")" }}
+      </button>
+    </div>
+  </header>
+
+  <section class="list-card">
+    <div class="filter-toolbar">
+      <div class="filter-field roll-id-filter">
+        <label for="rollIdFilter">Roll ID</label>
+        <input
+          id="rollIdFilter"
+          class="form-control"
+          type="search"
+          [(ngModel)]="rollIdFilter"
+          [ngModelOptions]="{ standalone: true }"
+          placeholder="Search roll ID, shade lot, or roll number"
+        />
+      </div>
+      <div class="filter-field">
+        <label for="fromDate">Created from</label>
+        <input
+          id="fromDate"
+          class="form-control"
+          type="date"
+          [(ngModel)]="fromDate"
+          [ngModelOptions]="{ standalone: true }"
+          (change)="onDateFilterChange()"
+        />
+      </div>
+      <div class="filter-field">
+        <label for="toDate">Created to</label>
+        <input
+          id="toDate"
+          class="form-control"
+          type="date"
+          [(ngModel)]="toDate"
+          [ngModelOptions]="{ standalone: true }"
+          (change)="onDateFilterChange()"
+        />
+      </div>
+      <button
+        class="btn btn-outline-secondary clear-filters"
+        type="button"
+        (click)="clearFilters()"
+        [disabled]="!rollIdFilter && !fromDate && !toDate"
+      >
+        Clear filters
+      </button>
+    </div>
+
+    <div class="list-toolbar">
+      <div>
+        <h2>Split roll inventory</h2>
+        <span class="result-count">
+          {{ filteredRolls.length }} of {{ rolls().length }} rolls()
+        </span>
+      </div>
+      <label class="select-all">
+        <input
+          type="checkbox"
+          [checked]="allRollsSelected"
+          [disabled]="filteredRolls.length === 0"
+          (change)="toggleAllRolls($any($event.target).checked)"
+        />
+        Select filtered
+      </label>
+    </div>
+
+    @if (isLoading()) {
+      <div class="list-state">
+        <span class="material-icons">sync</span>
+        Loading split rolls()...
+      </div>
+    } @else if (filteredRolls.length === 0) {
+      <div class="list-state empty-state">
+        <span class="material-icons">inventory_2</span>
+        <strong>
+          {{ rolls().length === 0 ? "No split rolls() found" : "No matching rolls()" }}
+        </strong>
+        <span>
+          {{
+            rolls().length === 0
+              ? "Split rolls() will appear here after a batch is created."
+              : "Try changing or clearing the filters."
+          }}
+        </span>
+      </div>
+    } @else {
+      <div class="table-responsive roll-table-scroll">
+        <table class="table roll-table">
+          <thead>
+            <tr>
+              <th scope="col" class="select-column">Select</th>
+              <th scope="col">Shade lot</th>
+              <th scope="col">Invoice</th>
+              <th scope="col">PO / OC</th>
+              <th scope="col">Style / Color</th>
+              <th scope="col">Quantity</th>
+              <th scope="col">Pallet</th>
+              <th scope="col">Created</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let roll of filteredRolls; trackBy: trackByRollId"
+              [class.selected-row]="selectedRollIds.has(roll.id)"
+            >
+              <td class="select-column">
+                <input
+                  type="checkbox"
+                  [checked]="selectedRollIds.has(roll.id)"
+                  [attr.aria-label]="'Select ' + roll.shadeLot"
+                  (change)="toggleRoll(roll.id, $any($event.target).checked)"
+                />
+              </td>
+              <td class="shade-lot">{{ roll.shadeLot || "-" }}</td>
+              <td>{{ roll.invoiceNo || "-" }}</td>
+              <td>{{ roll.poNo || "-" }} / {{ roll.ocNo || "-" }}</td>
+              <td>{{ roll.styleName || "-" }} / {{ roll.colorName || "-" }}</td>
+              <td>{{ roll.totalQty ?? "-" }}</td>
+              <td>{{ roll.palletId || "-" }}</td>
+              <td>{{ roll.createdAt | date: "short" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    }
+  </section>
+
+  <section
+    *ngIf="selectedRolls.length > 0"
+    id="selected-split-stickers"
+    class="selected-stickers"
+    aria-label="Selected sticker previews"
+  >
+    <article
+      class="sticker-card"
+      *ngFor="let roll of selectedRolls; trackBy: trackByRollId"
+    >
+      <div class="sticker-topline">
+        <span>FABRIC ROLL</span>
+        <span>ROLL {{ roll.id }}</span>
+      </div>
+      <div class="sticker-main">
+        <qrcode
+          [elementType]="'img'"
+          [qrdata]="roll.qrData"
+          [width]="140"
+          [errorCorrectionLevel]="'L'"
+        ></qrcode>
+        <div class="sticker-details">
+          <h3>{{ roll.shadeLot }}</h3>
+          <p><strong>Invoice</strong><span>{{ roll.invoiceNo || "-" }}</span></p>
+          <p><strong>Supplier</strong><span>{{ roll.supplierName || "-" }}</span></p>
+          <p><strong>OC / PO</strong><span>{{ roll.ocNo || "-" }} / {{ roll.poNo || "-" }}</span></p>
+          <p><strong>Reference</strong><span>{{ roll.fabricRef || "-" }}</span></p>
+          <p><strong>Style / Color</strong><span>{{ roll.styleName || "-" }} / {{ roll.colorName || "-" }}</span></p>
+          <p class="quantity"><strong>Quantity</strong><span>{{ roll.totalQty ?? "-" }}</span></p>
+        </div>
+      </div>
+    </article>
+  </section>
+</main>

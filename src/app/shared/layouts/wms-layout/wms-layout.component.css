@@ -1,0 +1,15 @@
+.scroll-container.show {
+    overflow-x: auto; /* Enables horizontal scrolling */
+    overflow-y: auto; /* Enables vertical scrolling */
+    max-height: 500px; /* Adjust the height as needed */
+    max-width: 100%; /* Ensures the table doesn't overflow parent */
+    display: block; /* Ensures the container behaves as a block element */
+  }
+  .main-content{
+    padding: 20px;
+    min-height: 94vh;
+    animation: fadeInDown 1s ease-in-out;
+    transition: background-color 0.5s ease, color 0.5s ease;
+  }
+
+ 

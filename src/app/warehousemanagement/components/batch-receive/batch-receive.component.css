@@ -1,0 +1,173 @@
+.t-rec-fab{
+    opacity: 0.8;
+}
+
+.dock-window {
+            width: 100%;
+            height: 450px;
+            position: relative;
+            background-image: url('https://primefaces.org/cdn/primeng/images/dock/window.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+
+        .p-dock {
+            z-index: 1000;
+        }
+
+        :host ::ng-deep {
+    .dock-window {
+        width: 100%;
+        height: 450px;
+        position: relative;
+        background-image: url('https://primefaces.org/cdn/primeng/images/dock/window.jpg');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+
+    .p-dock {
+        z-index: 1000;
+    }
+}
+/* Normal label */
+.form-label {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Animated alert mode */
+.alert-label {
+  color: #fff !important;
+  background: #000000; /* Bootstrap danger red */
+  padding: 6px 12px;
+  border-radius: 6px;
+  animation: pulse 1s infinite;
+  font-weight: bold;
+  box-shadow: 0 0 12px rgba(220, 53, 69, 0.7);
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(220, 53, 69, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 25px rgba(220, 53, 69, 1);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 12px rgba(220, 53, 69, 0.7);
+  }
+
+}
+  .resetbtn{
+    background-color: #dc3545 !important;
+    color: #fff !important;
+    border: none !important;
+    padding: 6px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease-in-out;
+  }
+  .rec-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background-color: #000000;
+  color: white;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s;
+
+  &:hover {
+    background-color: #146e02;
+  }
+}
+  .reset-btn {
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  background-color: #000000;
+  color: white;
+  padding: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: background 0.3s;
+
+  &:hover {
+    background-color: #146e02;
+  }
+}
+  .receive-fabric-form {
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  }
+  .table-scroll-container.t-rec-fab {
+    max-width: 900px;
+    margin: 2rem auto 0 auto;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+  }
+  .scanner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+
+
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: #ff3300;
+}
+
+input:checked + .slider:before {
+  transform: translateX(26px);
+}

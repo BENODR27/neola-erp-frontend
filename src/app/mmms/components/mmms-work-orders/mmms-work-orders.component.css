@@ -1,0 +1,13 @@
+@import '../mmms-operations/mmms-operations-professional.css';
+@import '../mmms-operations/mmms-editor.css';
+@import '../mmms-operations/mmms-actions.css';
+@import '../mmms-operations/mmms-history.css';
+
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.operation-page-work-orders {
+  min-height: 100%;
+}

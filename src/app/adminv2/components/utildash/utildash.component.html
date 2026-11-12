@@ -1,0 +1,231 @@
+<section class="adminv2-page">
+  <header class="adminv2-page-header">
+    <div>
+      <span class="adminv2-eyebrow"><i class="bi bi-bar-chart-line"></i> OPERATIONS ANALYTICS</span>
+      <h1>Web utility activity</h1>
+      <p>Explore activity by date, application, facility, and employee.</p>
+    </div>
+  </header>
+
+  <form (ngSubmit)="applyFilter()" class="row g-3 adminv2-panel adminv2-filter-panel">
+    <div class="col-12">
+      <div class="adminv2-panel-heading">
+        <div>
+          <h2>Filter activity</h2>
+          <p>Choose a date range and scope for the report.</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <label for="fromDate" class="form-label">From Date</label>
+      <input
+        type="date"
+        [(ngModel)]="filters.fromDate"
+        name="fromDate"
+        id="fromDate"
+        class="form-control"
+      />
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <label for="toDate" class="form-label">To Date</label>
+      <input
+        type="date"
+        [(ngModel)]="filters.toDate"
+        name="toDate"
+        id="toDate"
+        class="form-control"
+      />
+    </div>
+
+    <div class="col-12 col-md-6 col-lg-3">
+      <label for="name" class="form-label">Select Name</label>
+      <select
+        [(ngModel)]="filters.name"
+        name="name"
+        id="name"
+        class="form-select"
+      >
+        <option [value]="null" hidden selected>All</option>
+        <option
+          *ngFor="
+            let facility of ['WMS', 'cuttingQC', 'Troubleshoot', 'TechTicket']
+          "
+          [value]="facility"
+        >
+          {{ facility }}
+        </option>
+      </select>
+    </div>
+    <div class="col-12 col-md-6 col-lg-3">
+      <label for="facility" class="form-label">Select Facility</label>
+      <select
+        [(ngModel)]="filters.facilty"
+        name="facility"
+        id="facility"
+        class="form-select"
+      >
+        <option [value]="null" hidden selected>All</option>
+        <option
+          *ngFor="let facility of ['CFAI1', 'CFAI2', 'CFAI3', 'CFAI12']"
+          [value]="facility"
+        >
+          {{ facility }}
+        </option>
+      </select>
+    </div>
+    <div class="col-12 d-flex justify-content-end">
+      <button type="submit" class="btn btn-primary adminv2-primary-button">
+        <i class="bi bi-funnel" aria-hidden="true"></i> Apply filters
+      </button>
+    </div>
+  </form>
+
+  <div class="row mt-4" *ngIf="this.datas.length > 0">
+    <div class="col-12">
+      <div class="utiltable">
+        <table class="table">
+          <thead class="table-dark">
+            <tr>
+              <th>ID</th>
+              <th>Employee Code</th>
+              <th>Facility</th>
+              <th>Name</th>
+              <th>Created At</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let data of datas">
+              <td>{{ data.id }}</td>
+              <td>{{ data.empCode }}</td>
+              <td>{{ data.facilty || "N/A" }}</td>
+              <td>{{ data.name }}</td>
+              <td>{{ data.createdAt | date : "short" }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col-12">
+      <div
+        class="row justify-content-center mt-4"
+        *ngIf="this.datas.length > 0"
+      >
+        <app-chart-pie-demo
+          [customLabel]="'No Of Entries'"
+          [pieChartParams]="fullOrEmpty()"
+          [chartType]="'bar'"
+          class="w-100"
+        ></app-chart-pie-demo>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-4" *ngIf="datasNameWise().chartLabels.length > 0">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered utiltable">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Entry Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let label of datasFacilityWise().chartLabels; let i = index"
+            >
+              <td>{{ label }}</td>
+              <td>{{ datasFacilityWise().chartData[i] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="row justify-content-center mt-4"
+    *ngIf="datasFacilityWise().chartLabels.length > 0"
+  >
+    <div class="col-12 col-md-10">
+      <app-chart-pie-demo
+        [customLabel]="'No Of Entries'"
+        [pieChartParams]="datasFacilityWise()"
+        [chartType]="'bar'"
+        class="w-100"
+      ></app-chart-pie-demo>
+    </div>
+  </div>
+
+  <div class="row mt-4" *ngIf="datasNameWise().chartLabels.length > 0">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered utiltable">
+          <thead class="table-dark">
+            <tr>
+              <th>Name</th>
+              <th>Entry Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let label of datasNameWise().chartLabels; let i = index">
+              <td>{{ label }}</td>
+              <td>{{ datasNameWise().chartData[i] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="row justify-content-center mt-4"
+    *ngIf="datasNameWise().chartLabels.length > 0"
+  >
+    <div class="col-12 col-md-4">
+      <app-chart-pie-demo
+        [customLabel]="'No Of Entries'"
+        [pieChartParams]="datasNameWise()"
+        [chartType]="'polarArea'"
+        class="w-100"
+      ></app-chart-pie-demo>
+    </div>
+  </div>
+
+  <div class="row mt-4" *ngIf="datasEmpCodeWise().chartLabels.length > 0">
+    <div class="col-12">
+      <div class="table-responsive">
+        <table class="table table-striped table-bordered utiltable">
+          <thead class="table-dark">
+            <tr>
+              <th>Employee Code</th>
+              <th>Entry Count</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              *ngFor="let label of datasEmpCodeWise().chartLabels; let i = index"
+            >
+              <td>{{ label }}</td>
+              <td>{{ datasEmpCodeWise().chartData[i] }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="row justify-content-center mt-4"
+    *ngIf="datasEmpCodeWise().chartLabels.length > 0"
+  >
+    <div class="col-12 col-md-4">
+      <app-chart-pie-demo
+        [customLabel]="'No Of Entries'"
+        [pieChartParams]="datasEmpCodeWise()"
+        [chartType]="'radar'"
+        class="w-100"
+      ></app-chart-pie-demo>
+    </div>
+  </div>
+</section>

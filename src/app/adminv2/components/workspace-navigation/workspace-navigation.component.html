@@ -1,0 +1,187 @@
+<section class="adminv2-page">
+  <header class="adminv2-page-header">
+    <div>
+      <span class="adminv2-eyebrow">
+        <i class="bi bi-list-nested" aria-hidden="true"></i> WORKSPACE SETTINGS
+      </span>
+      <h1>Workspace navigation</h1>
+      <p>Manage each application's landing page and permission-aware navbar.</p>
+    </div>
+    <button
+      type="button"
+      class="btn btn-primary adminv2-primary-button"
+      (click)="startNewConfiguration()"
+    >
+      <i class="bi bi-plus-lg" aria-hidden="true"></i>
+      New configuration
+    </button>
+  </header>
+
+  <div class="navigation-layout">
+    <section class="adminv2-panel navigation-directory" aria-label="Navigation configurations()">
+      <div class="adminv2-panel-heading">
+        <div>
+          <h2>Applications</h2>
+          <p>{{ configurations().length }} navigation configurations()</p>
+        </div>
+      </div>
+      <div *ngIf="isLoading()" class="navigation-message" role="status">
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Loading navigation…
+      </div>
+      <div *ngIf="loadingError()" class="navigation-message text-danger" role="alert">
+        Could not load configurations().
+        <button
+          class="btn btn-sm btn-outline-secondary"
+          type="button"
+          (click)="loadConfigurations()"
+        >
+          Retry
+        </button>
+      </div>
+      <button
+        *ngFor="let configuration of configurations()"
+        type="button"
+        class="navigation-choice"
+        [class.active]="selectedApplicationName === configuration.applicationName"
+        (click)="selectConfiguration(configuration)"
+      >
+        <span class="navigation-choice-icon"><i class="bi bi-grid"></i></span>
+        <span>
+          <strong>{{ configuration.applicationName }}</strong>
+          <small>{{ configuration.navbarItems.length }} navbar items</small>
+        </span>
+        <i class="bi bi-chevron-right ms-auto" aria-hidden="true"></i>
+      </button>
+      <p
+        *ngIf="!isLoading() && !loadingError() && configurations().length === 0"
+        class="navigation-empty"
+      >
+        No navigation configurations() yet.
+      </p>
+    </section>
+
+    <section class="adminv2-panel navigation-editor" aria-label="Navigation editor">
+      <div class="adminv2-panel-heading">
+        <div>
+          <h2>
+            {{
+              isCreating()
+                ? 'Create configuration'
+                : selectedApplicationName || 'Select an application'
+            }}
+          </h2>
+          <p>Routes must start with a single slash, for example <code>/adminv2/welcome</code>.</p>
+        </div>
+        <button
+          *ngIf="selectedApplicationName && !isCreating()"
+          type="button"
+          class="btn btn-sm btn-outline-danger"
+          (click)="deleteConfiguration()"
+          [disabled]="isSaving()"
+        >
+          <i class="bi bi-trash" aria-hidden="true"></i> Delete
+        </button>
+      </div>
+
+      <form *ngIf="isCreating() || selectedApplicationName" [formGroup]="form" (ngSubmit)="save()">
+        <div class="navigation-form-fields">
+          <div>
+            <label class="form-label" for="navigationApplicationName">Application key</label>
+            <input
+              id="navigationApplicationName"
+              class="form-control"
+              formControlName="applicationName"
+              placeholder="For example: superadminv2"
+              maxlength="255"
+            />
+          </div>
+          <div>
+            <label class="form-label" for="navigationLandingRoute">Landing route</label>
+            <input
+              id="navigationLandingRoute"
+              class="form-control"
+              formControlName="landingRoute"
+              placeholder="/adminv2/welcome"
+              maxlength="255"
+            />
+          </div>
+        </div>
+
+        <div class="navigation-items-heading">
+          <div>
+            <h3>Navbar items</h3>
+            <p>Each item is shown only when the user has its required permission.</p>
+          </div>
+          <button type="button" class="btn btn-sm btn-outline-primary" (click)="addItem()">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i> Add item
+          </button>
+        </div>
+
+        <div formArrayName="navbarItems" class="navigation-items">
+          <article
+            *ngFor="let item of navbarItems.controls; let index = index"
+            class="navigation-item"
+            [formGroupName]="index"
+          >
+            <div class="navigation-item-title">
+              <strong>Item {{ index + 1 }}</strong>
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="removeItem(index)"
+                aria-label="Remove navigation item"
+              >
+                <i class="bi bi-x-lg" aria-hidden="true"></i>
+              </button>
+            </div>
+            <div class="navigation-item-fields">
+              <div>
+                <label class="form-label">Label</label>
+                <input class="form-control" formControlName="label" placeholder="Dashboard" />
+              </div>
+              <div>
+                <label class="form-label">Route</label>
+                <input class="form-control" formControlName="link" placeholder="/adminv2/welcome" />
+              </div>
+              <div>
+                <label class="form-label">Bootstrap icon</label>
+                <input class="form-control" formControlName="icon" placeholder="bi-house" />
+              </div>
+              <div>
+                <label class="form-label">Permission</label>
+                <input class="form-control" formControlName="permission" placeholder="admin-user" />
+              </div>
+            </div>
+          </article>
+          <div *ngIf="navbarItems.length === 0" class="navigation-empty">
+            No navbar items. Use “Add item” to add a link.
+          </div>
+        </div>
+
+        <div class="navigation-actions">
+          <button
+            type="submit"
+            class="btn btn-primary adminv2-primary-button"
+            [disabled]="form.invalid || isSaving()"
+          >
+            <span
+              *ngIf="isSaving()"
+              class="spinner-border spinner-border-sm me-1"
+              aria-hidden="true"
+            ></span>
+            <i *ngIf="!isSaving()" class="bi bi-check-lg" aria-hidden="true"></i>
+            {{ isSaving() ? 'Saving…' : 'Save navigation' }}
+          </button>
+          <button type="button" class="btn btn-light" (click)="cancel()">Cancel</button>
+        </div>
+      </form>
+
+      <div *ngIf="!isCreating() && !selectedApplicationName" class="navigation-placeholder">
+        <i class="bi bi-arrow-left-circle" aria-hidden="true"></i>
+        <strong>Select a configuration to edit</strong>
+        <span>Or create a new navigation configuration.</span>
+      </div>
+    </section>
+  </div>
+</section>

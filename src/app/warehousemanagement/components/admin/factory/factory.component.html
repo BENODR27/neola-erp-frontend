@@ -1,0 +1,105 @@
+<div class="row">
+  <div class="col-sm-12">
+    <h4 >Factory</h4>
+
+    <div class="home-tab">
+      <div
+        class="d-sm-flex align-items-center justify-content-between border-bottom"
+      >
+        <div>
+          <div class="btn-wrapper">
+            <button
+              type="button"
+              class="btn btn-primary text-white me-0"
+              data-bs-toggle="modal"
+              data-bs-target="#listReceivedFabric"
+            >
+              <i class="icon-plus"></i>Add
+            </button>
+            <div
+              class="modal fade"
+              id="listReceivedFabric"
+              tabindex="-1"
+              aria-labelledby="modalLabel"
+            >
+              <div class="modal-dialog modal-fullscreen">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h5 class="modal-title" id="modalLabel">Create Factory</h5>
+                    <button
+                      type="button"
+                      class="btn-close"
+                      data-bs-dismiss="modal"
+                      aria-label="Close"
+                    ></button>
+                  </div>
+                  <div class="modal-body">
+                    <form [formGroup]="form" class="forms-sample">
+                      <div class="form-group">
+                        <label for="name">Name</label>
+                        <input
+                          type="text"
+                          class="form-control"
+                          formControlName="name"
+                          id="name"
+                          placeholder="Enter name"
+                        />
+                      </div>
+    
+                      <button
+                        type="submit"
+                        class="btn btn-primary me-2"
+                        data-bs-dismiss="modal"
+                        (click)="create()"
+                      >
+                        Submit
+                      </button>
+                      <!-- <button class="btn btn-light" data-bs-dismiss="modal">Cancel</button> -->
+                    </form>
+                  </div>
+                  <!-- <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div> -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="tab-content tab-content-basic">
+        <div
+          class="tab-pane fade show active"
+          id="overview"
+          role="tabpanel"
+          aria-labelledby="overview"
+        >
+          @if(datas().length>0){
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Id</th>
+                  <th>NAME</th>
+
+                  <th>Enabled</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of datas()">
+                  <td>{{ row.id }}</td>
+                  <td>{{ row.name }}</td>
+
+                  <td>
+                    <label class="badge badge-danger">{{ row.enabled }}</label>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

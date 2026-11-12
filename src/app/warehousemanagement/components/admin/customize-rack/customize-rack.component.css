@@ -1,0 +1,269 @@
+
+
+.binbtns {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 95%; /* Center horizontally */
+  transform: translate(-50%, -50%);
+  color: rgb(5, 82, 18); /* Text color */
+  font-size: 10px; /* Adjust font size */
+  font-weight: bold;
+  padding: 1px; /* Adds padding inside the text box */
+  border-radius: 4px; /* Optional: Rounded corners */
+
+}
+.bindelete {
+  position: absolute;
+  top: 50%; /* Center vertically */
+  left: 50%; /* Center horizontally */
+  transform: translate(-50%, -50%);
+  color: rgb(5, 82, 18); /* Text color */
+  font-size: 10px; /* Adjust font size */
+  font-weight: bold;
+  padding: 1px; /* Adds padding inside the text box */
+  border-radius: 4px; /* Optional: Rounded corners */
+
+}
+
+.btnspd {
+
+  padding: 1px; /* Adds padding inside the text box */
+  border-radius: 4px; /* Optional: Rounded corners */
+
+}
+
+.text-box {
+    margin-top: 2px; /* Adjusts spacing between the image-container and text box */
+    display: block; /* Ensures it appears below the container */
+    width: 100%; /* Adjust width as needed */
+    max-width: 300px; /* Optional: Set a maximum width for the text box */
+    padding: 0px; /* Adds padding inside the text box */
+    border: 1px solid #ccc; /* Optional: Border styling */
+    border-radius: 4px; /* Optional: Rounded corners */
+    font-size: 16px; /* Font size */
+  }
+  .image-container {
+    
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    width: 50%;
+    height: auto;
+  }
+  
+  .image-container img {
+    border-radius:10px;
+    display: block;
+    width: 300px; /* Adjust the width as needed */
+    height: auto;
+  }
+  
+  .image-container .empty {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%);
+    color: rgb(5, 82, 18); /* Text color */
+    font-size: 15px; /* Adjust font size */
+    font-weight: bold;
+  }
+  .image-container .text {
+    position: absolute;
+    top: 50%; /* Center vertically */
+    left: 50%; /* Center horizontally */
+    transform: translate(-50%, -50%);
+    color: rgb(230, 46, 46); /* Text color */
+    font-size: 15px; /* Adjust font size */
+    font-weight: bold;
+  }
+  .fabriccase {
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+    width: 100%;
+    margin-bottom: 1rem;
+    background: black;
+    border: 10px black solid;
+    border-bottom: 30px black solid;
+  }
+  .fabriccase .fabriccase-left-side,
+  .fabriccase .fabriccase-right-side {
+    position: absolute;
+    width: 16px;
+    height: 100%;
+    background: #8b8b8b;
+    top: 0;
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+  }
+  .fabriccase .fabriccase-left-side {
+    left: 0;
+    box-shadow: inset -3px 0 15px rgba(33, 33, 33, 0.18);
+  }
+  .fabriccase .fabriccase-right-side {
+    right: 0;
+    box-shadow: inset 3px 0 15px rgba(33, 33, 33, 0.18);
+  }
+  
+  .shelf-row {
+    position: relative;
+    margin-top: 2rem;
+    perspective: 1000px;
+  }
+  
+  .shelf {
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    display: block;
+    position: absolute;
+    content: "";
+    left: 8px;
+    bottom: -25px;
+    background: #5c5a5a;
+    width: calc(100% - 16px);
+    height: 67px;
+    -webkit-transform: rotateX(75deg);
+    -moz-transform: rotateX(75deg);
+    -o-transition: rotateX(75deg);
+    transition: rotateX(75deg);
+    z-index: -1;
+  }
+  
+  .shelf-thickness {
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    display: block;
+    position: absolute;
+    content: "";
+    width: calc(100%);
+    left: 0;
+    bottom: -14px;
+    background: #000000;
+    background-repeat: repeat;
+    box-shadow: 0 2px 8px 2px rgba(33, 33, 33, 0.12);
+    height: 12px;
+    z-index: -2;
+  }
+  
+  .shelf-row:last-of-type > .shelf-thickness {
+    display: none;
+  }
+  
+  .fabric {
+    padding: 0rem 1rem 0.10rem;
+  }
+  .fabric img {
+    -webkit-transition: all 0.3s ease-in-out;
+    -moz-transition: all 0.3s ease-in-out;
+    transition: all 0.3s ease-in-out;
+    width: 100%;
+    height: auto;
+    box-shadow: 0 0px 2px 1px rgba(33, 33, 33, 0.5);
+  }
+  .fabric img:hover {
+    -webkit-transform: translate(0, -10px);
+    -moz-transform: translate(0, -10px);
+    -o-transform: translate(0, -10px);
+    transform: translate(0, -10px);
+    box-shadow: 0 2px 2px 1px rgba(33, 33, 33, 0.3);
+  }
+  
+  .flexbox-row {
+    display: -webkit-box;
+    display: -ms-flexbox;
+    display: -webkit-flex;
+    display: flex;
+    -webkit-flex-flow: row nowrap;
+    -ms-flex-flow: row nowrap;
+    flex-flow: row nowrap;
+  }
+  
+  .flexbox-align-center { 
+    -webkit-align-items: flex-end;
+    align-items: flex-end;
+  }
+  
+  .flexbox-justify {
+    -webkit-justify-content: center;
+    justify-content: center;
+  }
+  
+  .center {
+    text-align: center;
+  }
+  
+  .blocks {
+    position: relative;
+    z-index: 4;
+    margin: 0 auto -25px;
+  }
+  .blocks .block {
+    display: inline-block;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    margin: 0;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.6rem;
+    border-bottom: 0 !important;
+  }
+  .blocks .block:nth-child(2n) {
+    background: #f392b9;
+    border: 2px solid #f07baa;
+  }
+  .blocks .block:nth-child(odd) {
+    background: #ffe6a8;
+    border: 2px solid #ffdf8f;
+  }
+  
+  .warning {
+    display: none;
+    color: #d32f2f;
+    font-weight: bold;
+  }
+  h2 {
+      color: #fff;
+  }
+  
+  /* Default container styles */
+  .container {
+    width: 100%;
+    padding: 20px;
+  }
+  
+  /* Make the container smaller on larger devices */
+  @media (min-width: 1200px) {
+    .responsive-container {
+      max-width: 300px; 
+      max-height: 600px; /* Adjust the width as needed */
+  
+      margin: 0 auto; /* Center the container */
+      padding: 10px; /* Reduce padding for a compact look */
+    }
+  }
+  
+  /* Additional styling for smaller screens */
+  @media (max-width: 768px) {
+    .responsive-container {
+      width: 90%; /* Keep the container wider for smaller screens */
+    }
+  }
+  .scroll-container {
+    overflow-y: auto; /* Enables vertical scrolling */
+    max-height: 500px; /* Adjust the height as needed */
+    max-width: 100%; /* Ensures the table doesn't overflow parent */
+    display: block; /* Ensures the container behaves as a block element */
+    border: 1px solid #ccc; /* Optional: Border styling */
+  }
+  .scroll-container-card {
+    overflow-y: auto; /* Enables vertical scrolling */
+    max-height:75vh; /* Adjust the height as needed */
+    max-width: 100%; /* Ensures the table doesn't overflow parent */
+    display: block; /* Ensures the container behaves as a block element */
+    border: 1px solid #ccc; /* Optional: Border styling */
+  }

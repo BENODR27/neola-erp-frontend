@@ -1,0 +1,83 @@
+.history-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #17233a66;
+}
+.history-dialog {
+  width: min(620px, 100%);
+  max-height: 80vh;
+  overflow: auto;
+  border-radius: 18px;
+  background: #fff;
+  padding: 24px;
+  box-shadow: 0 24px 70px #17233a3d;
+}
+.history-dialog header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  border-bottom: 1px solid #edf0f5;
+  padding-bottom: 16px;
+}
+.history-dialog h2 {
+  margin: 4px 0;
+  font-size: 22px;
+}
+.history-dialog p {
+  margin: 0;
+  color: #7b879d;
+  font-size: 12px;
+}
+.history-dialog header button {
+  border: 0;
+  background: #f3f6fa;
+  border-radius: 8px;
+  width: 34px;
+  height: 34px;
+  color: #526781;
+}
+.history-empty {
+  padding: 32px 10px;
+  text-align: center;
+  color: #7b879d;
+  font-size: 13px;
+}
+.history-timeline {
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0 0 0 10px;
+  border-left: 2px solid #e8edf4;
+}
+.history-timeline li {
+  position: relative;
+  display: flex;
+  gap: 12px;
+  padding: 0 0 20px 18px;
+}
+.history-dot {
+  position: absolute;
+  left: -7px;
+  top: 2px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #3674e9;
+  box-shadow: 0 0 0 4px #e8f1ff;
+}
+.history-timeline strong,
+.history-timeline small {
+  display: block;
+}
+.history-timeline strong {
+  font-size: 13px;
+}
+.history-timeline small {
+  margin-top: 4px;
+  color: #7b879d;
+  font-size: 11px;
+}

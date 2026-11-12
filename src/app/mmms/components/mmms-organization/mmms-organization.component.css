@@ -1,0 +1,18 @@
+@import '../mmms-master-data/mmms-master-data.component.css';
+
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.master-page-organization .page-header h1 {
+  letter-spacing: -0.04em;
+}
+
+.master-page-organization .kicker {
+  color: #2f6fb5;
+}
+.context-notice { display:flex; gap:12px; align-items:flex-start; margin:0 0 18px; padding:13px 16px; border:1px solid #cfe1ff; border-radius:12px; background:#f3f8ff; color:#315078; }
+.context-notice > i { color:#2e73c7; font-size:18px; margin-top:1px; }
+.context-notice strong { display:block; font-size:13px; }
+.context-notice p { margin:4px 0 0; color:#607695; font-size:12px; line-height:1.45; }

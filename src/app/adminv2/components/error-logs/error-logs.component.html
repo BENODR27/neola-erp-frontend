@@ -1,0 +1,56 @@
+<section class="adminv2-page">
+  <header class="adminv2-page-header">
+    <div>
+      <span class="adminv2-eyebrow"><i class="bi bi-activity"></i> SYSTEM MONITORING</span>
+      <h1>Error logs</h1>
+      <p>Review reported errors and monitor application health.</p>
+    </div>
+    <div class="adminv2-header-meta">
+      <span class="adminv2-count">{{ datas().length }}</span>
+      <span class="adminv2-count-label">events</span>
+    </div>
+  </header>
+
+  <section class="adminv2-panel" aria-label="Error log events">
+    <div class="adminv2-panel-heading">
+      <div>
+        <h2>Recent events</h2>
+        <p>Latest error reports received by the system.</p>
+      </div>
+    </div>
+    <div class="table-responsive adminv2-table-wrap">
+  <table class="table adminv2-table">
+    <thead>
+      <tr>
+        <th>Event</th>
+        <th>Facility</th>
+        <th>Message</th>
+        <th>Reported</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let data of datas()">
+        <td>
+          <div class="adminv2-person">
+            <span class="adminv2-avatar adminv2-avatar-rose"><i class="bi bi-exclamation-triangle"></i></span>
+            <span><strong>{{ data.empCode || 'System event' }}</strong><small>Event #{{ data.id }}</small></span>
+          </div>
+        </td>
+        <td>{{ data.facilty }}</td>
+        <td class="adminv2-description">{{ data.message }}</td>
+        <td>{{ data.createdAt | date : "short" }}</td>
+      </tr>
+      <tr *ngIf="datas().length === 0">
+        <td colspan="4">
+          <div class="adminv2-empty-state">
+            <span><i class="bi bi-check2-circle"></i></span>
+            <strong>No error events</strong>
+            <p>There are no error reports to display.</p>
+          </div>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+  </section>
+</section>

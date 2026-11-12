@@ -1,0 +1,168 @@
+<!-- QR Scanner -->
+<div *ngIf="isScannerActive()" class="scanner-container">
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="wareHouseId">Select wareHouse</label>
+        <select
+          id="wareHouseId"
+          class="form-control"
+          formControlName="wareHouseId"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if(authService.hasPermission(warehouse.wareHouseName)){
+            <option value="{{ warehouse.id }}">
+              {{ warehouse.wareHouseName }}
+            </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="palletId">Fabric ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="palletId"
+            formControlName="fabricId"
+            class="form-control"
+            placeholder="Scan Fabric ID"
+            (keydown.enter)="$event.preventDefault()"
+            (input)="entryfabDetails()"
+          />
+          <button
+            class="btn-primary btn-sm"
+            type="button"
+            (click)="toggleScanner('fabricId')"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <!-- <button
+            class="btn btn-success btn-sm"
+            type="button"
+            (click)="entryfabDetails()"
+          >
+            GO
+          </button> -->
+        </div>
+
+        <small
+          *ngIf="form.get('fabricId')?.invalid && form.get('fabricId')?.touched"
+          class="text-danger"
+        >
+          Fabric ID is required.
+        </small>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="ocNo">Oc No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="ocNo"
+            formControlName="ocNo"
+            class="form-control"
+            placeholder="Enter OcNo"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="lotNo">Lot No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="lotNo"
+            formControlName="lotNo"
+            class="form-control"
+            placeholder="Enter Lot No"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    class="btn-success btn-sm"
+    type="button"
+    (click)="fetchFabricCollections()"
+  >
+    <span class="material-icons">search</span>
+  </button>
+</form>
+@if(fabrics().length>0){
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>OC No</th>
+        <th>Lot</th>
+        <!-- <th>kg/yard</th> -->
+        <th>TQty</th>
+        <!-- <th>Sample(kg/yard)</th> -->
+        <!-- <th>Bal Qty</th> -->
+        <th>Change</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of fabrics()">
+        <td>{{ row.ocNo }}</td>
+
+        <td>{{ row.shadeLot }}</td>
+
+        <!-- <td>
+                  <form>
+                    <input
+                      type="text"
+                      id="exampleInput1"
+                      placeholder=""
+                    />
+                  </form>
+                </td> -->
+        <td>{{ row.totalQty }}</td>
+
+        <!-- <td>
+                  @if(!row.sampleQty){
+                  <form>
+                    <input
+                      type="text"
+                      class="form-control"
+                      id="exampleInput1"
+                      placeholder=""
+                    />
+                  </form>
+                  }@else {
+                  {{ row.sampleQty }}
+                  }
+                </td> -->
+
+        <!-- <td> {{row.balanceQty}}</td> -->
+        <td>
+          <button
+            class="btn btn-sm btn-success"
+            (click)="onchangeInspectionStatus('Pass', row)"
+            type="button"
+          >
+            Pass
+          </button>
+          <button
+            class="btn btn-sm btn-danger"
+            (click)="onchangeInspectionStatus('Reject', row)"
+            type="button"
+          >
+            Reject
+          </button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+}

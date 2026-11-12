@@ -1,0 +1,371 @@
+<div class="rec-btn" (click)="onSubmit()">
+  <span class="material-icons refresh-btn">add</span>
+</div>
+<div class="reset-btn" (click)="resetForm()">
+  <span class="material-icons refresh-btn">refresh</span>
+</div>
+
+<div
+  *ngIf="isScannerActive"
+  class="scanner-container animate__animated animate__fadeIn"
+>
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<form
+  [formGroup]="form"
+  class="receive-fabric-form shadow-lg rounded-4 p-4 bg-white animate__animated animate__fadeInUp"
+>
+  <div class="row g-4">
+    <!-- Warehouse -->
+    <div
+      class="col-12 col-md-6"
+      *ngIf="!this.storage.getItem('selectedWarehouse')"
+    >
+      <div class="form-group">
+        <label for="wareHouseId" class="form-label fw-semibold"
+          >Warehouse</label
+        >
+        <select
+          id="wareHouseId"
+          class="form-select"
+          formControlName="wareHouseId"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if (authService.hasPermission(warehouse.wareHouseName)) {
+              <option value="{{ warehouse.id }}">
+                {{ warehouse.wareHouseName }}
+              </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+
+    <!-- Pallet ID -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label
+          for="palletId"
+          class="form-label fw-semibold"
+          [ngClass]="{
+            'alert-label': scanFor === 'palletId' || focusIn === 'palletId',
+          }"
+        >
+          Pallet ID
+          {{ scanFor == "palletId" ? " (Camera)" : "" }}
+          {{ focusIn == "palletId" ? " (Scanner)" : "" }}
+        </label>
+
+        <div class="input-group">
+          <button
+            class="btn btn-outline-danger"
+            type="button"
+            (click)="resetPalletId()"
+            title="RESET PALLET ID"
+          >
+            <span class="material-icons">refresh</span>
+          </button>
+          <input
+            type="text"
+            id="palletId"
+            formControlName="palletId"
+            class="form-control"
+            placeholder="Pallet ID"
+            (focusout)="focusIn = ''; scanFor = ''"
+            (focus)="
+              isScannerActive = false; scanFor = ''; focusIn = 'palletId'
+            "
+            (keydown.enter)="$event.preventDefault()"
+          />
+
+          <button
+            class="btn btn-outline-primary"
+            type="button"
+            (click)="toggleScanner('palletId')"
+            title="Scan QR"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <button
+            class="btn btn-outline-success"
+            type="button"
+            (click)="fetchFabricCollections()"
+            title="Search"
+          >
+            <span class="material-icons">search</span>
+          </button>
+        </div>
+        <small
+          *ngIf="form.get('palletId')?.invalid && form.get('palletId')?.touched"
+          class="text-danger"
+        >
+          Pallet ID is required.
+        </small>
+      </div>
+    </div>
+
+    <!-- Fabric ID -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label
+          for="fabricId"
+          class="form-label fw-semibold"
+          [ngClass]="{
+            'alert-label': scanFor === 'fabricId' || focusIn === 'fabricId',
+          }"
+          >Fabric ID
+          {{ scanFor == "fabricId" ? " (Camera)" : "" }}
+          {{ focusIn == "fabricId" ? " (Scanner)" : "" }}</label
+        >
+        <div class="input-group">
+          <button
+            class="btn btn-outline-danger"
+            type="button"
+            (click)="resetForm()"
+            title="RESET FABRIC ID"
+          >
+            <span class="material-icons">refresh</span>
+          </button>
+          <input
+            type="text"
+            id="fabricId"
+            formControlName="fabricId"
+            class="form-control"
+            placeholder="Scan Fabric ID"
+            (focus)="
+              isScannerActive = false; scanFor = ''; focusIn = 'fabricId'
+            "
+            (focusout)="focusIn = ''; scanFor = ''"
+            (keydown.enter)="$event.preventDefault()"
+            (input)="entryfabDetails()"
+          />
+
+          <button
+            class="btn btn-outline-primary"
+            type="button"
+            (click)="toggleScanner('fabricId')"
+            title="Scan QR"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+        </div>
+        <small
+          *ngIf="form.get('fabricId')?.invalid && form.get('fabricId')?.touched"
+          class="text-danger"
+        >
+          Fabric ID is required.
+        </small>
+      </div>
+    </div>
+
+    <!-- Invoice -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="invoiceNo" class="form-label fw-semibold">Invoice</label>
+        <input
+          type="text"
+          id="invoiceNo"
+          formControlName="invoiceNo"
+          class="form-control"
+          [readOnly]="true"
+        />
+        <small
+          *ngIf="
+            form.get('invoiceNo')?.invalid && form.get('invoiceNo')?.touched
+          "
+          class="text-danger"
+        >
+          Invoice is required.
+        </small>
+      </div>
+    </div>
+
+    <!-- Supplier -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="supplierName" class="form-label fw-semibold"
+          >Supplier</label
+        >
+        <input
+          type="text"
+          id="supplierName"
+          formControlName="supplierName"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- OC -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="ocNo" class="form-label fw-semibold">OC</label>
+        <input
+          type="text"
+          id="ocNo"
+          formControlName="ocNo"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- PO -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="poNo" class="form-label fw-semibold">PO</label>
+        <input
+          type="text"
+          id="poNo"
+          formControlName="poNo"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Fabric Ref -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="fabricRef" class="form-label fw-semibold">Fabric Ref</label>
+        <input
+          type="text"
+          id="fabricRef"
+          formControlName="fabricRef"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Style -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="styleName" class="form-label fw-semibold">Style</label>
+        <input
+          type="text"
+          id="styleName"
+          formControlName="styleName"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Color -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="colorName" class="form-label fw-semibold">Color</label>
+        <input
+          type="text"
+          id="colorName"
+          formControlName="colorName"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Lot -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="shadeLot" class="form-label fw-semibold">Lot</label>
+        <input
+          type="text"
+          id="shadeLot"
+          formControlName="shadeLot"
+          class="form-control"
+          [readOnly]="true"
+        />
+      </div>
+    </div>
+
+    <!-- Total Quantity -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="totalQty" class="form-label fw-semibold"
+          >Total Quantity</label
+        >
+        <input
+          type="text"
+          id="totalQty"
+          formControlName="totalQty"
+          class="form-control"
+        />
+        <small
+          *ngIf="form.get('totalQty')?.invalid && form.get('totalQty')?.touched"
+          class="text-danger"
+        >
+          Total Quantity is required and must be numeric.
+        </small>
+      </div>
+    </div>
+
+    <!-- Roll No -->
+    <div class="col-12 col-md-6">
+      <div class="form-group">
+        <label for="rollNo" class="form-label fw-semibold">Roll No</label>
+        <input
+          type="text"
+          id="rollNo"
+          formControlName="rollNo"
+          class="form-control"
+        />
+        <small
+          *ngIf="form.get('rollNo')?.invalid && form.get('rollNo')?.touched"
+          class="text-danger"
+        >
+          Roll No is required and must be numeric.
+        </small>
+      </div>
+    </div>
+  </div>
+</form>
+
+@if (fabrics().length > 0) {
+  <div
+    class="table-scroll-container t-rec-fab animate__animated animate__fadeInUp mt-4"
+  >
+    <app-table
+      [headers]="['Status', 'Invoice', 'Style', 'OC', 'Lot', 'Total Qty']"
+      [fields]="[
+        'status',
+        'invoiceNo',
+        'styleName',
+        'ocNo',
+        'shadeLot',
+        'totalQty',
+      ]"
+      [rows]="fabrics()"
+    >
+    </app-table>
+  </div>
+}
+
+<!-- Add this to your global styles or component styles -->
+<style>
+  .receive-fabric-form {
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+  }
+  .table-scroll-container.t-rec-fab {
+    max-width: 900px;
+    margin: 2rem auto 0 auto;
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    padding: 1.5rem;
+  }
+  .scanner-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+  }
+</style>
+
+<!-- Add Animate.css to your project for the animation classes to work -->
+<!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/> -->

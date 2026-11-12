@@ -1,0 +1,53 @@
+<header class="header">
+  <div class="profile-control">
+    <button
+      class="profile-toggle"
+      type="button"
+      aria-label="Open profile menu"
+      title="Profile"
+      [attr.aria-expanded]="isProfileMenuOpen()"
+      aria-haspopup="true"
+      (click)="toggleProfileMenu()"
+    >
+      <span class="profile-name" [hidden]="!currentEmpName()">
+        {{ currentEmpName() }}
+      </span>
+      <i class="bi bi-person-circle" aria-hidden="true"></i>
+    </button>
+    <div
+      class="profile-menu"
+      [hidden]="!isProfileMenuOpen()"
+      role="menu"
+      aria-label="Profile options"
+    >
+      <button type="button" class="profile-menu-item" role="menuitem" (click)="logout()">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        <span>Sign out</span>
+      </button>
+    </div>
+  </div>
+
+  <button
+    class="menu-toggle"
+    type="button"
+    aria-label="Toggle sidebar"
+    title="Toggle sidebar"
+    (click)="toggle()"
+  >
+    <i class="bi bi-layout-sidebar-inset"></i>
+  </button>
+
+  <a class="brand" [routerLink]="['/adminv2/welcome']" [attr.aria-label]="workspaceBrand + ' home'">
+    <!-- <span class="brand-mark">S</span>
+    <span class="brand-name">ADMIN</span> -->
+    <img [src]="appConfig.logo" [alt]="workspaceBrand" class="brand-logo" height="60" />
+  </a>
+
+  <span class="header-divider" aria-hidden="true"></span>
+  <h1 class="page-title" [hidden]="pageTitle === 'ADMIN'">{{ pageTitle }}</h1>
+
+  <!-- <div class="header-context">
+    <span class="status-dot" aria-hidden="true"></span>
+    <span> workspace</span>
+  </div> -->
+</header>

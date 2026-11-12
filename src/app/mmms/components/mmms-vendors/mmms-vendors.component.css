@@ -1,0 +1,14 @@
+@import '../mmms-master-data/mmms-master-data.component.css';
+
+:host {
+  display: block;
+  min-height: 100%;
+}
+
+.master-page-vendors .page-header h1 {
+  letter-spacing: -0.04em;
+}
+
+.master-page-vendors .kicker {
+  color: #2f6fb5;
+}

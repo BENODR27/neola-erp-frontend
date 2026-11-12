@@ -1,0 +1,177 @@
+<section class="mmms-page" *ngIf="data() as dashboard; else loadingState">
+  <header class="mmms-header">
+    <div>
+      <div class="mmms-breadcrumb">
+        <span class="mmms-brand-dot"></span> OPERATIONS / MAINTENANCE
+      </div>
+      <h1>Maintenance command center</h1>
+      <p>Keep every machine moving with a clear view of health, work orders, and downtime.</p>
+    </div>
+    <div class="mmms-header-actions">
+      <button class="mmms-icon-button" type="button" aria-label="Scan machine QR code">
+        <i class="bi bi-qr-code-scan"></i></button
+      ><button class="mmms-primary-button" type="button">
+        <i class="bi bi-plus-lg"></i> New work order
+      </button>
+    </div>
+  </header>
+  <section class="mmms-kpis" aria-label="Maintenance KPIs">
+    <article class="mmms-kpi-card" *ngFor="let kpi of dashboard.kpis" [class]="'tone-' + kpi.tone">
+      <div class="mmms-kpi-icon"><i class="bi" [ngClass]="kpi.icon"></i></div>
+      <div class="mmms-kpi-copy">
+        <span>{{ kpi.label }}</span
+        ><strong>{{ kpi.value }}</strong
+        ><small [class.positive]="kpi.trend === 'up'" [class.negative]="kpi.trend === 'down'"
+          ><i
+            class="bi"
+            [ngClass]="
+              kpi.trend === 'up'
+                ? 'bi-arrow-up-right'
+                : kpi.trend === 'down'
+                  ? 'bi-arrow-down-right'
+                  : 'bi-dash'
+            "
+          ></i
+          >{{ kpi.change }} vs last period</small
+        >
+      </div>
+    </article>
+  </section>
+  <div class="mmms-main-grid">
+    <section class="mmms-panel mmms-health-panel">
+      <div class="mmms-panel-heading">
+        <div>
+          <span class="mmms-section-kicker">FACTORY HEALTH</span>
+          <h2>Downtime overview</h2>
+        </div>
+        <div class="mmms-periods">
+          <button
+            *ngFor="let period of ['7d', '30d', '90d']"
+            type="button"
+            [class.active]="activePeriod() === period"
+            (click)="setPeriod($any(period))"
+          >
+            {{ period }}
+          </button>
+        </div>
+      </div>
+      <div class="mmms-chart-summary">
+        <strong>31.8 <small>hrs</small></strong
+        ><span><i class="bi bi-arrow-down-right"></i> 12.4% less downtime</span>
+      </div>
+      <div class="mmms-bar-chart" aria-label="Downtime hours by day">
+        <div class="mmms-chart-column" *ngFor="let item of dashboard.downtimeByDay">
+          <div class="mmms-bar-value">{{ item.hours }}</div>
+          <div class="mmms-bar-track">
+            <div class="mmms-bar" [style.height.%]="(item.hours / maxDowntime()) * 100"></div>
+          </div>
+          <span>{{ item.day }}</span>
+        </div>
+      </div>
+    </section>
+    <section class="mmms-panel mmms-mix-panel">
+      <div class="mmms-panel-heading">
+        <div>
+          <span class="mmms-section-kicker">MAINTENANCE MIX</span>
+          <h2>Work type split</h2>
+        </div>
+        <button class="mmms-more-button" type="button" aria-label="More maintenance mix options">
+          <i class="bi bi-three-dots"></i>
+        </button>
+      </div>
+      <div class="mmms-donut">
+        <div class="mmms-donut-inner"><strong>124</strong><span>tasks</span></div>
+      </div>
+      <div class="mmms-legend">
+        <div *ngFor="let item of dashboard.maintenanceMix">
+          <span class="mmms-legend-dot" [style.background]="item.color"></span
+          ><span>{{ item.label }}</span
+          ><strong>{{ item.value }}%</strong>
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="mmms-bottom-grid">
+    <section class="mmms-panel">
+      <div class="mmms-panel-heading">
+        <div>
+          <span class="mmms-section-kicker">ASSET REGISTER</span>
+          <h2>Machine health</h2>
+        </div>
+        <button class="mmms-text-button" type="button">
+          View all <i class="bi bi-arrow-up-right"></i>
+        </button>
+      </div>
+      <div class="mmms-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Machine</th>
+              <th>Status</th>
+              <th>Uptime</th>
+              <th>Last service</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let machine of dashboard.machines">
+              <td>
+                <div class="mmms-machine">
+                  <span class="mmms-machine-icon"><i class="bi bi-cpu"></i></span
+                  ><span
+                    ><strong>{{ machine.name }}</strong
+                    ><small>{{ machine.id }} · {{ machine.line }}</small></span
+                  >
+                </div>
+              </td>
+              <td>
+                <span class="mmms-status" [class]="machineStatusClass(machine.status)"
+                  ><i></i>{{ machine.status }}</span
+                >
+              </td>
+              <td>
+                <div class="mmms-progress"><span [style.width.%]="machine.uptime"></span></div>
+                <strong class="mmms-percent">{{ machine.uptime }}%</strong>
+              </td>
+              <td class="mmms-muted">{{ machine.lastService }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+    <section class="mmms-panel mmms-orders-panel">
+      <div class="mmms-panel-heading">
+        <div>
+          <span class="mmms-section-kicker">ACTION QUEUE</span>
+          <h2>Recent work orders</h2>
+        </div>
+        <button class="mmms-text-button" type="button">
+          Open queue <i class="bi bi-arrow-up-right"></i>
+        </button>
+      </div>
+      <div class="mmms-orders">
+        <article *ngFor="let order of dashboard.workOrders">
+          <div class="mmms-order-top">
+            <span class="mmms-order-id">{{ order.id }}</span
+            ><span class="mmms-priority" [class]="'priority-' + order.priority.toLowerCase()">{{
+              order.priority
+            }}</span>
+          </div>
+          <strong>{{ order.issue }}</strong
+          ><small>{{ order.machine }}</small>
+          <div class="mmms-order-bottom">
+            <span><i class="bi bi-person"></i>{{ order.technician }}</span
+            ><span class="mmms-status compact" [class]="workOrderStatusClass(order.status)"
+              ><i></i>{{ order.status }}</span
+            >
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</section>
+<ng-template #loadingState
+  ><div class="mmms-loading">
+    <span class="spinner-border" aria-hidden="true"></span>
+    <p>Loading maintenance command center…</p>
+  </div></ng-template
+>

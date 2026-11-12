@@ -1,0 +1,258 @@
+<!-- QR Scanner -->
+<div *ngIf="isScannerActive()" class="scanner-container">
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<form [formGroup]="fabricForm">
+  <div class="row">
+    <!-- rack ID -->
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <div class="form-group">
+          <label for="wareHouseId">WareHouse</label>
+          <select
+            (change)="fetchRackDatas()"
+            id="wareHouseId"
+            class="form-control"
+            formControlName="wareHouseId"
+          >
+            <ng-container *ngFor="let warehouse of warehouses()">
+              @if(authService.hasPermission(warehouse.wareHouseName)){
+              <option value="{{ warehouse.id }}">
+                {{ warehouse.wareHouseName }}
+              </option>
+              }
+            </ng-container>
+          </select>
+        </div>
+        <!-- <div class="form-group">
+                  <label for="rackNumber">rackNumber</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="rackNumber"
+                    id="rackNumber"
+                    placeholder="rackNumber"
+                  />
+                </div>
+                <div class="form-group">
+                  <label for="bayNumber">bayNumber</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    formControlName="bayNumber"
+                    id="bayNumber"
+                    placeholder="bayNumber"
+                  />
+                </div> -->
+      </div>
+      <!-- <label for="rackId">BAY QR</label> -->
+      <!-- <div class="input-group">
+        <button
+          class="btn btn-warning btn-sm"
+          type="button"
+          (click)="toggleCustomBay()"
+        >
+          WAREHOUSE
+        </button>
+        <button
+          class="btn btn-success btn-sm"
+          type="button"
+          (click)="fetchRackDatas()"
+        >
+          GO
+        </button>
+        <button
+          class="btn btn-primary btn-sm"
+          type="button"
+          (click)="toggleScanner('bayScan')"
+        >
+          <i class="mdi mdi-qrcode-scan"></i>
+        </button>
+      </div> -->
+    </div>
+    @if(fabrics().length>0){
+    <div class="col-12 mb-1">
+      <div class="form-group">
+        <label for="palletId">Pallet ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="palletId"
+            formControlName="palletId"
+            class="form-control"
+            placeholder="Pallet ID"
+            readonly
+          />
+          <!-- <button
+                    class="btn btn-primary btn-sm"
+                    type="button"
+                    (click)="toggleScanner('palletId')"
+                  >
+                    <i class="mdi mdi-qrcode-scan"></i>
+                  </button>
+                  <button
+                    class="btn btn-success btn-sm"
+                    type="button"
+                    (click)="fetchFabricCollections()"
+                  >
+                    GO
+                  </button> -->
+        </div>
+      </div>
+    </div>
+
+    <div class="table-responsive table-scroll-container-mini">
+      <table class="table">
+        <thead>
+          <tr>
+            <th [colSpan]="3">Total Rolls</th>
+            <th [colSpan]="5">{{fabrics().length}}</th>
+          </tr>
+          <tr>
+            <!-- <th>Bin Number</th> -->
+            <th>Status</th>
+            <th>Fabric Ref</th>
+            <th>Color</th>
+            <th>Invoice</th>
+            <th>Style</th>
+            <th>OC</th>
+            <th>Lot</th>
+            <th>Total Qty</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let fabric of fabrics()">
+            <!-- <td>{{ fabric?.fbin?.BinNo}}</td> -->
+            <td>{{ fabric.status }}</td>
+            <td>{{fabric?.fabricRef}}</td>
+            <td>{{fabric?.colorName}}</td>
+            <td>{{ fabric.invoiceNo }}</td>
+            <td>{{ fabric.styleName }}</td>
+            <td>{{ fabric.ocNo }}</td>
+            <td>{{ fabric.shadeLot }}</td>
+            <td>{{ fabric.totalQty }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    }
+
+    <div class="scroll-container-card">
+      @if(racks().length>0){
+
+      <div
+        *ngFor="let rack of racks()"
+        class="rack-animated"
+        tabindex="0"
+        [attr.aria-label]="'Rack ' + rack.rackNumber"
+      >
+        <h2 class="text-dark">{{ rack.rackNumber }}</h2>
+        <div class="container scroll-container">
+          <div class="row">
+            <button
+              type="button"
+              class="btn btn-success text-white me-0 m-3"
+              (click)="rack.showBays = !rack.showBays"
+            >
+              {{ rack.showBays ? "Hide Bays" : "Show Bays" }}
+              <i class="mdi mdi-plus"></i>
+            </button>
+            @if(rack.showBays){
+
+            <ng-container *ngFor="let bay of rack.bays">
+              <div
+                class="container responsive-container"
+                [style.width]="
+                  bay?.levels[0]?.bins?.length == 1 ? '55%' : '90%'
+                "
+                tabindex="0"
+                [attr.aria-label]="'Bay ' + bay.bayNumber"
+              >
+                <div class="center">
+                  <h2 class="text-dark">{{ bay.bayNumber }}</h2>
+                </div>
+                <div class="shelfs">
+                  <div class="shelf-row">
+                    <div class="shelf"></div>
+                  </div>
+                </div>
+                <div class="fabriccase" id="fabriccase">
+                  <div class="fabriccase-left-side fabriccase-side"></div>
+                  <div class="fabriccase-right-side fabriccase-side"></div>
+                  <div class="shelfs">
+                    <!-- level -->
+                    <div class="shelf-row" *ngFor="let level of bay.levels">
+                      <!-- <h3>{{level.levelNumber}}</h3> -->
+                      <div class="shelf"></div>
+                      <div class="shelf-thickness"></div>
+                      <div class="fabrics() flexbox-row">
+                        <!-- Bin -->
+                        <div class="fabric" *ngFor="let bin of level.bins">
+                          @if(bin.palletId!=null){
+                          <div
+                            class="image-container"
+                            [style.width]="
+                              level.bins.length < 2 ? '43%' : 'auto'
+                            "
+                            (click)="fetchFabricCollections(bin.palletId)"
+                            tabindex="0"
+                            [attr.aria-label]="
+                              'Occupied Bin ' +
+                              bin.BinNo +
+                              ' with Pallet ' +
+                              bin.palletId
+                            "
+                            title="Click to view Pallet {{
+                              bin.palletId
+                            }} details"
+                          >
+                            <div class="red-box"></div>
+                            <div class="text text-white">
+                              {{ bin.palletId }}
+                            </div>
+                            <span class="ripple"></span>
+                          </div>
+                          <!-- <button
+                            class="btn btn-warning text-dark text-center p-1"
+                            (click)="takePalletOut(bin)"
+                          >
+                            Take Pallet out
+                          </button> -->
+                          }@else {
+                          <div
+                            class="image-container"
+                            [style.width]="
+                              level.bins.length < 2 ? '43%' : 'auto'
+                            "
+                            tabindex="0"
+                            [attr.aria-label]="'Empty Bin ' + bin.BinNo"
+                            title="Empty Bin"
+                          >
+                            <div class="green-box"></div>
+                            <!-- <div class="empty">Empty</div> -->
+                            <span class="ripple"></span>
+                          </div>
+
+                          }
+                          <h5 class="text-box text-white text-center">
+                            {{ bin.BinNo }}
+                          </h5>
+                        </div>
+                        <!-- bin end -->
+                      </div>
+                    </div>
+                    <!-- level end -->
+                  </div>
+                </div>
+              </div></ng-container
+            >
+            }
+          </div>
+        </div>
+      </div>
+
+      }
+    </div>
+  </div>
+</form>

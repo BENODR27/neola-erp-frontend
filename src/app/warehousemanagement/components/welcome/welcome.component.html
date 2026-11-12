@@ -1,0 +1,119 @@
+<main class="welcome-page">
+  <div class="session-notice" role="status">
+    <span class="material-icons" aria-hidden="true">schedule</span>
+    <p>For your security, you’ll be signed out automatically after 8 hours.</p>
+  </div>
+
+  <section class="welcome-hero" aria-labelledby="welcome-title">
+    <div class="welcome-copy">
+      <span class="welcome-eyebrow">WAREHOUSE MANAGEMENT SYSTEM</span>
+      <h1 id="welcome-title">Welcome to WMS</h1>
+      <p class="welcome-description">
+        Your workspace for managing fabric, tracking warehouse activity, and
+        keeping operations moving.
+      </p>
+
+      <div class="warehouse-card">
+        <span class="warehouse-icon material-icons" aria-hidden="true"
+          >warehouse</span
+        >
+        <div class="warehouse-control">
+          <label for="warehouseSelect">Active warehouse</label>
+          <select
+            id="warehouseSelect"
+            class="form-select"
+            [ngModel]="selectedWarehouse()"
+            (change)="onWarehouseChange($event)"
+            aria-describedby="warehouse-hint"
+          >
+            <option *ngFor="let warehouse of warehouses()" [value]="warehouse.id">
+              {{ warehouse.wareHouseName }}
+            </option>
+          </select>
+          <span id="warehouse-hint" class="warehouse-hint">
+            Current location: {{ selectedWarehouseName }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <div class="welcome-art" aria-hidden="true">
+      <div class="art-orbit orbit-outer"></div>
+      <div class="art-orbit orbit-inner"></div>
+      <div class="art-icon material-icons">inventory_2</div>
+      <div class="art-tag tag-top">
+        <span class="material-icons">qr_code_2</span>
+        <span>Track every roll</span>
+      </div>
+      <div class="art-tag tag-bottom">
+        <span class="material-icons">task_alt</span>
+        <span>One connected workspace</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="welcome-footer">
+    <div>
+      <span class="footer-indicator"></span>
+      <span>Ready for your next warehouse task</span>
+    </div>
+    <button type="button" class="release-link" (click)="showReleaseNotes()">
+      Release notes
+      <span class="material-icons" aria-hidden="true">arrow_forward</span>
+    </button>
+  </section>
+
+  <div class="modal" [class.show]="isModalVisible()">
+    <div
+      class="modal-content"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="release-notes-title"
+    >
+      <button
+        type="button"
+        class="close"
+        aria-label="Close release notes"
+        (click)="closeModal()"
+      >
+        &times;
+      </button>
+
+      <h4 id="release-notes-title">Release Notes - Version: 1.0.0</h4>
+      <ul class="release-notes-list">
+        <li>
+          <strong>Enhanced User Interface:</strong> Improved UI for a better and
+          more intuitive user experience.
+        </li>
+        <li>
+          <strong>Edit Options:</strong> Added the ability to edit topics,
+          types, and tasks.
+        </li>
+        <li>
+          <strong>Task Editing Restrictions:</strong>
+          <ul>
+            <li>
+              Topics and types can be edited only when the task is in "Not
+              Started" status.
+            </li>
+            <li>Task name and description can be edited at any time.</li>
+          </ul>
+        </li>
+        <li>
+          <strong>Task Deletion:</strong> Tasks can only be deleted when they
+          are in "Not Started" status.
+        </li>
+      </ul>
+      <h4>Release Notes - Version:MVP</h4>
+      <ul class="release-notes-list">
+        <li><strong>Topics</strong> Create Topic option with list</li>
+        <li><strong>Types</strong> Create Type option with list</li>
+        <li><strong>Task</strong> Create Task option with list with filter</li>
+        <li><strong>Team Task</strong> Team Tasks List with Filter</li>
+        <li>
+          <strong>Department Task</strong> Department Tasks List with Filter
+        </li>
+      </ul>
+    </div>
+  </div>
+</main>

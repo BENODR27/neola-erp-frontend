@@ -1,0 +1,118 @@
+:host ::ng-deep .p-meter {
+    background-color: #f80a0a;
+  }
+  
+  :host ::ng-deep .p-meter .p-meter-value {
+    background-color: #00ff00 !important; /* Replace with your desired color */
+  }
+.statcard{
+    padding: 18px 20px;
+    background: linear-gradient(135deg, #c4c4c4 0%, #7e7e7e 100%);
+    opacity: 0.95;
+    border-radius: 16px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+.statcard:hover, .hover-shadow:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16);
+    transform: translateY(-4px) scale(1.02);
+    cursor: pointer;
+}
+.progress, .progress-stacked{
+    --bs-progress-bg: #e0e0e0;
+    background-color: #e0e0e0;
+    border-radius: 8px;
+    height: 18px;
+}
+.bg-success {
+    --bs-bg-opacity: 1;
+    background: linear-gradient(90deg, #34fda9 0%, #00c6fb 100%) !important;
+}
+.progress.progress-md {
+    height: 18px;
+    border-radius: 8px;
+}
+.progress.progress-sm {
+    height: 10px;
+    border-radius: 6px;
+}
+.card{
+    background: linear-gradient(135deg, #fff7f0 0%, #f3f3f3 100%);
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    transition: box-shadow 0.3s, transform 0.3s;
+}
+.card:hover {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+    transform: translateY(-2px) scale(1.01);
+}
+.card-racks{
+    background: linear-gradient(135deg, #f3aaaa 0%, #ffe6e6 100%);
+}
+.card-bays{
+    background: linear-gradient(135deg, #91ccfc 0%, #e6f7ff 100%);
+}
+.card-bins{
+    background: linear-gradient(135deg, #34fda9 0%, #e6fff7 100%);
+}
+.display-4 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+.animate__delay-1s {
+    animation-delay: 0.5s;
+}
+.animate__delay-2s {
+    animation-delay: 1s;
+}
+.max-width-progress-wrap {
+    max-width: 420px;
+    margin: 0 auto;
+}
+.fw-bold {
+    font-weight: 700 !important;
+}
+.fw-semibold {
+    font-weight: 600 !important;
+}
+.text-primary {
+    color: #007bff !important;
+}
+.text-info {
+    color: #17a2b8 !important;
+}
+.text-success {
+    color: #28a745 !important;
+}
+.text-secondary {
+    color: #6c757d !important;
+}
+.text-dark {
+    color: #343a40 !important;
+}
+.shadow-lg {
+    box-shadow: 0 8px 32px rgba(0,0,0,0.16) !important;
+}
+.shadow-sm {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08) !important;
+}
+ul.list-unstyled {
+    padding-left: 0;
+    margin-bottom: 0;
+}
+.mb-3 {
+    margin-bottom: 1rem !important;
+}
+.mb-4 {
+    margin-bottom: 1.5rem !important;
+}
+.g-4 {
+    gap: 1.5rem !important;
+}
+.animate__animated {
+    /* Animate.css base class */
+}
+.animate__fadeIn, .animate__fadeInUp, .animate__bounceIn, .animate__pulse {
+    /* Animate.css animation classes, loaded via CDN or npm */
+}

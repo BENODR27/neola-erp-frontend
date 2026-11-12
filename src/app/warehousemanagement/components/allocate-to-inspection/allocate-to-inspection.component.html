@@ -1,0 +1,162 @@
+<!-- QR Scanner -->
+<div *ngIf="isScannerActive()" class="scanner-container">
+  <app-qr-scanner (scanSuccess)="onScanSuccess($event)"></app-qr-scanner>
+</div>
+
+<form [formGroup]="form">
+  <div class="row">
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="wareHouseId">Select wareHouse</label>
+        <select
+          id="wareHouseId"
+          class="form-control"
+          formControlName="wareHouseId"
+        >
+          <ng-container *ngFor="let warehouse of warehouses()">
+            @if(authService.hasPermission(warehouse.wareHouseName)){
+            <option value="{{ warehouse.id }}">
+              {{ warehouse.wareHouseName }}
+            </option>
+            }
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="palletId">Fabric ID</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="palletId"
+            formControlName="fabricId"
+            class="form-control"
+            placeholder="Scan Fabric ID"
+            (keydown.enter)="$event.preventDefault()"
+            (input)="entryfabDetails()"
+          />
+          <button
+            class="btn-primary btn-sm"
+            type="button"
+            (click)="toggleScanner('fabricId')"
+          >
+            <span class="material-icons">qr_code_scanner</span>
+          </button>
+          <!-- <button
+            class="btn btn-success btn-sm"
+            type="button"
+            (click)="entryfabDetails()"
+          >
+            GO
+          </button> -->
+        </div>
+
+        <small
+          *ngIf="form.get('fabricId')?.invalid && form.get('fabricId')?.touched"
+          class="text-danger"
+        >
+          Fabric ID is required.
+        </small>
+      </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="ocNo">Oc No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="ocNo"
+            formControlName="ocNo"
+            class="form-control"
+            placeholder="Enter OcNo"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-1">
+      <div class="form-group">
+        <label for="lotNo">Lot No</label>
+        <div class="input-group">
+          <input
+            type="text"
+            id="lotNo"
+            formControlName="lotNo"
+            class="form-control"
+            placeholder="Enter Lot No"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+  <button
+    class="btn-sm btn-success"
+    type="button"
+    (click)="fetchFabricCollections()"
+  >
+    <span class="material-icons">search</span>
+  </button>
+</form>
+@if(fabrics().length>0){
+
+<div class="table-responsive table-scroll-container">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isAllSelected()"
+              (change)="toggleSelectAll()"
+            />
+            <label class="form-check-label"></label>
+          </div>
+        </th>
+        <th>Oc No</th>
+        <th>Lot</th>
+        <th>Full Issue</th>
+        <th>Bal Qty</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let row of fabrics()">
+        <td>
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="selectedIds.has(row.id)"
+              (change)="toggleSelect(row.id)"
+            />
+          </div>
+        </td>
+        <td>{{ row.ocNo }}</td>
+        <td>{{ row.shadeLot }}</td>
+        <td>
+          <button
+            class="btn btn-primary"
+            type="button"
+            (click)="onAllocateToInspection(row)"
+            [disabled]="selectedIds.size != 0"
+          >
+            Issue
+          </button>
+        </td>
+        <td>{{ row.balanceQty }}</td>
+        <td>{{ row.status }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+}
+<button
+  class="btn btn-success"
+  [hidden]="selectedIds.size == 0"
+  (click)="issueSelectedItems()"
+>
+  ISSUE SELECTED
+</button>

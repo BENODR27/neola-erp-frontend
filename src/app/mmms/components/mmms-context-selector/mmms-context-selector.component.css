@@ -1,0 +1,15 @@
+:host { display: block; }
+.mmms-context-anchor { position: fixed; right: 0; top: 82px; z-index: 1060; }
+.mmms-context-backdrop { position: fixed; inset: 0; z-index: -1; background: rgba(22, 35, 64, .42); backdrop-filter: blur(2px); }
+.mmms-context-trigger { width: 28px; height: 34px; border: 1px solid rgba(78, 101, 149, .24); border-right: 0; border-radius: 10px 0 0 10px; background: rgba(255,255,255,.86); color: #52688f; box-shadow: 0 4px 14px rgba(36,54,91,.12); transition: all .18s ease; }
+.mmms-context-trigger:hover { width: 34px; color: #3454b8; background: #fff; }
+.mmms-context-panel { width: min(340px, calc(100vw - 24px)); margin-top: 6px; padding: 16px; border: 1px solid #e1e7f1; border-right: 0; border-radius: 14px 0 0 14px; background: #fff; box-shadow: 0 18px 44px rgba(32,50,86,.2); }
+.context-heading { display:flex; justify-content:space-between; gap: 12px; align-items:flex-start; }
+.eyebrow { display:block; color:#72809a; font-size:10px; letter-spacing:.11em; text-transform:uppercase; font-weight:800; }
+.context-heading strong { color:#253754; font-size:15px; }
+.context-help { color:#718099; font-size:12px; line-height:1.45; margin:10px 0 14px; }
+label { display:block; color:#3c4c69; font-size:12px; font-weight:700; margin:10px 0 5px; }
+.context-current { display:flex; gap:8px; align-items:flex-start; margin-top:14px; padding:9px 10px; border-radius:9px; background:#f3f6fc; color:#4c607f; font-size:11px; line-height:1.35; }
+.context-current i { color:#1e9b77; font-size:14px; }
+.clear-context { padding-left:0; color:#5268a2; }
+@media (max-width: 575.98px) { .mmms-context-anchor { top: 68px; } .mmms-context-panel { border-radius:12px 0 0 12px; } }

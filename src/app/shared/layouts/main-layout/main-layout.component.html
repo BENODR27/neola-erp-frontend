@@ -1,0 +1,37 @@
+<div class="app-shell">
+  <app-mmms-context-selector *ngIf="isMmmsRoute()"></app-mmms-context-selector>
+  <!-- Weather animation: full-page rain and clouds -->
+  <!-- <div class="weather-animation">
+    <div class="thunder-flash" [class.active]="thunderActive()"></div>
+    <div class="cloud cloud-1" *ngIf="weather !== 'sunny'"></div>
+    <div class="cloud cloud-2" *ngIf="weather !== 'sunny'"></div>
+    <div class="cloud cloud-3" *ngIf="weather !== 'sunny'"></div>
+    <div class="cloud cloud-4" *ngIf="weather !== 'sunny'"></div>
+
+    <div class="sun" *ngIf="showSun()" [ngStyle]="{ left: sunLeft() }"></div>
+    <div class="rain" *ngIf="weather === 'rain'">
+      <ng-container *ngFor="let drop of raindrops; let i = index">
+        <div class="raindrop" [ngStyle]="getRaindropStyle(i)"></div>
+        <div class="splash" [ngStyle]="getRaindropStyle(i)"></div>
+      </ng-container>
+    </div>
+  </div>
+  <div
+    class="jerry-assistant"
+    [class.visible]="jerryVisible()"
+    [ngStyle]="{ left: jerryLeft() + 'px' }"
+  >
+    <div class="jerry-figure" [ngClass]="jerryGesture()"></div>
+    <div class="dog-board">
+      🪧 Any help required? <span class="dog-board-action">click here!</span>
+    </div>
+  </div> -->
+  <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+  <app-sidebar
+    [isExpanded]="shouldExpandSidebar"
+    (mouseenter)="onSidebarMouseEnter()"
+    (mouseleave)="onSidebarMouseLeave()"
+  ></app-sidebar>
+  <app-main-content [isExpanded]="shouldExpandSidebar"></app-main-content>
+  <app-chat *ngIf="isChatEnabled()"></app-chat>
+</div>

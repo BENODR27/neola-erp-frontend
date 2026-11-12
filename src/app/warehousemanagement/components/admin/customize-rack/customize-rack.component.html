@@ -1,0 +1,397 @@
+<form [formGroup]="rackForm">
+  <div class="row">
+    <div class="col-lg-6 col-md-12 mb-1">
+      <div class="input-group">
+        <select
+          class="form-control"
+          formControlName="wareHouseId"
+          id="wareHouseId"
+        >
+          <option value="3">CW1</option>
+          <option value="2">CW2</option>
+          <option value="1">CW3</option>
+        </select>
+        <button
+          class="btn btn-success btn-sm"
+          type="button"
+          (click)="fetchWarehouseDatas()"
+        >
+          GO
+        </button>
+      </div>
+    </div>
+    <!-- rack section -->
+    <div class="scroll-container-card mt-3">
+      @if(racks.length>0){
+      <div *ngFor="let rack of racks">
+        <h2 class="text-dark">
+          {{ rack.rackNumber }}
+          <!-- <button type="button" class="btn-sm btn-warning text-white me-0 m-3">
+            <i class="mdi mdi-table-edit"></i>
+          </button>
+          <button type="button" class="btn-sm btn-secondary text-darkme-0 m-3">
+            <i class="mdi mdi-close-box-outline"></i>
+          </button> -->
+          @if(rack?.bays.length==0){
+          <button
+            type="button"
+            class="btn-sm btn-danger text-white me-0 m-3 p-2"
+            (click)="deleteRack(rack.id)"
+          >
+            Delete
+          </button>
+          }
+        </h2>
+        <!-- <button
+          type="button"
+          class="btn btn-success text-white me-0 m-3"
+          (click)="rack.showBays = !rack.showBays"
+        >
+          {{ rack.showBays ? "Hide Bays" : "Show Bays" }}
+          <i class="mdi mdi-plus"></i>
+        </button> -->
+        @if(true){
+        <!-- bay section -->
+        <div class="container scroll-container">
+          <div class="row">
+            <div
+              class="container responsive-container"
+              *ngFor="let bay of rack?.bays | orderByBayNumber"
+            >
+              <div class="center">
+                <h2 class="text-dark">
+                  {{ bay.bayNumber }}
+                  <!-- <button
+                    type="button"
+                    class="btn-sm btn-warning text-white me-0 m-3"
+                  >
+                    <i class="mdi mdi-table-edit"></i>
+                  </button>
+
+                  <button
+                    type="button"
+                    class="btn-sm btn-secondary text-dark me-0 m-3"
+                  >
+                    <i class="mdi mdi-close-box-outline"></i>
+                  </button> -->
+                  @if(bay.levels.length==0){
+                  <button
+                    type="button"
+                    class="btn-sm btn-danger text-white me-0 m-3"
+                    (click)="deleteBay(bay.id)"
+                  >
+                    Delete
+                  </button>
+                  }
+                </h2>
+              </div>
+              <div class="shelfs">
+                <div class="shelf-row">
+                  <div class="shelf"></div>
+                </div>
+              </div>
+              <div class="fabriccase" id="fabriccase">
+                <div class="fabriccase-left-side fabriccase-side"></div>
+                <div class="fabriccase-right-side fabriccase-side"></div>
+                <div class="shelfs" style="position: relative">
+                  <!-- level section -->
+
+                  <div class="shelf-row" *ngFor="let level of bay.levels">
+                    <div>
+                      <h5>
+                        {{ level.levelNumber }}
+
+                        <!-- <button type="button" class="btn-sm btn-warning p-0">
+                          <i class="mdi mdi-table-edit"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-sm btn-secondary p-0 text-dark"
+                        >
+                          <i class="mdi mdi-close-box-outline"></i>
+                        </button> -->
+                        @if( level?.bins?.length==0){
+                        <button
+                          type="button"
+                          class="btn-sm btn-danger p-0"
+                          (click)="deleteLevel(level.id)"
+                        >
+                          Delete
+                        </button>
+                        }
+                      </h5>
+                    </div>
+                    <div class="shelf"></div>
+                    <div class="shelf-thickness"></div>
+
+                    <div class="fabrics flexbox-row">
+                      <!-- Bin -->
+
+                      <div class="fabric" *ngFor="let bin of level.bins">
+                        @if(bin.palletId!=null){
+                        <!-- <div class="image-container">
+                                  <img
+                                    src="/images/pallet.jpg"
+                                    alt="Background"
+                                  />
+
+                                </div> -->
+                        }@else {
+
+                        <!-- <div class="image-container">
+                                  <img
+                                    src="/images/green.jpg"
+                                    alt="Background"
+                                  />
+
+                                </div> -->
+                        }
+                        <h5 class="text-box text-white text-center">
+                          {{ bin.BinNo }}
+                        </h5>
+                        <!-- <button type="button" class="btn-sm btn-warning p-0">
+                          <i class="mdi mdi-table-edit"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-sm btn-secondary p-0 text-dark"
+                        >
+                          <i class="mdi mdi-close-box-outline"></i>
+                        </button> -->
+                        <button
+                          *ngIf="!bin?.palletId"
+                          type="button"
+                          class="btn-sm btn-danger p-0"
+                          (click)="deleteBin(bin.id)"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                      <div class="fabric">
+                        <button
+                          type="button"
+                          class="btn btn-success text-white btnspd"
+                          data-bs-toggle="modal"
+                          data-bs-target="#addBinDrawer"
+                          (click)="setClickedLevel(level.id)"
+                        >
+                          <i class="icon-plus"></i> Bin
+                        </button>
+                      </div>
+                      <!-- bin end -->
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn-sm btn-success text-white mt-2"
+                    data-bs-toggle="modal"
+                    data-bs-target="#addLevelDrawer"
+                    (click)="setClickedBay(bay.id)"
+                  >
+                    <i class="icon-plus"></i> Level
+                  </button>
+                  <!-- end level section -->
+                </div>
+              </div>
+            </div>
+            <button
+              type="button"
+              class="btn btn-success text-white"
+              data-bs-toggle="modal"
+              data-bs-target="#addBayDrawer"
+              (click)="setClickedRack(rack.id)"
+            >
+              <i class="icon-plus"></i> Bay
+            </button>
+          </div>
+        </div>
+        <!-- end bay section -->
+        }
+      </div>
+      }
+    </div>
+    <button
+      type="button"
+      class="btn btn-success text-white mt-5 mb-5"
+      data-bs-toggle="modal"
+      data-bs-target="#AddRackDrawer"
+    >
+      <i class="icon-plus"></i> Rack
+    </button>
+    <!-- end rack section -->
+  </div>
+</form>
+<!-- models -->
+<div
+  class="modal fade"
+  id="addBinDrawer"
+  tabindex="-1"
+  aria-labelledby="modalLabel"
+>
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Add Bin</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="binForm" class="forms-sample">
+          <div class="form-group">
+            <label for="BinNo">Bin Number</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="BinNo"
+              id="BinNo"
+              placeholder="Enter BinNo"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            data-bs-dismiss="modal"
+            (click)="createBin()"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="addBayDrawer"
+  tabindex="-1"
+  aria-labelledby="modalLabel"
+>
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Add Bay</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="bayForm" class="forms-sample">
+          <div class="form-group">
+            <label for="bayNumber">Bay Number</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="bayNumber"
+              id="bayNumber"
+              placeholder="Enter bayNumber"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            data-bs-dismiss="modal"
+            (click)="createBay()"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="AddRackDrawer"
+  tabindex="-1"
+  aria-labelledby="modalLabel"
+>
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Add Rack</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="rackForm" class="forms-sample">
+          <div class="form-group">
+            <label for="rackNumber">Rack Number</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="rackNumber"
+              id="rackNumber"
+              placeholder="Enter rackNumber"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            data-bs-dismiss="modal"
+            (click)="createRack()"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<div
+  class="modal fade"
+  id="addLevelDrawer"
+  tabindex="-1"
+  aria-labelledby="modalLabel"
+>
+  <div class="modal-dialog modal-fullscreen">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalLabel">Add Level</h5>
+        <button
+          type="button"
+          class="btn-close"
+          data-bs-dismiss="modal"
+          aria-label="Close"
+        ></button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="levelForm" class="forms-sample">
+          <div class="form-group">
+            <label for="levelNumber">Level Number</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="levelNumber"
+              id="levelNumber"
+              placeholder="Enter levelNumber"
+            />
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary me-2"
+            data-bs-dismiss="modal"
+            (click)="createLevel()"
+          >
+            Submit
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end models -->

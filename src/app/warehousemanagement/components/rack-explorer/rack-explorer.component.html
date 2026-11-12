@@ -1,0 +1,100 @@
+<form [formGroup]="form" *ngIf="showFilters">
+  <div class="row">
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="wareHouseId">Racks</label>
+        <select
+          id="wareHouseId"
+          class="form-control"
+          formControlName="rackNumber"
+          (change)="fetchFabricCollections()"
+        >
+          <ng-container *ngFor="let data of racks()">
+            <option value="{{ data?.rackNumber }}-">
+              {{ data?.rackNumber }}
+            </option>
+          </ng-container>
+        </select>
+      </div>
+    </div>
+    <div class="col-md-12 col-lg-2">
+      <div class="form-group">
+        <label for="turnaround"
+          >Turn Arround Days Greater than or equal to
+        </label>
+        <input
+          id="turnaround"
+          class="form-control"
+          type="number"
+          formControlName="turnAroundDays"
+        />
+      </div>
+    </div>
+  </div>
+</form>
+<button
+  *ngIf="!showFilters"
+  class="btn-sm btn-primary"
+  type="button"
+  (click)="showFilters = !showFilters"
+>
+  Filters
+  <span class="material-icons">filter_list</span>
+</button>
+<button
+  *ngIf="showFilters"
+  class="btn-sm btn-primary"
+  type="button"
+  (click)="fetchFabricCollections()"
+>
+  <span class="material-icons">filter_list</span>
+</button>
+<button
+  *ngIf="this.fabrics.length > 0"
+  type="button"
+  class="btn-sm btn-secondary"
+  (click)="exportTable()"
+>
+  <span class="material-icons">download</span>
+</button>
+@if(fabrics().length>0){
+<app-table
+  [headers]="[
+    'Invoice No',
+    'Location',
+    'Status',
+    'Total Qty',
+    'Sample Qty',
+    'Issued Qty',
+    'Balance Qty',
+    'Fabric Ref',
+    'Supplier Name',
+    'PO No',
+    'Color Name',
+    'OC No',
+    'Style Name',
+    'Shade Lot',
+    'Roll No'
+  ]"
+  [fields]="[
+    'invoiceNo',
+    'location',
+    'status',
+    'totalQty',
+    'sampleQty',
+    'issuedQty',
+    'balanceQty',
+    'fabricRef',
+    'supplierName',
+    'poNo',
+    'colorName',
+    'ocNo',
+    'styleName',
+    'shadeLot',
+    'rollNo'
+  ]"
+  [rows]="fabrics()"
+>
+</app-table>
+
+}

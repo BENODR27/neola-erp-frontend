@@ -1,0 +1,80 @@
+<section class="operation-page operation-page-reports" data-page-code="MMMS-REPORTS" class="mmms-operations" *ngIf="!isLoading(); else loadingState">
+  <section class="history-backdrop" *ngIf="selectedMachine() as machine" (click)="closeMachineHistory()"><article class="history-dialog" role="dialog" aria-modal="true" (click)="$event.stopPropagation()"><header><div><span class="section-kicker">MACHINE HISTORY</span><h2>{{ machine.name }}</h2><p>{{ machine.machineCode || machine.id }} Â· QR {{ machine.qrReference || 'Not generated' }}</p></div><button type="button" (click)="closeMachineHistory()" aria-label="Close history"><i class="bi bi-x-lg"></i></button></header><div *ngIf="historyLoading()" class="history-empty">Loading timelineâ€¦</div><div *ngIf="!historyLoading() && !machineHistory().length" class="history-empty">No recorded events yet. New registration, status, archive, and master-data changes will appear here.</div><ol class="history-timeline" *ngIf="!historyLoading() && machineHistory().length"><li *ngFor="let event of machineHistory()"><span class="history-dot"></span><div><strong>{{ event.summary }}</strong><small>{{ event.eventType }} Â· {{ event.occurredAt | date:'medium' }}</small></div></li></ol></article></section>
+  <app-mmms-record-editor [open]="editorOpen()" [module]="module()" [title]="title()" [editingId]="editingId()" [draft]="draftData" [machineOptions]="machineOptions()" [technicianOptions]="technicianOptions()" [error]="editorError()" (closed)="closeEditor()" (saved)="saveEditor()"></app-mmms-record-editor>
+  <div class="editor-backdrop" *ngIf="false"></div>
+  <header class="operations-header">
+    <div>
+      <a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a>
+      <span class="section-kicker"><i class="bi" [ngClass]="moduleIcon()"></i> MMMS WORKSPACE</span>
+      <h1>{{ title() }}</h1>
+      <p>{{ description() }}</p>
+    </div>
+    <div class="header-actions"><button class="primary-action" type="button" *ngIf="isEditableModule()" (click)="openEditor()"><i class="bi bi-plus-lg"></i> {{ module() === 'machines' ? 'Add machine' : module() === 'technicians' ? 'Add technician' : module() === 'work-orders' ? 'Create work order' : 'Add record' }}</button></div>
+  </header>
+
+  <section class="module-hero" aria-label="Module summary">
+    <div class="module-hero-icon"><i class="bi" [ngClass]="moduleIcon()"></i></div>
+    <div><span class="hero-label">OPERATIONS MODULE</span><strong>{{ title() }}</strong><span>Live data synchronized with the MMMS API</span></div>
+    <div class="hero-live"><i class="bi bi-circle-fill"></i> Live API</div>
+  </section>
+
+  <section class="module-stats" aria-label="Module metrics">
+    <article *ngFor="let stat of moduleStats()"><span class="stat-icon"><i class="bi" [ngClass]="stat.icon"></i></span><div><span>{{ stat.label }}</span><strong>{{ stat.value }}</strong><small>{{ stat.note }}</small></div></article>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'machines'">
+    <div class="card-toolbar"><div><strong>{{ machines().length }} tracked assets</strong><span>Live data from the MMMS API when available</span></div><label class="search-box"><i class="bi bi-search"></i><input #machineSearch [value]="search()" (input)="updateSearch(machineSearch.value)" placeholder="Search machines" /></label></div>
+    <div class="table-scroll"><table><thead><tr><th>Asset</th><th>Category</th><th>Line</th><th>Status</th><th>Uptime</th><th>Last update</th><th></th></tr></thead><tbody><tr *ngFor="let machine of machines()"><td><strong>{{ machine.name }}</strong><small>{{ machine.machineCode || machine.id }} Â· {{ machine.assetNumber || 'No asset number' }}</small></td><td>{{ machine.category }}</td><td>{{ machine.line }}</td><td><span class="status" [class]="statusClass(machine.status)"><i></i>{{ machine.status }}</span></td><td><div class="progress"><span [style.width.%]="machine.uptime"></span></div>{{ machine.uptime }}%</td><td class="muted">{{ machine.lastService }}</td><td class="row-actions"><button type="button" (click)="viewMachineHistory(machine)" aria-label="View machine history"><i class="bi bi-clock-history"></i></button><button type="button" (click)="openEditor(machine)" aria-label="Edit machine"><i class="bi bi-pencil"></i></button><button type="button" (click)="deleteRecord(machine)" aria-label="Archive machine"><i class="bi bi-archive"></i></button></td></tr></tbody></table></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'technicians'">
+    <div class="card-toolbar"><div><strong>{{ technicians().length }} technicians</strong><span>Assignment-ready workforce directory</span></div><label class="search-box"><i class="bi bi-search"></i><input #technicianSearch [value]="search()" (input)="updateSearch(technicianSearch.value)" placeholder="Search technicians" /></label></div>
+    <div class="parts-grid technician-grid"><article class="part-card technician-card" *ngFor="let technician of technicians()"><div class="part-heading"><span class="part-icon"><i class="bi bi-person-badge"></i></span><span class="status" [class]="technician.active ? statusClass(technician.availability) : 'unavailable'"><i></i>{{ technician.active ? technician.availability : 'Inactive' }}</span></div><small>{{ technician.employeeNumber }} Â· {{ technician.shift }} shift Â· {{ technician.factory }}</small><h3>{{ technician.name }}</h3><p class="skill-list">{{ technician.skills.join(' Â· ') }}</p><div class="part-stock"><strong>{{ technician.workload }}</strong><span>open work orders<br />current workload</span></div><footer><span>{{ technician.phone || technician.email || 'Contact not set' }}</span><div class="card-actions"><button type="button" (click)="openEditor(technician)"><i class="bi bi-pencil"></i> Edit</button><button type="button" (click)="deleteRecord(technician)"><i class="bi bi-trash"></i></button></div></footer></article></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'work-orders'">
+    <div class="card-toolbar"><div><strong>{{ workOrders().length }} work orders</strong><span>Maintenance workflow activity</span></div><button class="filter-button" type="button"><i class="bi bi-funnel"></i> Filter</button></div>
+    <div class="order-grid"><article *ngFor="let order of workOrders()"><div class="order-meta"><span>{{ order.id }}</span><span class="priority" [class]="'priority-' + order.priority.toLowerCase()">{{ order.priority }}</span></div><h3>{{ order.issue }}</h3><p>{{ order.machine }}</p><footer><span><i class="bi bi-person"></i>{{ order.technician }}</span><span class="status" [class]="statusClass(order.status)"><i></i>{{ order.status }}</span></footer><div class="card-actions"><button type="button" (click)="openEditor(order)"><i class="bi bi-pencil"></i> Edit</button><button type="button" (click)="deleteRecord(order)"><i class="bi bi-trash"></i></button></div></article></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'preventive-maintenance'">
+    <div class="card-toolbar"><div><strong>{{ preventiveMaintenance().length }} scheduled plans</strong><span>Recurring service schedule and compliance</span></div><button class="filter-button" type="button"><i class="bi bi-calendar3"></i> This month</button></div>
+    <div class="table-scroll"><table><thead><tr><th>Plan</th><th>Machine</th><th>Task</th><th>Frequency</th><th>Next due</th><th>Compliance</th><th>Owner</th><th></th></tr></thead><tbody><tr *ngFor="let plan of preventiveMaintenance()"><td><strong>{{ plan.id }}</strong></td><td>{{ plan.machine }}</td><td>{{ plan.task }}</td><td>{{ plan.frequency }}</td><td [class.overdue]="plan.nextDue === 'Today'">{{ plan.nextDue }}</td><td><div class="progress"><span [style.width.%]="plan.compliance"></span></div>{{ plan.compliance }}%</td><td class="muted">{{ plan.owner }}</td><td class="row-actions"><button type="button" (click)="openEditor(plan)"><i class="bi bi-pencil"></i></button><button type="button" (click)="deleteRecord(plan)"><i class="bi bi-trash"></i></button></td></tr></tbody></table></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'breakdowns'">
+    <div class="card-toolbar"><div><strong>{{ breakdowns().length }} downtime events</strong><span>Breakdown investigation and recovery log</span></div><button class="filter-button" type="button"><i class="bi bi-funnel"></i> Filter</button></div>
+    <div class="table-scroll"><table><thead><tr><th>Event</th><th>Machine</th><th>Category</th><th>Started</th><th>Downtime</th><th>Root cause</th><th>Status</th><th></th></tr></thead><tbody><tr *ngFor="let breakdown of breakdowns()"><td><strong>{{ breakdown.id }}</strong></td><td>{{ breakdown.machine }}</td><td>{{ breakdown.category }}</td><td>{{ breakdown.startedAt }}</td><td>{{ breakdown.downtime }}</td><td>{{ breakdown.rootCause }}</td><td><span class="status" [class]="statusClass(breakdown.status)"><i></i>{{ breakdown.status }}</span></td><td class="row-actions"><button type="button" (click)="openEditor(breakdown)"><i class="bi bi-pencil"></i></button><button type="button" (click)="deleteRecord(breakdown)"><i class="bi bi-trash"></i></button></td></tr></tbody></table></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'spare-parts'">
+    <div class="card-toolbar"><div><strong>{{ spareParts().length }} stocked parts</strong><span>Reorder levels for maintenance-critical inventory</span></div><button class="filter-button" type="button"><i class="bi bi-box-seam"></i> Inventory view</button></div>
+    <div class="parts-grid"><article class="part-card" *ngFor="let part of spareParts()"><div class="part-heading"><span class="part-icon"><i class="bi bi-gear-wide-connected"></i></span><span class="status" [class.low-stock]="isLowStock(part)"><i></i>{{ isLowStock(part) ? 'Reorder' : 'Healthy' }}</span></div><small>{{ part.id }} Â· {{ part.category }}</small><h3>{{ part.name }}</h3><div class="part-stock"><strong>{{ part.stock }}</strong><span>on hand<br />reorder at {{ part.reorderLevel }}</span></div><footer><span>{{ part.supplier }}</span><strong>{{ part.unitCost }}</strong></footer><div class="card-actions"><button type="button" (click)="openEditor(part)"><i class="bi bi-pencil"></i> Edit</button><button type="button" (click)="deleteRecord(part)"><i class="bi bi-trash"></i></button></div></article></div>
+  </section>
+
+  <section class="module-card report-panel" *ngIf="module() === 'reports'">
+    <div class="report-hero"><div><span class="section-kicker">LIVE REPORT CENTER</span><h2>Know what needs attention before it stops production.</h2><p>Generated {{ reportSummary()?.generatedAt | date:'medium' }} from {{ reportSummary()?.metrics?.machineCount || 0 }} machines, {{ reportSummary()?.metrics?.workOrderCount || 0 }} work orders, {{ reportSummary()?.metrics?.breakdownCount || 0 }} breakdowns, and {{ reportSummary()?.metrics?.sparePartCount || 0 }} spare parts.</p></div><i class="bi bi-bar-chart-line"></i></div>
+    <div class="report-options"><article><i class="bi bi-speedometer2"></i><h3>Asset performance</h3><p>Uptime, utilization, and service history by machine and production line.</p><button type="button">Preview report <i class="bi bi-arrow-up-right"></i></button></article><article><i class="bi bi-stopwatch"></i><h3>Downtime analysis</h3><p>Breakdown trends, MTTR, recurring causes, and lost production hours.</p><button type="button">Preview report <i class="bi bi-arrow-up-right"></i></button></article><article><i class="bi bi-box-seam"></i><h3>Parts readiness</h3><p>Stock exposure and reorder recommendations for active maintenance plans.</p><button type="button">Preview report <i class="bi bi-arrow-up-right"></i></button></article></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'costs'">
+    <div class="card-toolbar"><div><strong>Machine maintenance spend</strong><span>Live maintenance cost ledger</span></div><button class="filter-button" type="button"><i class="bi bi-download"></i> Export</button></div>
+    <div class="table-scroll"><table><thead><tr><th>Machine</th><th>Labor</th><th>Spare parts</th><th>Contractors</th><th>Total</th><th>Trend</th></tr></thead><tbody><tr *ngFor="let cost of costs()"><td><strong>{{ cost.machine }}</strong></td><td>{{ cost.labor }}</td><td>{{ cost.spareParts }}</td><td>{{ cost.contractors }}</td><td><strong>{{ cost.total }}</strong></td><td><span class="status" [class]="cost.trend === 'down' ? 'completed' : 'breakdown'"><i></i>{{ cost.trend === 'down' ? 'Improving' : 'Rising' }}</span></td></tr></tbody></table></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'mobile'">
+    <div class="card-toolbar"><div><strong>{{ mobileTasks().length }} technician tasks</strong><span>Mobile queue and offline synchronization preview</span></div><span class="device-pill"><i class="bi bi-phone"></i> Shop-floor mode</span></div>
+    <div class="order-grid"><article *ngFor="let task of mobileTasks()"><div class="order-meta"><span>{{ task.id }}</span><span class="priority" [class]="'priority-' + task.priority.toLowerCase()">{{ task.priority }}</span></div><h3>{{ task.task }}</h3><p>{{ task.machine }}</p><footer><span><i class="bi bi-person"></i>{{ task.assignee }}</span><span class="status" [class]="statusClass(task.sync)"><i></i>{{ task.sync }}</span></footer><div class="card-actions"><button type="button" (click)="openEditor(task)"><i class="bi bi-pencil"></i> Edit</button><button type="button" (click)="deleteRecord(task)"><i class="bi bi-trash"></i></button></div></article></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'qr-management'">
+    <div class="card-toolbar"><div><strong>QR asset access</strong><span>Machine context available after scan</span></div><button class="filter-button" type="button"><i class="bi bi-qr-code-scan"></i> Scan code</button></div>
+    <div class="parts-grid"><article class="part-card" *ngFor="let asset of qrAccess()"><div class="part-heading"><span class="part-icon"><i class="bi bi-qr-code"></i></span><span class="status" [class]="statusClass(asset.status)"><i></i>{{ asset.status }}</span></div><small>{{ asset.assetNumber }} Â· last scan {{ asset.lastScan }}</small><h3>{{ asset.machine }}</h3><div class="part-stock"><strong>{{ asset.openOrders }}</strong><span>open work orders<br />{{ asset.breakdowns }} breakdown records</span></div><footer><span>Machine details Â· History</span><strong>Open asset <i class="bi bi-arrow-up-right"></i></strong></footer></article></div>
+  </section>
+
+  <section class="module-card" *ngIf="false && module() === 'production-integration'">
+    <div class="card-toolbar"><div><strong>Production impact watch</strong><span>Orders and units exposed to maintenance downtime</span></div><button class="filter-button" type="button"><i class="bi bi-arrow-repeat"></i> Refresh</button></div>
+    <div class="table-scroll"><table><thead><tr><th>Production order</th><th>Line</th><th>Machine</th><th>Downtime</th><th>Units at risk</th><th>Recovery</th></tr></thead><tbody><tr *ngFor="let impact of productionImpact()"><td><strong>{{ impact.order }}</strong></td><td>{{ impact.line }}</td><td>{{ impact.machine }}</td><td>{{ impact.downtime }}</td><td>{{ impact.unitsAtRisk }}</td><td><span class="status" [class]="statusClass(impact.recovery)"><i></i>{{ impact.recovery }}</span></td></tr></tbody></table></div>
+  </section>
+</section>
+<ng-template #loadingState><div class="operations-loading"><span class="spinner-border" aria-hidden="true"></span><p>Loading MMMS workspaceâ€¦</p></div></ng-template>
