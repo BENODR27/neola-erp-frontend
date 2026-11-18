@@ -1,14 +1,14 @@
 :host {
   display: block;
   min-height: 100%;
-  background: #f5f7fb;
+  background: var(--app-surface);
 }
 
 .issue-page {
   max-width: 1500px;
   margin: 0 auto;
   padding: 30px clamp(16px, 3vw, 40px) 48px;
-  color: #25364d;
+  color: var(--app-text);
 }
 
 .page-header,
@@ -26,7 +26,7 @@
 
 .page-eyebrow {
   margin: 0 0 6px;
-  color: #4773ae;
+  color: var(--app-primary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -34,7 +34,7 @@
 
 .page-header h1 {
   margin: 0;
-  color: #162b49;
+  color: var(--app-text);
   font-size: clamp(1.75rem, 3vw, 2.25rem);
   font-weight: 750;
 }
@@ -43,7 +43,7 @@
 .section-title p,
 .inventory-heading p {
   margin: 6px 0 0;
-  color: #718096;
+  color: var(--app-muted);
   font-size: 0.9rem;
 }
 
@@ -53,10 +53,10 @@
   align-items: center;
   gap: 7px;
   padding: 9px 13px;
-  border: 1px solid #c9ddf5;
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: #edf5ff;
-  color: #285b94;
+  background: var(--app-surface);
+  color: var(--app-primary);
   font-size: 0.82rem;
   font-weight: 700;
   white-space: nowrap;
@@ -69,9 +69,9 @@
 .filter-card,
 .inventory-card {
   overflow: hidden;
-  border: 1px solid #e5eaf1;
-  border-radius: 15px;
-  background: #fff;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  background: var(--app-surface);
   box-shadow: 0 8px 24px rgba(24, 47, 78, 0.05);
 }
 
@@ -106,14 +106,14 @@
   height: 42px;
   place-items: center;
   border-radius: 12px;
-  background: #edf5ff;
-  color: #35699f;
+  background: var(--app-surface);
+  color: var(--app-primary);
 }
 
 .section-title h2,
 .inventory-heading h2 {
   margin: 0;
-  color: #203550;
+  color: var(--app-text);
   font-size: 1.1rem;
   font-weight: 750;
 }
@@ -128,7 +128,7 @@
 .form-group label {
   display: block;
   margin-bottom: 7px;
-  color: #384b64;
+  color: var(--app-text);
   font-size: 0.83rem;
   font-weight: 700;
 }
@@ -139,16 +139,16 @@
 
 .form-group label small {
   margin-left: 5px;
-  color: #8996a8;
+  color: var(--app-muted);
   font-size: 0.75rem;
   font-weight: 500;
 }
 
 .form-control {
   min-height: 42px;
-  border-color: #d9e1eb;
+  border-color: var(--app-border);
   border-radius: 8px;
-  color: #2d4059;
+  color: var(--app-text);
 }
 
 .form-control:focus {
@@ -177,14 +177,14 @@
 
 .inventory-heading {
   padding: 18px 20px;
-  border-bottom: 1px solid #e9edf3;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .roll-count {
   padding: 6px 11px;
-  border-color: #e1e8f0;
-  background: #f7f9fc;
-  color: #596d86;
+  border-color: var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-muted);
 }
 
 .request-heading-actions {
@@ -199,7 +199,7 @@
   height: 36px;
   padding: 0;
   place-items: center;
-  border-color: #dce4ed;
+  border-color: var(--app-border);
   border-radius: 8px;
 }
 
@@ -214,8 +214,8 @@
 
 .issue-table thead th {
   padding: 13px 14px;
-  background: #f5f7fa;
-  color: #607189;
+  background: var(--app-surface);
+  color: var(--app-muted);
   font-size: 0.74rem;
   font-weight: 800;
   letter-spacing: 0.045em;
@@ -225,14 +225,14 @@
 
 .issue-table tbody td {
   padding: 14px;
-  border-color: #edf0f4;
-  color: #52647b;
+  border-color: var(--app-border);
+  color: var(--app-muted);
   font-size: 0.86rem;
   vertical-align: middle;
 }
 
 .lot-name {
-  color: #203b5c;
+  color: var(--app-text);
 }
 
 .balance-pill {
@@ -240,14 +240,14 @@
   min-width: 42px;
   padding: 4px 9px;
   border-radius: 999px;
-  background: #eaf6ef;
-  color: #287449;
+  background: var(--app-surface-alt);
+  color: var(--app-text);
   font-weight: 750;
   text-align: center;
 }
 
 .quantity-issued {
-  color: #203b5c;
+  color: var(--app-text);
   font-size: 0.95rem;
 }
 
@@ -255,7 +255,7 @@
   display: inline-block;
   padding: 4px 9px;
   border-radius: 999px;
-  background: #fff4d8;
+  background: var(--app-surface-alt);
   color: #8a5c00;
   font-size: 0.75rem;
   font-weight: 750;
@@ -263,12 +263,12 @@
 }
 
 .status-accepted {
-  background: #eaf6ef;
-  color: #287449;
+  background: var(--app-surface-alt);
+  color: var(--app-text);
 }
 
 .status-rejected {
-  background: #fff0ef;
+  background: var(--app-surface-alt);
   color: #a3332b;
 }
 
@@ -284,18 +284,18 @@
 
 .issue-page .btn-primary {
   border-color: #285f9e;
-  background: #285f9e;
-  color: #fff !important;
+  background: var(--app-primary);
+  color: var(--app-on-primary) !important;
 }
 
 .issue-page .btn-primary:hover:not(:disabled) {
   border-color: #1f4d83;
-  background: #1f4d83;
-  color: #fff !important;
+  background: var(--app-primary);
+  color: var(--app-on-primary) !important;
 }
 
 .issue-page .btn-outline-secondary {
-  color: #50627a !important;
+  color: var(--app-text) !important;
 }
 
 .empty-state {
@@ -306,18 +306,18 @@
   justify-content: center;
   gap: 7px;
   padding: 24px;
-  color: #7c8ba0;
+  color: var(--app-muted);
   text-align: center;
 }
 
 .empty-state .material-icons {
   margin-bottom: 3px;
-  color: #91a2b8;
+  color: var(--app-muted);
   font-size: 36px;
 }
 
 .empty-state strong {
-  color: #344a65;
+  color: var(--app-text);
   font-size: 0.95rem;
 }
 

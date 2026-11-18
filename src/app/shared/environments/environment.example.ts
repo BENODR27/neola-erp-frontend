@@ -21,4 +21,6 @@ export const environment = {
   apiUrl: `http://${IP1}:3000`,
   apiServiceUrl: `http://${IP1}:3052`,
   authv2ApiUrl: `http://${IP1}:8082/v2`,
+  MMMS_API_URL: 'http://localhost:7010/v1',
+  MMMS_USE_MOCK_DATA: true,
 } satisfies Environment;

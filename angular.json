@@ -38,6 +38,28 @@
             "scripts": ["node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"]
           },
           "configurations": {
+            "local": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/shared/environments/environment.ts",
+                  "with": "src/app/shared/environments/environment.local.ts"
+                }
+              ]
+            },
+            "mmms-test": {
+              "optimization": false,
+              "extractLicenses": false,
+              "sourceMap": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/app/shared/environments/environment.ts",
+                  "with": "src/app/shared/environments/environment.mmms-test.ts"
+                }
+              ]
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -52,7 +74,6 @@
                   "maximumWarning": "10mb",
                   "maximumError": "10mb"
                 },
-
                 {
                   "type": "initial",
                   "name": "initial",
@@ -71,6 +92,14 @@
               "optimization": false,
               "extractLicenses": false,
               "sourceMap": true
+            },
+            "docker": {
+              "fileReplacements": [
+                {
+                  "replace": "src/app/shared/environments/environment.ts",
+                  "with": "src/app/shared/environments/environment.docker.ts"
+                }
+              ]
             }
           },
           "defaultConfiguration": "production"
@@ -78,6 +107,12 @@
         "serve": {
           "builder": "@angular/build:dev-server",
           "configurations": {
+            "local": {
+              "buildTarget": "frontend:build:local"
+            },
+            "mmms-test": {
+              "buildTarget": "frontend:build:mmms-test"
+            },
             "production": {
               "buildTarget": "frontend:build:production"
             },

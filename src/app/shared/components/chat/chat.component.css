@@ -1,10 +1,10 @@
 :host {
   --chat-green: #087f5b;
   --chat-green-dark: #075e45;
-  --chat-ink: #172b26;
-  --chat-muted: #70817b;
-  --chat-background: #f3f7f5;
-  --chat-border: #e3ebe7;
+  --chat-ink: var(--app-text);
+  --chat-muted: var(--app-muted);
+  --chat-background: var(--app-surface-alt);
+  --chat-border: var(--app-border);
   position: relative;
   z-index: 1100;
 }
@@ -20,9 +20,9 @@
   padding: 0;
   border: 0;
   border-radius: 999px;
-  background: linear-gradient(135deg, #11a879, var(--chat-green-dark));
+  background: linear-gradient(135deg, var(--app-surface-alt), var(--chat-green-dark));
   box-shadow: 0 12px 30px rgb(6 72 52 / 28%);
-  color: #fff;
+  color: var(--app-text);
   cursor: pointer;
   font: inherit;
   font-weight: 700;
@@ -37,9 +37,9 @@
   right: 1px;
   width: 13px;
   height: 13px;
-  border: 2px solid #fff;
+  border: 2px solid var(--app-border);
   border-radius: 50%;
-  background: #70e19d;
+  background: var(--app-surface-alt);
   content: "";
 }
 
@@ -82,7 +82,7 @@
   overflow: hidden;
   border: 1px solid rgb(255 255 255 / 75%);
   border-radius: 22px;
-  background: #fff;
+  background: var(--app-surface);
   box-shadow: 0 24px 70px rgb(21 48 39 / 23%);
   animation: chat-pop-in 180ms ease-out;
 }
@@ -94,8 +94,8 @@
   padding: 17px 18px;
   background:
     radial-gradient(circle at 90% 10%, rgb(255 255 255 / 17%), transparent 34%),
-    linear-gradient(120deg, #0b9468, #075e45);
-  color: #fff;
+    linear-gradient(120deg, var(--app-surface-alt), var(--app-surface-alt));
+  color: var(--app-text);
 }
 
 .assistant-avatar {
@@ -136,7 +136,7 @@
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #8cf0be;
+  background: var(--app-surface-alt);
   box-shadow: 0 0 0 3px rgb(140 240 190 / 18%);
 }
 
@@ -148,7 +148,7 @@
   border: 0;
   border-radius: 50%;
   background: rgb(255 255 255 / 13%);
-  color: #fff;
+  color: var(--app-text);
   cursor: pointer;
   font-size: 25px;
   line-height: 1;
@@ -185,14 +185,14 @@
   align-self: flex-start;
   border: 1px solid var(--chat-border);
   border-bottom-left-radius: 5px;
-  background: #fff;
+  background: var(--app-surface);
   box-shadow: 0 3px 10px rgb(20 52 40 / 4%);
 }
 
 .message.user {
   align-self: flex-end;
   border-bottom-right-radius: 5px;
-  background: #d8f6e8;
+  background: var(--app-surface-alt);
 }
 
 .message.pending {
@@ -204,7 +204,7 @@
   max-width: 100%;
   margin-top: auto;
   padding: 6px 10px;
-  border: 1px solid #dfe9e4;
+  border: 1px solid var(--app-border);
   border-radius: 999px;
   background: rgb(255 255 255 / 75%);
   color: var(--chat-muted);
@@ -217,15 +217,15 @@
   gap: 8px;
   overflow-x: auto;
   padding: 10px 14px 2px;
-  background: #fff;
+  background: var(--app-surface);
 }
 
 .quick-commands button {
   flex: 0 0 auto;
   padding: 7px 10px;
-  border: 1px solid #bce8d5;
+  border: 1px solid var(--app-border);
   border-radius: 999px;
-  background: #f5fcf8;
+  background: var(--app-surface);
   color: var(--chat-green-dark);
   cursor: pointer;
   font: inherit;
@@ -234,7 +234,7 @@
 }
 
 .quick-commands button:hover {
-  background: #e6f8ef;
+  background: var(--app-surface-alt);
 }
 
 .chat-input {
@@ -242,7 +242,7 @@
   align-items: center;
   gap: 9px;
   padding: 12px 14px 14px;
-  background: #fff;
+  background: var(--app-surface);
 }
 
 .chat-input input {
@@ -252,7 +252,7 @@
   border: 1px solid var(--chat-border);
   border-radius: 999px;
   outline: none;
-  background: #f9fbfa;
+  background: var(--app-surface);
   color: var(--chat-ink);
   font: inherit;
   font-size: 13px;
@@ -276,7 +276,7 @@
   border: 0;
   border-radius: 50%;
   background: var(--chat-green);
-  color: #fff;
+  color: var(--app-text);
   cursor: pointer;
   font-size: 17px;
 }

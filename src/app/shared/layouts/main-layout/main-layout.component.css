@@ -4,14 +4,14 @@
   min-width: 0;
   min-height: 100vh;
   min-height: 100dvh;
-  --shell-primary: #4565c5;
-  --shell-primary-strong: #3454b8;
-  --shell-primary-soft: #edf2ff;
-  --shell-ink: #263650;
-  --shell-muted: #74819a;
-  --shell-border: #e5eaf3;
-  --shell-background: #f4f7fc;
-  --shell-sidebar: #17243d;
+  --shell-primary: var(--app-primary);
+  --shell-primary-strong: var(--app-primary);
+  --shell-primary-soft: var(--app-surface-alt);
+  --shell-ink: var(--app-text);
+  --shell-muted: var(--app-muted);
+  --shell-border: var(--app-border);
+  --shell-background: var(--app-background);
+  --shell-sidebar: var(--app-sidebar);
   background: var(--shell-background);
 }
 

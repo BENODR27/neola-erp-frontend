@@ -56,11 +56,11 @@
   width: 100%; /* Adjust width as needed */
   max-width: 300px; /* Optional: Set a maximum width for the text box */
   padding: 0px; /* Adds padding inside the text box */
-  border: 1px solid #ccc; /* Optional: Border styling */
+  border: 1px solid var(--app-border); /* Optional: Border styling */
   border-radius: 4px; /* Optional: Rounded corners */
   font-size: 16px; /* Font size */
   background: rgba(0,0,0,0.65);
-  color: #fff;
+  color: var(--app-text);
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(0,0,0,0.12);
   border: none;
@@ -115,7 +115,7 @@
   border-radius: 18px 18px 30px 30px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
   overflow: hidden;
-  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+  background: linear-gradient(135deg, var(--app-surface-alt) 0%, var(--app-surface-alt) 100%);
 }
 .fabriccase .fabriccase-left-side,
 .fabriccase .fabriccase-right-side {
@@ -239,7 +239,7 @@
   height: 50px;
   line-height: 50px;
   margin: 0;
-  color: #fff;
+  color: var(--app-text);
   font-weight: bold;
   font-size: 1.6rem;
   border-bottom: 0 !important;
@@ -259,7 +259,7 @@
   font-weight: bold;
 }
 h2 {
-    color: #fff;
+    color: var(--app-text);
 }
 
 /* Default container styles */

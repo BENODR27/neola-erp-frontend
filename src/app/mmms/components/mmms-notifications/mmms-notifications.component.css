@@ -1,3 +1,4 @@
+@import '../mmms-operations/mmms-forms.css';
 @import '../mmms-master-data/mmms-master-data.component.css';
 
 :host {
@@ -10,5 +11,5 @@
 }
 
 .master-page-notifications .kicker {
-  color: #2f6fb5;
+  color: var(--app-primary);
 }

@@ -1,6 +1,4 @@
 import { Injectable, signal } from '@angular/core';
-import { forkJoin, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
 import { ApiService } from '../../shared/services/api/api.service';
 import { environment } from '../../shared/environments/environment';
 
@@ -42,22 +40,12 @@ export class MmmsContextService {
     if (this.isLoading()) return;
     this.isLoading.set(true);
     this.error.set('');
-    forkJoin({
-      organizations: this.api.getDatas(`${environment.MMMS_API_URL}/master-data/organization`).pipe(catchError(() => of({ result: [] }))),
-      factories: this.api.getDatas(`${environment.MMMS_API_URL}/master-data/factories`).pipe(catchError(() => of({ result: [] }))),
-    }).pipe(
-      map(({ organizations, factories }) => ({
-        organizations: this.normalize(organizations),
-        factories: this.normalize(factories),
-      })),
-    ).subscribe({
-      next: (options) => {
-        this.organizations.set(options.organizations);
-        this.factories.set(options.factories.map((factory) => ({
-          ...factory,
-          organizationId: this.read(factory, 'organizationId'),
-          organizationName: this.read(factory, 'organizationName') || this.read(factory, 'organization'),
-        })));
+    this.api.getDatas(`${environment.MMMS_API_URL}/workspace-context`).subscribe({
+      next: (response: {
+        result: { organizations: MmmsScopeOption[]; factories: MmmsScopeOption[] };
+      }) => {
+        this.organizations.set(response.result.organizations);
+        this.factories.set(response.result.factories);
         this.reconcileContext();
         this.isLoading.set(false);
       },
@@ -70,14 +58,20 @@ export class MmmsContextService {
 
   selectOrganization(option: MmmsScopeOption | null): void {
     if (!option) {
-      this.setContext({ organizationId: null, organizationName: null, factoryId: null, factoryName: null });
+      this.setContext({
+        organizationId: null,
+        organizationName: null,
+        factoryId: null,
+        factoryName: null,
+      });
       return;
     }
     const current = this.context();
     const nextOrganizationId = option.id;
-    const factory = current.factoryId && this.factoryBelongsTo(current.factoryId, nextOrganizationId)
-      ? this.factories().find((item) => item.id === current.factoryId)
-      : null;
+    const factory =
+      current.factoryId && this.factoryBelongsTo(current.factoryId, nextOrganizationId)
+        ? this.factories().find((item) => item.id === current.factoryId)
+        : null;
     this.setContext({
       organizationId: nextOrganizationId,
       organizationName: option.name,
@@ -98,7 +92,12 @@ export class MmmsContextService {
   }
 
   clear(): void {
-    this.setContext({ organizationId: null, organizationName: null, factoryId: null, factoryName: null });
+    this.setContext({
+      organizationId: null,
+      organizationName: null,
+      factoryId: null,
+      factoryName: null,
+    });
   }
 
   contextQuery(): string {
@@ -119,14 +118,19 @@ export class MmmsContextService {
 
   private restore(): void {
     try {
-      const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as Partial<MmmsContext> | null;
-      if (saved) this.context.set({
-        organizationId: saved.organizationId || null,
-        organizationName: saved.organizationName || null,
-        factoryId: saved.factoryId || null,
-        factoryName: saved.factoryName || null,
-      });
-    } catch { /* Ignore invalid local storage and use an unscoped context. */ }
+      const saved = JSON.parse(
+        localStorage.getItem(STORAGE_KEY) || 'null',
+      ) as Partial<MmmsContext> | null;
+      if (saved)
+        this.context.set({
+          organizationId: saved.organizationId || null,
+          organizationName: saved.organizationName || null,
+          factoryId: saved.factoryId || null,
+          factoryName: saved.factoryName || null,
+        });
+    } catch {
+      /* Ignore invalid local storage and use an unscoped context. */
+    }
   }
 
   private reconcileContext(): void {
@@ -137,9 +141,16 @@ export class MmmsContextService {
     // workspace as an empty page after refresh.
     const organizationsLoaded = this.organizations().length > 0;
     const factoriesLoaded = this.factories().length > 0;
-    const organization = current.organizationId ? this.organizations().find((item) => item.id === current.organizationId) : null;
-    const factory = current.factoryId ? this.factories().find((item) => item.id === current.factoryId) : null;
-    const organizationId = organizationsLoaded && current.organizationId && !organization ? null : current.organizationId;
+    const organization = current.organizationId
+      ? this.organizations().find((item) => item.id === current.organizationId)
+      : null;
+    const factory = current.factoryId
+      ? this.factories().find((item) => item.id === current.factoryId)
+      : null;
+    const organizationId =
+      organizationsLoaded && current.organizationId && !organization
+        ? null
+        : current.organizationId;
     const factoryId = factoriesLoaded && current.factoryId && !factory ? null : current.factoryId;
     const next = {
       organizationId,
@@ -157,26 +168,5 @@ export class MmmsContextService {
     if (!organizationId) return true;
     const factory = this.factories().find((item) => item.id === factoryId);
     return !factory?.organizationId || factory.organizationId === organizationId;
-  }
-
-  private normalize(response: unknown): MmmsScopeOption[] {
-    const rows = Array.isArray(response) ? response : (response as { result?: unknown[] })?.result;
-    return (Array.isArray(rows) ? rows : []).map((row) => {
-      const source = row as Record<string, unknown>;
-      const organization = source['organization'] as Record<string, unknown> | string | undefined;
-      const organizationId = source['organizationId'] ?? (typeof organization === 'object' ? organization?.['id'] : undefined);
-      const organizationName = source['organizationName'] ?? (typeof organization === 'object' ? organization?.['name'] : organization);
-      return {
-        id: String(source['id'] ?? source['code'] ?? ''),
-        name: String(source['name'] ?? source['organizationName'] ?? source['factoryName'] ?? source['code'] ?? source['id'] ?? ''),
-        code: source['code'] ? String(source['code']) : undefined,
-        organizationId: organizationId ? String(organizationId) : undefined,
-        organizationName: organizationName ? String(organizationName) : undefined,
-      };
-    }).filter((item) => item.id && item.name);
-  }
-
-  private read(record: MmmsScopeOption, key: string): string | undefined {
-    return (record as unknown as Record<string, string | undefined>)[key];
   }
 }

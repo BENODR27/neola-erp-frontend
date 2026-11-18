@@ -1,49 +1,182 @@
-<section class="master-page master-page-transfers" data-page-code="MMMS-TRANSFERS">
+<section class="master-page">
   <header class="page-header">
     <div>
-      <a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a>
-      <span class="kicker"><i class="bi" [ngClass]="page().icon"></i> MMMS-TRANSFERS</span>
-      <h1>Machine Transfers</h1>
-      <p>{{ page().description }}</p>
+      <a routerLink="/mmms">Command center</a>
+      <h1>{{ title }}</h1>
+      <p>Controlled machine movements with approvals, receipt and permanent history.</p>
     </div>
-    <button class="primary-action" type="button" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add {{ page().singular }}</button>
+    <button type="button" class="primary-action" (click)="openCreate()">New request</button>
   </header>
+  <p role="alert" *ngIf="error()">{{ error() }}</p>
   <section class="summary">
-    <div><span class="icon"><i class="bi" [ngClass]="page().icon"></i></span><div><strong>{{ records().length }}</strong><small>records in this workspace</small></div></div>
-    <label class="search"><i class="bi bi-search"></i><input #box [value]="query()" (input)="updateQuery(box.value)" placeholder="Search records"></label>
+    <strong>{{ records().length }} requests</strong
+    ><label
+      >Search<input
+        #query
+        [value]="search()"
+        (input)="search.set(query.value); pagination.reset()" /></label
+    ><button type="button" (click)="load()">Refresh</button>
   </section>
+  <p role="status" *ngIf="loading()">Loading movements…</p>
   <section class="table-card">
     <div class="table-scroll">
       <table>
-        <thead><tr><th *ngFor="let field of fields">{{ field.label }}</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let record of filtered">
-            <td *ngFor="let field of fields"><strong *ngIf="field === fields[0]">{{ value(record, field.key) }}</strong><span *ngIf="field !== fields[0]">{{ value(record, field.key) }}</span></td>
-            <td><span class="status">{{ record.status }}</span></td>
-            <td class="actions"><button type="button" (click)="openEdit(record)" aria-label="Edit"><i class="bi bi-pencil"></i></button><button type="button" (click)="remove(record)" aria-label="Delete"><i class="bi bi-trash3"></i></button></td>
+        <thead>
+          <tr>
+            <th>Reference / machine</th>
+            <th>From</th>
+            <th>Destination</th>
+            <th>Type</th>
+            <th>Status</th>
+            <th></th>
           </tr>
-          <tr *ngIf="!filtered.length"><td class="empty" [attr.colspan]="fields.length + 2">No records match your search.</td></tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of pagination.slice(visible())">
+            <td>{{ row.code }}<br />{{ row.machineCode }} · {{ row.machine }}</td>
+            <td>{{ row.source.factory }} / {{ row.source.currentLocation }}</td>
+            <td>{{ row.destination.factory }} / {{ row.destination.currentLocation }}</td>
+            <td>{{ row.allocationType }}</td>
+            <td>{{ row.status | mmmsStatusLabel }}</td>
+            <td>
+              <button type="button" (click)="selected.set(row); actionReason = ''">
+                View / actions
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="!loading() && !visible().length">
+            <td colspan="6">No movement requests found.</td>
+          </tr>
         </tbody>
       </table>
     </div>
+
+    <app-mmms-pagination
+      [pager]="pagination"
+      [total]="visible().length"
+      label="Transfers"
+    ></app-mmms-pagination>
   </section>
-  <div class="editor-backdrop" *ngIf="editorOpen()" (click)="closeEditor()">
-    <form class="editor" (submit)="$event.preventDefault(); save()" (click)="$event.stopPropagation()">
-      <header><div><span class="kicker">{{ editingId() ? 'EDIT' : 'NEW' }} {{ page().singular | uppercase }}</span><h2>{{ editingId() ? 'Update record' : 'Add record' }}</h2></div><button type="button" class="close" (click)="closeEditor()"><i class="bi bi-x-lg"></i></button></header>
+  <div class="editor-backdrop" *ngIf="editorOpen()">
+    <form class="editor" (ngSubmit)="save()">
+      <header>
+        <h2>New {{ title }}</h2>
+        <button type="button" (click)="editorOpen.set(false)" [disabled]="saving()">Close</button>
+      </header>
       <div class="form-grid">
-        <label *ngFor="let field of fields">{{ field.label }}
-          <ng-container *ngIf="field.type === 'relation'; else staticField">
-            <input *ngIf="optionsFor(field).length > 8" #relationSearchBox type="search" placeholder="Search options" [value]="relationSearch()[field.key] || ''" (input)="updateRelationSearch(field.key, relationSearchBox.value)">
-            <select [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"><option value="">Select...</option><option *ngFor="let option of filteredOptions(field)" [value]="option">{{ option }}</option></select>
-          </ng-container>
-          <ng-template #staticField>
-            <select *ngIf="field.type === 'select'; else inputField" [(ngModel)]="draft[field.key]" [name]="field.key"><option value="">Select...</option><option *ngFor="let option of optionsFor(field)" [value]="option">{{ option }}</option></select>
-            <ng-template #inputField><input [type]="field.type || 'text'" [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"></ng-template>
-          </ng-template>
+        <label
+          >Machine<select name="machineId" [(ngModel)]="draft.machineId" required>
+            <option value="">Select machine</option>
+            <option *ngFor="let item of machines()" [value]="item.id">
+              {{ item.machineCode }} · {{ item.name }}
+            </option>
+          </select></label
+        >
+        <label
+          >Destination factory<select
+            name="factoryId"
+            [(ngModel)]="draft.destination.factoryId"
+            (ngModelChange)="resetDestination()"
+            required
+          >
+            <option value="">Select factory</option>
+            <option *ngFor="let item of factories()" [value]="item.id">{{ item.name }}</option>
+          </select></label
+        >
+        <label
+          >Department<select name="departmentId" [(ngModel)]="draft.destination.departmentId">
+            <option value="">Unassigned</option>
+            <option *ngFor="let unit of destinationUnits('Department')" [value]="unit.id">
+              {{ unit.name }}
+            </option>
+          </select></label
+        >
+        <label
+          >Production line<select
+            name="productionLineId"
+            [(ngModel)]="draft.destination.productionLineId"
+          >
+            <option value="">Unassigned</option>
+            <option *ngFor="let unit of destinationUnits('Production Line')" [value]="unit.id">
+              {{ unit.name }}
+            </option>
+          </select></label
+        >
+        <label
+          >Registered floor<select name="floorId" [(ngModel)]="draft.destination.floorId">
+            <option value="">Use floor description</option>
+            <option *ngFor="let unit of destinationUnits('Floor')" [value]="unit.id">
+              {{ unit.name }}
+            </option>
+          </select></label
+        >
+        <label
+          >Registered location<select name="locationId" [(ngModel)]="draft.destination.locationId">
+            <option value="">Use location description</option>
+            <option *ngFor="let unit of destinationUnits('Machine Location')" [value]="unit.id">
+              {{ unit.name }}
+            </option>
+          </select></label
+        >
+        <label>Floor<input name="floor" [(ngModel)]="draft.destination.floor" /></label
+        ><label
+          >Location<input
+            name="currentLocation"
+            [(ngModel)]="draft.destination.currentLocation"
+            [required]="!draft.destination.locationId"
+        /></label>
+        <label
+          >Responsible person<input
+            name="responsiblePerson"
+            [(ngModel)]="draft.destination.responsiblePerson" /></label
+        ><label
+          >Reason<textarea name="reason" [(ngModel)]="draft.reason" required></textarea>
         </label>
-        <label>Status<select [(ngModel)]="draft.status" name="status"><option>Active</option><option>Planned</option><option>In progress</option><option>Approved</option><option>Valid</option><option>Expired</option></select></label>
+        <label
+          >Expected date<input type="date" name="expectedDate" [(ngModel)]="draft.expectedDate"
+        /></label>
+        <label
+          >Allocation type<select name="allocationType" [(ngModel)]="draft.allocationType">
+            <option>Permanent</option>
+            <option>Temporary</option>
+          </select></label
+        >
       </div>
-      <footer><button type="button" class="secondary" (click)="closeEditor()">Cancel</button><button type="submit" class="primary-action">Save record</button></footer>
+      <footer>
+        <button type="submit" class="primary-action" [disabled]="saving()">
+          {{ saving() ? 'Saving…' : 'Create draft' }}
+        </button>
+      </footer>
     </form>
+  </div>
+  <div class="editor-backdrop" *ngIf="selected() as row">
+    <section class="editor">
+      <header>
+        <h2>{{ row.code }} · {{ row.status | mmmsStatusLabel }}</h2>
+        <button type="button" (click)="selected.set(null)" [disabled]="saving()">Close</button>
+      </header>
+      <p>{{ row.reason }}</p>
+      <p>
+        {{ row.source.factory }} / {{ row.source.currentLocation }} →
+        {{ row.destination.factory }} / {{ row.destination.currentLocation }}
+      </p>
+      <ol>
+        <li *ngFor="let event of row.events">
+          {{ event.to }} · {{ event.actorId }} · {{ event.occurredAt | date: 'medium' }}
+          <p>{{ event.reason }}</p>
+        </li>
+      </ol>
+      <label>Action / rejection reason<textarea [(ngModel)]="actionReason"></textarea></label>
+      <footer>
+        <button
+          type="button"
+          *ngFor="let action of actions(row)"
+          (click)="transition(row, action)"
+          [disabled]="saving()"
+        >
+          {{ action }}
+        </button>
+      </footer>
+    </section>
   </div>
 </section>

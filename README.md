@@ -1,4 +1,6 @@
-# ADMIN Frontend
+# Platform Frontend
+
+MMMS follows [MMMS-NEW.MD](../reqs/MMMS-NEW.MD). See [architecture](../docs/ARCHITECTURE.md), [developer setup](../docs/MMMS-GETTING-STARTED.md) and [coverage and gaps](../docs/MMMS-REQUIREMENTS-COVERAGE.md).
 
 ADMIN is an enterprise operations platform built with Angular 22. The frontend currently contains the warehouse-management and administration workspaces, shared authentication, navigation, reporting, AI/chat, QR scanning, and reusable UI services.
 
@@ -114,4 +116,5 @@ Agent rules:
 - Some legacy screens still use NgModules and broad `any` models; they are migration candidates, not blockers for new feature work.
 - The Karma builder is retained for compatibility with the current test suite. A future task should move tests to the Angular 22 application test builder or a Vite-native runner.
 - Existing third-party PDF/export packages produce CommonJS optimization warnings. They should be isolated behind lazy services before tightening bundle budgets.
+
 # frontend-v1

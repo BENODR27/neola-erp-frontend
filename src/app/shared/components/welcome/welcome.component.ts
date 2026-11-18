@@ -1,15 +1,19 @@
-import { Component, Input } from '@angular/core';
-import { SharedServiceService } from '../../services/shared-service/shared-service.service';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { AuthService } from '../../../auth/services/auth.service';
+import { APP_CONFIG } from '../../config/app-config';
 
 @Component({
   selector: 'app-welcome',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './welcome.component.html',
   styleUrl: './welcome.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WelcomeComponent {
-  @Input() title = 'ADMIN ';
-  constructor(private sharedService: SharedServiceService) {
-    this.sharedService.updateNavbarItems([]);
-  }
+  readonly appConfig = APP_CONFIG;
+  private readonly auth = inject(AuthService);
+  readonly employeeName = computed(() =>
+    String(this.auth.currentUser()?.['employeeName'] || this.auth.currentUser()?.name || ''),
+  );
 }

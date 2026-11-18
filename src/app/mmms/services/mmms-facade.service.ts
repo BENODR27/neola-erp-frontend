@@ -1,11 +1,28 @@
-import { Injectable, signal } from '@angular/core';
-import { catchError, forkJoin, map, Observable, of, throwError } from 'rxjs';
+import type { NavbarItem } from '../../shared/services/shared-service/shared-service.service';
+import { Injectable, inject, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { MmmsStoredFile } from '../models/mmms-file.models';
+import {
+  MaintenanceExpense,
+  CalibrationRecord,
+  MaintenanceNotification,
+  MaintenanceReport,
+  ReportFilter,
+} from '../models/mmms-administration.models';
+import { WorkOrderRecord } from '../models/mmms-work-order.models';
+import { MachineRecord } from '../models/mmms-machine.models';
+import { BreakdownRecord } from '../models/mmms-breakdown.models';
+import { MaintenanceAnalytics } from '../models/mmms-analytics.models';
+import { MechanicRecord } from '../models/mmms-mechanic.models';
+import { OrganizationUnit } from '../models/mmms-organization.models';
+import { MaintenanceSettings } from '../models/mmms-configuration.models';
+import { SharedVendor, VendorProfile, VendorService } from '../models/mmms-vendor.models';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import {
   BreakdownSummary,
   CostSummary,
   MachineHistorySummary,
   MachineStatus,
-  MmmsDashboardData,
   MachineSummary,
   MobileTaskSummary,
   PreventiveMaintenancePlan,
@@ -19,6 +36,15 @@ import {
 import { ApiService } from '../../shared/services/api/api.service';
 import { environment } from '../../shared/environments/environment';
 import { MmmsContextService } from './mmms-context.service';
+import { MachineMovement, MovementDraft } from '../models/mmms-movement.models';
+import {
+  InventoryPart,
+  StockTransaction,
+  StockTransactionDraft,
+  MaintenancePlanRecord,
+  MaintenanceOccurrence,
+  InspectionRecord,
+} from '../models/mmms-maintenance.models';
 
 interface MachineApiRecord {
   id: string | number;
@@ -75,6 +101,7 @@ interface WorkOrderApiRecord {
   repairNotes?: string;
   completionNotes?: string;
   verificationNotes?: string;
+  rejectionReason?: string;
   laborMinutes?: number;
 }
 export interface MmmsMasterRecord {
@@ -86,12 +113,370 @@ export interface MmmsMasterRecord {
   [key: string]: unknown;
 }
 
-/** Typed workspace boundary. Replace the demo observable with HttpClient calls when the MMMS API is ready. */
+/** Typed workspace boundary for live MMMS APIs and response mapping. */
 @Injectable({ providedIn: 'root' })
 export class MmmsFacadeService {
   readonly selectedPeriod = signal<'7d' | '30d' | '90d'>('30d');
+  private readonly http = inject(HttpClient);
+  getSharedVendors(): Observable<SharedVendor[]> {
+    return this.api
+      .getDatas(`${environment.authv2ApiUrl}/api/auth/vendors`)
+      .pipe(map((response) => response.result as SharedVendor[]));
+  }
+  saveSharedVendor(id: string | null, draft: Partial<SharedVendor>): Observable<unknown> {
+    const scope = this.context.context();
+    const payload = {
+      ...draft,
+      organizationId: scope.organizationId,
+      organizationName: scope.organizationName,
+      factoryId: scope.factoryId,
+      factoryName: scope.factoryName,
+    };
+    const url = `${environment.authv2ApiUrl}/api/auth/vendors${id ? '/' + encodeURIComponent(id) : ''}`;
+    return id ? this.api.putAtUrl(url, payload) : this.api.addData(payload, url);
+  }
+  getVendorProfiles(): Observable<VendorProfile[]> {
+    return this.readRecords<VendorProfile>('vendor-profiles');
+  }
+  saveVendorProfile(draft: VendorProfile): Observable<unknown> {
+    const scope = this.context.context();
+    return this.api.putAtUrl(
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/vendor-profiles/${encodeURIComponent(draft.vendorId)}`,
+      ),
+      { ...draft, organizationId: scope.organizationId, factoryId: scope.factoryId },
+    );
+  }
+  getVendorServices(): Observable<VendorService[]> {
+    return this.readRecords<VendorService>('vendor-services');
+  }
+  createVendorService(draft: Partial<VendorService>): Observable<unknown> {
+    return this.api.addData(draft, this.scopedUrl(`${environment.MMMS_API_URL}/vendor-services`));
+  }
+  updateVendorService(id: string, draft: Partial<VendorService>): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/vendor-services/${encodeURIComponent(id)}/status`,
+      ),
+    );
+  }
+  getSettings(): Observable<MaintenanceSettings> {
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/configuration/effective`))
+      .pipe(map((response) => response.result as MaintenanceSettings));
+  }
+  saveSetting(key: string, value: unknown): Observable<unknown> {
+    const scope = this.context.context();
+    return this.api.putAtUrl(
+      this.scopedUrl(`${environment.MMMS_API_URL}/configuration/${encodeURIComponent(key)}`),
+      { value, organizationId: scope.organizationId, factoryId: scope.factoryId },
+    );
+  }
+  getMechanicRecords(): Observable<MechanicRecord[]> {
+    return this.readRecords<MechanicRecord>('technicians');
+  }
+  saveMechanicRecord(id: string | null, draft: Partial<MechanicRecord>): Observable<unknown> {
+    const scope = this.context.context();
+    const payload = {
+      ...draft,
+      organizationId: draft.organizationId || scope.organizationId,
+      factoryId: draft.factoryId || scope.factoryId,
+      factory: draft.factory || scope.factoryName,
+    };
+    const url = this.scopedUrl(
+      `${environment.MMMS_API_URL}/technicians${id ? '/' + encodeURIComponent(id) : ''}`,
+    );
+    return id ? this.api.putAtUrl(url, payload) : this.api.addData(payload, url);
+  }
+  getAnalytics(view: string): Observable<MaintenanceAnalytics> {
+    const days = Number(this.selectedPeriod().replace('d', ''));
+    const query = new URLSearchParams({
+      view,
+      from: new Date(Date.now() - days * 86400000).toISOString(),
+      to: new Date().toISOString(),
+    });
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/analytics?${query}`))
+      .pipe(map((response) => response.result as MaintenanceAnalytics));
+  }
+  getBreakdownRecords(): Observable<BreakdownRecord[]> {
+    return this.readRecords<BreakdownRecord>('breakdowns');
+  }
+  reportBreakdown(draft: Partial<BreakdownRecord>): Observable<unknown> {
+    return this.api.addData(draft, this.scopedUrl(`${environment.MMMS_API_URL}/breakdowns`));
+  }
+  getOrganizationHierarchy(): Observable<OrganizationUnit[]> {
+    return this.api
+      .getDatas(`${environment.MMMS_API_URL}/hierarchy`)
+      .pipe(map((response) => response.result as OrganizationUnit[]));
+  }
+  saveOrganizationUnit(id: string | null, draft: Partial<OrganizationUnit>): Observable<unknown> {
+    const url = `${environment.MMMS_API_URL}/hierarchy${id ? '/' + encodeURIComponent(id) : ''}`;
+    return id ? this.api.putAtUrl(url, draft) : this.api.addData(draft, url);
+  }
+  getMachineRecords(): Observable<MachineRecord[]> {
+    return this.readRecords<MachineRecord>('machines');
+  }
+  saveMachineRecord(id: string | null, draft: Partial<MachineRecord>): Observable<unknown> {
+    const scope = this.context.context();
+    const payload = {
+      ...draft,
+      organizationId: draft.organizationId || scope.organizationId,
+      factoryId: draft.factoryId || scope.factoryId,
+    };
+    const url = this.scopedUrl(
+      `${environment.MMMS_API_URL}/machines${id ? '/' + encodeURIComponent(id) : ''}`,
+    );
+    return id ? this.api.putAtUrl(url, payload) : this.api.addData(payload, url);
+  }
+  importMachines(rows: Partial<MachineRecord>[]): Observable<unknown> {
+    const scope = this.context.context();
+    return this.api.addData(
+      rows.map((row) => ({
+        ...row,
+        organizationId: scope.organizationId,
+        factoryId: scope.factoryId,
+      })),
+      this.scopedUrl(`${environment.MMMS_API_URL}/machines/createBatch`),
+    );
+  }
+  resolveMachineQr(reference: string): Observable<MachineRecord> {
+    return this.api
+      .getDatas(`${environment.MMMS_API_URL}/machines/qr/${encodeURIComponent(reference)}`)
+      .pipe(map((response) => response.result as MachineRecord));
+  }
+  getQrMachineHistory(id: string): Observable<MachineHistorySummary[]> {
+    return this.api
+      .getDatas(`${environment.MMMS_API_URL}/machines/${encodeURIComponent(id)}/history`)
+      .pipe(map((response) => response.result as MachineHistorySummary[]));
+  }
+  getWorkOrderRecords(personal = false): Observable<WorkOrderRecord[]> {
+    return this.readRecords<WorkOrderRecord>(
+      personal ? 'work-orders?personal=true' : 'work-orders',
+    );
+  }
+  saveWorkOrderRecord(
+    id: string | null,
+    draft: Partial<WorkOrderRecord>,
+    transition = false,
+  ): Observable<unknown> {
+    const url = this.scopedUrl(
+      `${environment.MMMS_API_URL}/work-orders${id ? '/' + encodeURIComponent(id) : ''}${transition ? '/workflow' : ''}`,
+    );
+    return transition
+      ? this.api.patchDataAtUrl(url, draft)
+      : id
+        ? this.api.putAtUrl(url, draft)
+        : this.api.addData(draft, url);
+  }
+  getWorkOrderHistory(id: string): Observable<MachineHistorySummary[]> {
+    return this.readRecords<MachineHistorySummary>(`work-orders/${encodeURIComponent(id)}/history`);
+  }
+  getExpenses(): Observable<MaintenanceExpense[]> {
+    return this.readRecords<MaintenanceExpense>('expenses');
+  }
+  createExpense(draft: Partial<MaintenanceExpense>): Observable<unknown> {
+    return this.api.addData(draft, this.scopedUrl(`${environment.MMMS_API_URL}/expenses`));
+  }
+  voidExpense(id: string, reason: string): Observable<unknown> {
+    return this.api.addData(
+      { reason },
+      this.scopedUrl(`${environment.MMMS_API_URL}/expenses/${encodeURIComponent(id)}/void`),
+    );
+  }
+  getCalibrations(): Observable<CalibrationRecord[]> {
+    return this.readRecords<CalibrationRecord>('master-data/calibration');
+  }
+  createCalibration(draft: Partial<CalibrationRecord>): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(`${environment.MMMS_API_URL}/master-data/calibration`),
+    );
+  }
+  completeCalibration(id: string, draft: Partial<CalibrationRecord>): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/master-data/calibration/${encodeURIComponent(id)}/complete`,
+      ),
+    );
+  }
+  getNotifications(): Observable<MaintenanceNotification[]> {
+    return this.readRecords<MaintenanceNotification>('master-data/notifications');
+  }
+  readNotification(id: string): Observable<unknown> {
+    return this.api.addData(
+      {},
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/master-data/notifications/${encodeURIComponent(id)}/read`,
+      ),
+    );
+  }
+  getReportCatalog(): Observable<{ id: string; title: string }[]> {
+    return this.readRecords<{ id: string; title: string }>('reports/catalog');
+  }
+  getReport(name: string, filter: ReportFilter, exporting = false): Observable<MaintenanceReport> {
+    const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => !!value));
+    if (exporting) query.set('export', 'true');
+    return this.api
+      .getDatas(
+        this.scopedUrl(
+          `${environment.MMMS_API_URL}/reports/data/${encodeURIComponent(name)}?${query}`,
+        ),
+      )
+      .pipe(map((response) => response.result as MaintenanceReport));
+  }
 
-  constructor(private readonly api: ApiService, private readonly context: MmmsContextService) {}
+  uploadAttachments(files: FileList | File[]): Observable<MmmsStoredFile[]> {
+    const data = new FormData();
+    Array.from(files).forEach((file) => data.append('files', file));
+    const scope = this.context.context();
+    const query = new URLSearchParams({
+      organizationId: scope.organizationId || '',
+      factoryId: scope.factoryId || '',
+    });
+    return this.http
+      .post<{ result: MmmsStoredFile[] }>(
+        `${environment.SS_API_URL}/api/ss/mmms/files?${query}`,
+        data,
+      )
+      .pipe(map((response) => response.result));
+  }
+  downloadAttachment(file: MmmsStoredFile): Observable<Blob> {
+    if (!file.url.startsWith('/api/ss/mmms/files/')) throw new Error('Unsupported attachment URL');
+    return this.http.get(`${environment.SS_API_URL}${file.url}`, { responseType: 'blob' });
+  }
+
+  getInventoryParts(): Observable<InventoryPart[]> {
+    return this.readRecords<InventoryPart>('spare-parts');
+  }
+  getStockDestinations(): Observable<InventoryPart[]> {
+    return this.api
+      .getDatas(`${environment.MMMS_API_URL}/spare-parts`)
+      .pipe(map((response) => response.result as InventoryPart[]));
+  }
+  getStockTransactions(id: string): Observable<StockTransaction[]> {
+    return this.readRecords<StockTransaction>(`spare-parts/${encodeURIComponent(id)}/transactions`);
+  }
+  postStockTransaction(id: string, draft: StockTransactionDraft): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/spare-parts/${encodeURIComponent(id)}/transactions`,
+      ),
+    );
+  }
+  saveInventoryPart(id: string | null, draft: Partial<InventoryPart>): Observable<unknown> {
+    const payload = {
+      name: draft.name,
+      category: draft.category,
+      reorderLevel: draft.reorderLevel,
+      unitCost: draft.unitCost,
+      supplier: draft.supplier,
+      details: draft.details,
+      organizationId: this.context.context().organizationId,
+      factoryId: this.context.context().factoryId,
+    };
+    const url = this.scopedUrl(
+      `${environment.MMMS_API_URL}/spare-parts${id ? '/' + encodeURIComponent(id) : ''}`,
+    );
+    return id ? this.api.putAtUrl(url, payload) : this.api.addData(payload, url);
+  }
+  getMaintenancePlans(): Observable<MaintenancePlanRecord[]> {
+    return this.readRecords<MaintenancePlanRecord>('preventive-maintenance');
+  }
+  saveMaintenancePlan(
+    id: string | null,
+    draft: Partial<MaintenancePlanRecord>,
+  ): Observable<unknown> {
+    const url = this.scopedUrl(
+      `${environment.MMMS_API_URL}/preventive-maintenance${id ? '/' + encodeURIComponent(id) : ''}`,
+    );
+    return id ? this.api.putAtUrl(url, draft) : this.api.addData(draft, url);
+  }
+  generateMaintenanceTasks(id: string): Observable<unknown> {
+    return this.api.addData(
+      {},
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/preventive-maintenance/${encodeURIComponent(id)}/generate`,
+      ),
+    );
+  }
+  getMaintenanceOccurrences(id: string): Observable<MaintenanceOccurrence[]> {
+    return this.readRecords<MaintenanceOccurrence>(
+      `preventive-maintenance/${encodeURIComponent(id)}/occurrences`,
+    );
+  }
+  getInspections(): Observable<InspectionRecord[]> {
+    return this.readRecords<InspectionRecord>('master-data/inspections');
+  }
+  createInspection(draft: Partial<InspectionRecord>): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(`${environment.MMMS_API_URL}/master-data/inspections`),
+    );
+  }
+  completeInspection(
+    id: string,
+    results: Record<string, string>,
+    observations: string,
+    attachments: MmmsStoredFile[] = [],
+  ): Observable<unknown> {
+    return this.api.addData(
+      { results, observations, attachments },
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/master-data/inspections/${encodeURIComponent(id)}/complete`,
+      ),
+    );
+  }
+  private readRecords<T>(path: string): Observable<T[]> {
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/${path}`))
+      .pipe(map((response) => response.result as T[]));
+  }
+
+  getMovements(module: 'allocations' | 'transfers'): Observable<MachineMovement[]> {
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/master-data/${module}`))
+      .pipe(map((response) => response.result as MachineMovement[]));
+  }
+
+  createMovement(module: 'allocations' | 'transfers', draft: MovementDraft): Observable<unknown> {
+    return this.api.addData(
+      draft,
+      this.scopedUrl(`${environment.MMMS_API_URL}/master-data/${module}`),
+    );
+  }
+
+  transitionMovement(
+    module: 'allocations' | 'transfers',
+    id: string,
+    status: string,
+    reason: string,
+  ): Observable<unknown> {
+    return this.api.patchDataAtUrl(
+      this.scopedUrl(
+        `${environment.MMMS_API_URL}/master-data/${module}/${encodeURIComponent(id)}/workflow`,
+      ),
+      { status, reason },
+    );
+  }
+
+  getMovementDestinations(): Observable<import('../models/mmms-movement.models').MovementUnit[]> {
+    return this.api
+      .getDatas(`${environment.MMMS_API_URL}/movement-options`)
+      .pipe(
+        map(
+          (response) => response.result as import('../models/mmms-movement.models').MovementUnit[],
+        ),
+      );
+  }
+
+  constructor(
+    private readonly api: ApiService,
+    private readonly context: MmmsContextService,
+  ) {}
 
   private scopedUrl(url: string, includeFactory = true, includeOrganization = true): string {
     if (!url.startsWith(environment.MMMS_API_URL)) return url;
@@ -105,11 +490,14 @@ export class MmmsFacadeService {
   }
 
   getMasterRecords(module: string): Observable<MmmsMasterRecord[]> {
-    if (module === 'machines') return this.getMachines() as unknown as Observable<MmmsMasterRecord[]>;
-    if (module === 'technicians') return this.getTechnicians() as unknown as Observable<MmmsMasterRecord[]>;
-    const baseUrl = module === 'vendors'
-      ? `${environment.authv2ApiUrl}/api/auth/vendors`
-      : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`;
+    if (module === 'machines')
+      return this.getMachines() as unknown as Observable<MmmsMasterRecord[]>;
+    if (module === 'technicians')
+      return this.getTechnicians() as unknown as Observable<MmmsMasterRecord[]>;
+    const baseUrl =
+      module === 'vendors'
+        ? `${environment.authv2ApiUrl}/api/auth/vendors`
+        : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`;
     return this.api
       .getDatas(this.scopedUrl(baseUrl))
       .pipe(
@@ -124,23 +512,26 @@ export class MmmsFacadeService {
     id: string | null,
     draft: Record<string, string | number>,
   ): Observable<unknown> {
-    const url = module === 'vendors'
-      ? `${environment.authv2ApiUrl}/api/auth/vendors`
-      : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`;
+    const url =
+      module === 'vendors'
+        ? `${environment.authv2ApiUrl}/api/auth/vendors`
+        : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`;
     const payload = this.applyContext(module, draft);
     return id
       ? this.api.putAtUrl(this.scopedUrl(`${url}/${encodeURIComponent(id)}`), payload)
       : this.api.addData(
-        payload,
-        module === 'organization'
-          ? this.scopedUrl(url, false, false)
-          : this.scopedUrl(url, module !== 'factories'),
-      );
+          payload,
+          module === 'organization'
+            ? this.scopedUrl(url, false, false)
+            : this.scopedUrl(url, module !== 'factories'),
+        );
   }
 
   deleteMasterRecord(module: string, id: string): Observable<unknown> {
     return this.api.deleteAtUrl(
-      this.scopedUrl(`${module === 'vendors' ? `${environment.authv2ApiUrl}/api/auth/vendors` : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`}/${encodeURIComponent(id)}`),
+      this.scopedUrl(
+        `${module === 'vendors' ? `${environment.authv2ApiUrl}/api/auth/vendors` : `${environment.MMMS_API_URL}/master-data/${encodeURIComponent(module)}`}/${encodeURIComponent(id)}`,
+      ),
     );
   }
 
@@ -228,7 +619,10 @@ export class MmmsFacadeService {
         warrantyExpiryDate: String(draft['warrantyExpiryDate'] ?? '') || null,
         criticality: String(draft['criticality'] ?? 'Medium'),
         lifecycleCondition: String(draft['lifecycleCondition'] ?? 'Operational'),
-        status: String(draft['status'] ?? 'Idle').replace('Maintenance', 'Under Maintenance'),
+        status:
+          draft['status'] === 'Maintenance'
+            ? 'Under Maintenance'
+            : String(draft['status'] ?? 'Idle'),
         uptimePercent: Number(draft['uptime'] ?? 0),
       };
     if (module === 'technicians')
@@ -260,12 +654,13 @@ export class MmmsFacadeService {
         factoryId: String(draft['factoryId'] ?? '') || null,
         issue: String(draft['issue'] ?? ''),
         priority: String(draft['priority'] ?? 'Medium'),
-        status: String(draft['status'] ?? 'Open'),
-        dueAt: this.normaliseDate(draft['due'], 1),
+        status: String(draft['status'] ?? 'Draft'),
+        dueAt: draft['due'] ? this.normaliseDate(draft['due'], 1) : null,
         diagnosis: String(draft['diagnosis'] ?? ''),
         repairNotes: String(draft['repairNotes'] ?? ''),
         completionNotes: String(draft['completionNotes'] ?? ''),
         verificationNotes: String(draft['verificationNotes'] ?? ''),
+        rejectionReason: String(draft['rejectionReason'] ?? ''),
         laborMinutes: Number(draft['laborMinutes'] ?? 0),
       };
     if (module === 'preventive-maintenance')
@@ -309,9 +704,17 @@ export class MmmsFacadeService {
   private applyContext(module: string, payload: Record<string, unknown>): Record<string, unknown> {
     const current = this.context.context();
     const scoped = { ...payload };
-    if (module !== 'organization' && !scoped['organizationId'] && current.organizationId) scoped['organizationId'] = current.organizationId;
-    if (module !== 'organization' && module !== 'factories' && !scoped['factoryId'] && current.factoryId) scoped['factoryId'] = current.factoryId;
-    if (module === 'factories' && !scoped['organizationId'] && current.organizationId) scoped['organizationId'] = current.organizationId;
+    if (module !== 'organization' && !scoped['organizationId'] && current.organizationId)
+      scoped['organizationId'] = current.organizationId;
+    if (
+      module !== 'organization' &&
+      module !== 'factories' &&
+      !scoped['factoryId'] &&
+      current.factoryId
+    )
+      scoped['factoryId'] = current.factoryId;
+    if (module === 'factories' && !scoped['organizationId'] && current.organizationId)
+      scoped['organizationId'] = current.organizationId;
     return scoped;
   }
 
@@ -363,7 +766,11 @@ export class MmmsFacadeService {
 
   getMachineHistory(machineId: string): Observable<MachineHistorySummary[]> {
     return this.api
-      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/machines/${encodeURIComponent(machineId)}/history`))
+      .getDatas(
+        this.scopedUrl(
+          `${environment.MMMS_API_URL}/machines/${encodeURIComponent(machineId)}/history`,
+        ),
+      )
       .pipe(
         map((response) =>
           Array.isArray(response?.result) ? (response.result as MachineHistorySummary[]) : [],
@@ -373,26 +780,28 @@ export class MmmsFacadeService {
 
   getTechnicians(search = ''): Observable<TechnicianSummary[]> {
     const query = search.trim() ? `?search=${encodeURIComponent(search.trim())}` : '';
-    return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/technicians${query}`)).pipe(
-      map((response) =>
-        (Array.isArray(response?.result) ? (response.result as TechnicianApiRecord[]) : []).map(
-          (technician) => ({
-            id: String(technician.id),
-            employeeNumber: technician.employeeNumber,
-            name: technician.name,
-            skills: technician.skillCategories ?? [],
-            shift: technician.shift,
-            factory: technician.factory,
-            active: technician.active,
-            workload: Number(technician.currentWorkload ?? 0),
-            availability: technician.availability,
-            email: technician.email,
-            phone: technician.phone,
-          }),
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/technicians${query}`))
+      .pipe(
+        map((response) =>
+          (Array.isArray(response?.result) ? (response.result as TechnicianApiRecord[]) : []).map(
+            (technician) => ({
+              id: String(technician.id),
+              employeeNumber: technician.employeeNumber,
+              name: technician.name,
+              skills: technician.skillCategories ?? [],
+              shift: technician.shift,
+              factory: technician.factory,
+              active: technician.active,
+              workload: Number(technician.currentWorkload ?? 0),
+              availability: technician.availability,
+              email: technician.email,
+              phone: technician.phone,
+            }),
+          ),
         ),
-      ),
-      catchError((error: unknown) => throwError(() => error)),
-    );
+        catchError((error: unknown) => throwError(() => error)),
+      );
   }
 
   getWorkOrders(): Observable<WorkOrderSummary[]> {
@@ -408,10 +817,13 @@ export class MmmsFacadeService {
             status: order.status,
             priority: order.priority,
             due: order.dueAt ? new Date(order.dueAt).toLocaleString() : 'No due date',
+            dueAt: order.dueAt,
             diagnosis: order.diagnosis,
             repairNotes: order.repairNotes,
             completionNotes: order.completionNotes,
             verificationNotes: order.verificationNotes,
+            rejectionReason: order.rejectionReason,
+            machineId: order.machineId === undefined ? undefined : String(order.machineId),
             laborMinutes: order.laborMinutes,
           }),
         ),
@@ -421,101 +833,36 @@ export class MmmsFacadeService {
   }
 
   getPreventiveMaintenance(): Observable<PreventiveMaintenancePlan[]> {
-    const fallback: Observable<PreventiveMaintenancePlan[]> = of([
-      {
-        id: 'PM-0184',
-        machine: 'M-1042 · Juki DDL-9000C',
-        task: 'Lubrication and needle bar inspection',
-        frequency: 'Every 250h',
-        nextDue: 'Today',
-        compliance: 100,
-        owner: 'Sewing Engineering',
-      },
-      {
-        id: 'PM-0179',
-        machine: 'M-0871 · Brother BAS-326H',
-        task: '500-hour preventive service',
-        frequency: 'Every 500h',
-        nextDue: 'Today',
-        compliance: 82,
-        owner: 'Lina Saleh',
-      },
-      {
-        id: 'PM-0174',
-        machine: 'M-1138 · Gerber Paragon HX',
-        task: 'Blade alignment and calibration',
-        frequency: 'Monthly',
-        nextDue: 'Tomorrow',
-        compliance: 96,
-        owner: 'Cutting Engineering',
-      },
-      {
-        id: 'PM-0168',
-        machine: 'M-0914 · Kansai Special FX',
-        task: 'Drive belt and tension check',
-        frequency: 'Every 1000h',
-        nextDue: '18 Nov 2026',
-        compliance: 74,
-        owner: 'Omar Haddad',
-      },
-    ]);
-    return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/preventive-maintenance`)).pipe(
-      map((response) =>
-        (Array.isArray(response?.result) ? response.result : []).map(
-          (row: {
-            id: string;
-            machine?: { name?: string };
-            machineId?: string;
-            task: string;
-            frequency: string;
-            nextDue: string;
-            compliancePercent?: number;
-            ownerName?: string;
-          }) => ({
-            id: row.id,
-            machine: row.machine?.name ?? row.machineId ?? '',
-            task: row.task,
-            frequency: row.frequency,
-            nextDue: new Date(row.nextDue).toLocaleDateString(),
-            compliance: Number(row.compliancePercent ?? 0),
-            owner: row.ownerName ?? 'Unassigned',
-          }),
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/preventive-maintenance`))
+      .pipe(
+        map((response) =>
+          (Array.isArray(response?.result) ? response.result : []).map(
+            (row: {
+              id: string;
+              machine?: { name?: string };
+              machineId?: string;
+              task: string;
+              frequency: string;
+              nextDue: string;
+              compliancePercent?: number;
+              ownerName?: string;
+            }) => ({
+              id: row.id,
+              machine: row.machine?.name ?? row.machineId ?? '',
+              task: row.task,
+              frequency: row.frequency,
+              nextDue: new Date(row.nextDue).toLocaleDateString(),
+              compliance: Number(row.compliancePercent ?? 0),
+              owner: row.ownerName ?? 'Unassigned',
+            }),
+          ),
         ),
-      ),
-      catchError((error: unknown) => throwError(() => error)),
-    );
+        catchError((error: unknown) => throwError(() => error)),
+      );
   }
 
   getBreakdowns(): Observable<BreakdownSummary[]> {
-    const fallback: Observable<BreakdownSummary[]> = of([
-      {
-        id: 'BD-0062',
-        machine: 'M-0914 · Kansai Special FX',
-        category: 'Electrical',
-        startedAt: '10 Nov 2026 · 08:18',
-        downtime: '2h 42m',
-        rootCause: 'Thread tension sensor fault',
-        status: 'Investigating',
-      },
-      {
-        id: 'BD-0061',
-        machine: 'M-0871 · Brother BAS-326H',
-        category: 'Mechanical',
-        startedAt: '09 Nov 2026 · 14:05',
-        downtime: '1h 18m',
-        rootCause: 'Needle bar wear',
-        status: 'Resolved',
-      },
-      {
-        id: 'BD-0058',
-        machine: 'M-0752 · Pegasus M-952',
-        category: 'Pneumatic',
-        startedAt: '07 Nov 2026 · 11:42',
-        downtime: '46m',
-        rootCause: 'Air pressure below threshold',
-        status: 'Resolved',
-      },
-    ]);
     return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/breakdowns`)).pipe(
       map((response) =>
         (Array.isArray(response?.result) ? response.result : []).map(
@@ -544,44 +891,6 @@ export class MmmsFacadeService {
   }
 
   getSpareParts(): Observable<SparePartSummary[]> {
-    const fallback: Observable<SparePartSummary[]> = of([
-      {
-        id: 'SP-2048',
-        name: 'Thread tension sensor',
-        category: 'Electrical',
-        stock: 2,
-        reorderLevel: 5,
-        supplier: 'SewTech Supplies',
-        unitCost: '$42.00',
-      },
-      {
-        id: 'SP-1182',
-        name: 'Needle bar assembly',
-        category: 'Mechanical',
-        stock: 8,
-        reorderLevel: 4,
-        supplier: 'Classic Parts Hub',
-        unitCost: '$68.50',
-      },
-      {
-        id: 'SP-3021',
-        name: 'Timing belt 900mm',
-        category: 'Drive system',
-        stock: 3,
-        reorderLevel: 3,
-        supplier: 'Motion Works',
-        unitCost: '$19.80',
-      },
-      {
-        id: 'SP-4420',
-        name: 'Pneumatic valve 1/4in',
-        category: 'Pneumatic',
-        stock: 14,
-        reorderLevel: 6,
-        supplier: 'Motion Works',
-        unitCost: '$27.25',
-      },
-    ]);
     return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/spare-parts`)).pipe(
       map((response) =>
         (Array.isArray(response?.result) ? response.result : []).map(
@@ -609,32 +918,6 @@ export class MmmsFacadeService {
   }
 
   getCosts(): Observable<CostSummary[]> {
-    const fallback: Observable<CostSummary[]> = of([
-      {
-        machine: 'M-1042 · Juki DDL-9000C',
-        labor: '$420',
-        spareParts: '$86',
-        contractors: '$0',
-        total: '$506',
-        trend: 'down',
-      },
-      {
-        machine: 'M-0871 · Brother BAS-326H',
-        labor: '$680',
-        spareParts: '$245',
-        contractors: '$120',
-        total: '$1,045',
-        trend: 'up',
-      },
-      {
-        machine: 'M-0914 · Kansai Special FX',
-        labor: '$310',
-        spareParts: '$42',
-        contractors: '$0',
-        total: '$352',
-        trend: 'down',
-      },
-    ]);
     return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/costs`)).pipe(
       map((response) =>
         Array.isArray(response?.result) ? (response.result as CostSummary[]) : [],
@@ -644,32 +927,6 @@ export class MmmsFacadeService {
   }
 
   getMobileTasks(): Observable<MobileTaskSummary[]> {
-    const fallback: Observable<MobileTaskSummary[]> = of([
-      {
-        id: 'WO-24081',
-        machine: 'M-0914 · Kansai Special FX',
-        task: 'Resolve thread tension sensor fault',
-        priority: 'Critical',
-        assignee: 'Omar Haddad',
-        sync: 'Synced',
-      },
-      {
-        id: 'WO-24079',
-        machine: 'M-0871 · Brother BAS-326H',
-        task: 'Complete 500-hour preventive service',
-        priority: 'High',
-        assignee: 'Lina Saleh',
-        sync: 'Pending sync',
-      },
-      {
-        id: 'WO-24076',
-        machine: 'M-1042 · Juki DDL-9000C',
-        task: 'Perform oil level inspection',
-        priority: 'Medium',
-        assignee: 'Unassigned',
-        sync: 'Synced',
-      },
-    ]);
     return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/mobile`)).pipe(
       map((response) =>
         Array.isArray(response?.result) ? (response.result as MobileTaskSummary[]) : [],
@@ -679,32 +936,6 @@ export class MmmsFacadeService {
   }
 
   getQrAccess(): Observable<QrAccessSummary[]> {
-    const fallback: Observable<QrAccessSummary[]> = of([
-      {
-        machine: 'Juki DDL-9000C',
-        assetNumber: 'AST-1042',
-        lastScan: 'Today, 09:12',
-        openOrders: 1,
-        breakdowns: 0,
-        status: 'Running',
-      },
-      {
-        machine: 'Brother BAS-326H',
-        assetNumber: 'AST-0871',
-        lastScan: 'Today, 08:55',
-        openOrders: 2,
-        breakdowns: 1,
-        status: 'Under Maintenance',
-      },
-      {
-        machine: 'Kansai Special FX',
-        assetNumber: 'AST-0914',
-        lastScan: 'Yesterday, 16:42',
-        openOrders: 1,
-        breakdowns: 2,
-        status: 'Breakdown',
-      },
-    ]);
     return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/qr-management`)).pipe(
       map((response) =>
         Array.isArray(response?.result) ? (response.result as QrAccessSummary[]) : [],
@@ -714,38 +945,14 @@ export class MmmsFacadeService {
   }
 
   getProductionImpact(): Observable<ProductionImpactSummary[]> {
-    const fallback: Observable<ProductionImpactSummary[]> = of([
-      {
-        order: 'PO-88421',
-        line: 'Sewing · Line 04',
-        machine: 'M-1042',
-        downtime: '18m',
-        unitsAtRisk: 64,
-        recovery: 'On track',
-      },
-      {
-        order: 'PO-88418',
-        line: 'Sewing · Line 07',
-        machine: 'M-0914',
-        downtime: '2h 42m',
-        unitsAtRisk: 380,
-        recovery: 'At risk',
-      },
-      {
-        order: 'PO-88396',
-        line: 'Sewing · Line 02',
-        machine: 'M-0871',
-        downtime: '1h 18m',
-        unitsAtRisk: 120,
-        recovery: 'Delayed',
-      },
-    ]);
-    return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/production-integration`)).pipe(
-      map((response) =>
-        Array.isArray(response?.result) ? (response.result as ProductionImpactSummary[]) : [],
-      ),
-      catchError((error: unknown) => throwError(() => error)),
-    );
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/production-integration`))
+      .pipe(
+        map((response) =>
+          Array.isArray(response?.result) ? (response.result as ProductionImpactSummary[]) : [],
+        ),
+        catchError((error: unknown) => throwError(() => error)),
+      );
   }
 
   getReportSummary(): Observable<{
@@ -757,211 +964,21 @@ export class MmmsFacadeService {
       sparePartCount: number;
     };
   }> {
-    return this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/reports/maintenance`)).pipe(
-      map(
-        (response) =>
-          response.result as {
-            generatedAt: string;
-            metrics: {
-              machineCount: number;
-              workOrderCount: number;
-              breakdownCount: number;
-              sparePartCount: number;
-            };
-          },
-      ),
-    );
-  }
-
-  getDashboardData(): Observable<MmmsDashboardData> {
-    return forkJoin({
-      summary: this.api.getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/dashboard`)),
-      machines: this.getMachines(),
-      workOrders: this.getWorkOrders(),
-      breakdowns: this.getBreakdowns(),
-    }).pipe(
-      map(({ summary, machines, workOrders, breakdowns }) => {
-        const counts = summary.result as {
-          machines: number;
-          openWorkOrders: number;
-          activeBreakdowns: number;
-          spareParts: number;
-        };
-        const uptime = machines.length
-          ? machines.reduce((total, machine) => total + machine.uptime, 0) / machines.length
-          : 0;
-        return {
-          kpis: [
-            {
-              label: 'Open work orders',
-              value: String(counts.openWorkOrders),
-              change: 'Live',
-              trend: 'neutral' as const,
-              icon: 'bi-clipboard2-pulse',
-              tone: 'blue' as const,
+    return this.api
+      .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/reports/maintenance`))
+      .pipe(
+        map(
+          (response) =>
+            response.result as {
+              generatedAt: string;
+              metrics: {
+                machineCount: number;
+                workOrderCount: number;
+                breakdownCount: number;
+                sparePartCount: number;
+              };
             },
-            {
-              label: 'Machine uptime',
-              value: `${uptime.toFixed(1)}%`,
-              change: 'Live',
-              trend: 'neutral' as const,
-              icon: 'bi-activity',
-              tone: 'teal' as const,
-            },
-            {
-              label: 'Active breakdowns',
-              value: String(counts.activeBreakdowns),
-              change: 'Live',
-              trend: 'neutral' as const,
-              icon: 'bi-exclamation-triangle',
-              tone: 'amber' as const,
-            },
-            {
-              label: 'Tracked spare parts',
-              value: String(counts.spareParts),
-              change: 'Live',
-              trend: 'neutral' as const,
-              icon: 'bi-box-seam',
-              tone: 'violet' as const,
-            },
-          ],
-          machines,
-          workOrders,
-          downtimeByDay: [],
-          maintenanceMix: [
-            { label: 'Preventive', value: 0, color: '#3b82f6' },
-            { label: 'Breakdown', value: breakdowns.length, color: '#f26b5e' },
-            { label: 'Corrective', value: workOrders.length, color: '#f4b740' },
-          ],
-        } satisfies MmmsDashboardData;
-      }),
-    );
-    /* Removed legacy mock dashboard payload.
-    return of({
-      kpis: [
-        {
-          label: 'Open work orders',
-          value: '24',
-          change: '+8.2%',
-          trend: 'up',
-          icon: 'bi-clipboard2-pulse',
-          tone: 'blue',
-        },
-        {
-          label: 'Machine uptime',
-          value: '96.4%',
-          change: '+2.1%',
-          trend: 'up',
-          icon: 'bi-activity',
-          tone: 'teal',
-        },
-        {
-          label: 'Overdue PM tasks',
-          value: '07',
-          change: '-14.3%',
-          trend: 'down',
-          icon: 'bi-calendar2-week',
-          tone: 'amber',
-        },
-        {
-          label: 'MTTR',
-          value: '3h 42m',
-          change: '-18.6%',
-          trend: 'down',
-          icon: 'bi-stopwatch',
-          tone: 'violet',
-        },
-      ],
-      machines: [
-        {
-          id: 'M-1042',
-          name: 'Juki DDL-9000C',
-          category: 'Lockstitch',
-          line: 'Sewing · Line 04',
-          status: 'Running',
-          uptime: 98,
-          lastService: 'Today, 08:40',
-        },
-        {
-          id: 'M-0871',
-          name: 'Brother BAS-326H',
-          category: 'Buttonhole',
-          line: 'Sewing · Line 02',
-          status: 'Under Maintenance',
-          uptime: 88,
-          lastService: 'Today, 07:15',
-        },
-        {
-          id: 'M-1138',
-          name: 'Gerber Paragon HX',
-          category: 'Cutting',
-          line: 'Cutting · Bay 01',
-          status: 'Idle',
-          uptime: 94,
-          lastService: 'Yesterday, 16:20',
-        },
-        {
-          id: 'M-0914',
-          name: 'Kansai Special FX',
-          category: 'Overlock',
-          line: 'Sewing · Line 07',
-          status: 'Breakdown',
-          uptime: 71,
-          lastService: 'Yesterday, 13:05',
-        },
-      ],
-      workOrders: [
-        {
-          id: 'WO-24081',
-          machine: 'M-0914 · Kansai Special FX',
-          issue: 'Thread tension sensor fault',
-          technician: 'Omar Haddad',
-          status: 'In Progress',
-          priority: 'Critical',
-          due: 'Due in 42 min',
-        },
-        {
-          id: 'WO-24079',
-          machine: 'M-0871 · Brother BAS-326H',
-          issue: 'Preventive service · 500h',
-          technician: 'Lina Saleh',
-          status: 'Waiting Parts',
-          priority: 'High',
-          due: 'Today, 14:30',
-        },
-        {
-          id: 'WO-24076',
-          machine: 'M-1042 · Juki DDL-9000C',
-          issue: 'Oil level inspection',
-          technician: 'Unassigned',
-          status: 'Open',
-          priority: 'Medium',
-          due: 'Tomorrow',
-        },
-        {
-          id: 'WO-24070',
-          machine: 'M-0752 · Pegasus M-952',
-          issue: 'Needle bar replacement',
-          technician: 'Yazan Nassar',
-          status: 'Completed',
-          priority: 'Low',
-          due: 'Closed 10:12',
-        },
-      ],
-      downtimeByDay: [
-        { day: 'Mon', hours: 6.4 },
-        { day: 'Tue', hours: 4.8 },
-        { day: 'Wed', hours: 7.1 },
-        { day: 'Thu', hours: 3.9 },
-        { day: 'Fri', hours: 5.2 },
-        { day: 'Sat', hours: 2.6 },
-        { day: 'Sun', hours: 1.8 },
-      ],
-      maintenanceMix: [
-        { label: 'Preventive', value: 54, color: '#3b82f6' },
-        { label: 'Breakdown', value: 28, color: '#f26b5e' },
-        { label: 'Corrective', value: 18, color: '#f4b740' },
-      ],
-    }); */
+        ),
+      );
   }
 }

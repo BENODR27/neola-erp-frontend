@@ -8,8 +8,8 @@ export const APP_CONSTANTS = Object.freeze({
   }),
   routes: Object.freeze({
     login: '/signin',
-    home: '/adminv2/welcome',
-    applications: '/adminv2/applications',
+    home: '/home',
+    applications: '/applications',
     warehouse: '/wms/dashboard',
   }),
   assets: Object.freeze({

@@ -36,7 +36,7 @@
 
 /* Animated alert mode */
 .alert-label {
-  color: #fff !important;
+  color: var(--app-text) !important;
   background: #000000; /* Bootstrap danger red */
   padding: 6px 12px;
   border-radius: 6px;
@@ -63,7 +63,7 @@
 }
   .resetbtn{
     background-color: #dc3545 !important;
-    color: #fff !important;
+    color: var(--app-text) !important;
     border: none !important;
     padding: 6px 12px;
     border-radius: 4px;
@@ -74,7 +74,7 @@
   bottom: 24px;
   right: 24px;
   background-color: #000000;
-  color: white;
+  color: var(--app-text);
   padding: 12px;
   border-radius: 50%;
   cursor: pointer;
@@ -92,7 +92,7 @@
   bottom: 24px;
   left: 24px;
   background-color: #000000;
-  color: white;
+  color: var(--app-text);
   padding: 12px;
   border-radius: 50%;
   cursor: pointer;
@@ -107,14 +107,14 @@
 }
   .receive-fabric-form {
     margin: 0 auto;
-    background: #fff;
+    background: var(--app-surface);
     border-radius: 1.5rem;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
   }
   .table-scroll-container.t-rec-fab {
     max-width: 900px;
     margin: 2rem auto 0 auto;
-    background: #fff;
+    background: var(--app-surface);
     border-radius: 1.5rem;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
     padding: 1.5rem;
@@ -147,7 +147,7 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: #ccc;
+  background-color: var(--app-surface-alt);
   transition: 0.4s;
   border-radius: 24px;
 }
@@ -159,7 +159,7 @@
   width: 18px;
   left: 3px;
   bottom: 3px;
-  background-color: white;
+  background-color: var(--app-surface);
   transition: 0.4s;
   border-radius: 50%;
 }

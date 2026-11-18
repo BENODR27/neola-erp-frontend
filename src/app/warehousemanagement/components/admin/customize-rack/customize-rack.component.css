@@ -38,7 +38,7 @@
     width: 100%; /* Adjust width as needed */
     max-width: 300px; /* Optional: Set a maximum width for the text box */
     padding: 0px; /* Adds padding inside the text box */
-    border: 1px solid #ccc; /* Optional: Border styling */
+    border: 1px solid var(--app-border); /* Optional: Border styling */
     border-radius: 4px; /* Optional: Rounded corners */
     font-size: 16px; /* Font size */
   }
@@ -84,8 +84,8 @@
     width: 100%;
     margin-bottom: 1rem;
     background: black;
-    border: 10px black solid;
-    border-bottom: 30px black solid;
+    border: 10px var(--app-border) solid;
+    border-bottom: 30px var(--app-border) solid;
   }
   .fabriccase .fabriccase-left-side,
   .fabriccase .fabriccase-right-side {
@@ -207,7 +207,7 @@
     height: 50px;
     line-height: 50px;
     margin: 0;
-    color: #fff;
+    color: var(--app-text);
     font-weight: bold;
     font-size: 1.6rem;
     border-bottom: 0 !important;
@@ -227,7 +227,7 @@
     font-weight: bold;
   }
   h2 {
-      color: #fff;
+      color: var(--app-text);
   }
   
   /* Default container styles */
@@ -258,12 +258,12 @@
     max-height: 500px; /* Adjust the height as needed */
     max-width: 100%; /* Ensures the table doesn't overflow parent */
     display: block; /* Ensures the container behaves as a block element */
-    border: 1px solid #ccc; /* Optional: Border styling */
+    border: 1px solid var(--app-border); /* Optional: Border styling */
   }
   .scroll-container-card {
     overflow-y: auto; /* Enables vertical scrolling */
     max-height:75vh; /* Adjust the height as needed */
     max-width: 100%; /* Ensures the table doesn't overflow parent */
     display: block; /* Ensures the container behaves as a block element */
-    border: 1px solid #ccc; /* Optional: Border styling */
+    border: 1px solid var(--app-border); /* Optional: Border styling */
   }

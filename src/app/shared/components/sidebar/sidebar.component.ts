@@ -1,11 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, Input } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { Component, EventEmitter, HostListener, Input, Output } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../../auth/services/auth.service';
 import Swal from 'sweetalert2';
-import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { SharedServiceService } from '../../services/shared-service/shared-service.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 
@@ -20,21 +17,19 @@ export class SidebarComponent {
   readonly navbarItems: SharedServiceService['navbarItems'];
 
   constructor(
-    private sharedService: SharedServiceService,
-    public authService: AuthService
+    public sharedService: SharedServiceService,
+    public authService: AuthService,
   ) {
     this.navbarItems = sharedService.navbarItems;
   }
-  
-  isMobileSidebarOpen = false;
 
-  toggleMobileSidebar() {
-    this.isMobileSidebarOpen = !this.isMobileSidebarOpen;
-  }
+  @Input() isMobileSidebarOpen = false;
+  @Output() mobileClosed = new EventEmitter<void>();
 
   @HostListener('document:keydown.escape')
   closeMobileSidebarOnEscape(): void {
     this.isMobileSidebarOpen = false;
+    this.mobileClosed.emit();
   }
 
   logout() {

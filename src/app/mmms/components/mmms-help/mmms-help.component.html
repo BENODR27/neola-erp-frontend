@@ -1,1 +1,65 @@
-<section class="help-shell"><a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a><span class="kicker">MAINTIQ GUIDE</span><h1>How to use MMMS</h1><p class="lead">A practical guide for planning maintenance, responding to breakdowns and keeping machine history complete.</p><div class="help-grid"><article><i class="bi bi-1-circle"></i><h2>Set up your workspace</h2><p>Start with Organization, Factories, Departments and Machine Categories. Add assets in Machines, then assign each asset to a factory and line.</p></article><article><i class="bi bi-2-circle"></i><h2>Plan the work</h2><p>Create Preventive Maintenance plans with an owner, frequency and next due date. Use Inspections and Calibration to track compliance evidence.</p></article><article><i class="bi bi-3-circle"></i><h2>Execute and assign</h2><p>Create Work Orders from planned work or Breakdowns. Assign a technician, priority and target date, then move the order through its status workflow.</p></article><article><i class="bi bi-4-circle"></i><h2>Close the loop</h2><p>Record parts, labor and costs before completion. Machine history, reports and Production Impact then show the operational result.</p></article></div><section class="quick-links"><h2>Quick links</h2><a routerLink="/mmms/machines">Register machines <i class="bi bi-arrow-up-right"></i></a><a routerLink="/mmms/work-orders">Create a work order <i class="bi bi-arrow-up-right"></i></a><a routerLink="/mmms/reports">Review reports <i class="bi bi-arrow-up-right"></i></a></section></section>
+<section class="help-shell">
+  <a routerLink="/mmms" class="back-link"
+    ><i class="bi bi-arrow-left" aria-hidden="true"></i> Back to command center</a
+  >
+  <header class="help-hero">
+    <div>
+      <span class="kicker">MMMS USER GUIDE</span>
+      <h1>How to use MMMS</h1>
+      <p class="lead">
+        From company setup to verified maintenance, stock, reports and factory-floor work. Follow
+        the steps for your task.
+      </p>
+    </div>
+    <div class="hero-badge">
+      <i class="bi bi-book" aria-hidden="true"></i
+      ><span>Practical guide<br /><strong>Every workflow connected</strong></span>
+    </div>
+  </header>
+  <label class="guide-search"
+    >Find a workflow<input
+      #search
+      type="search"
+      [value]="query()"
+      (input)="query.set(search.value)"
+      placeholder="Search transfers, parts, inspection, offline…"
+  /></label>
+  <div class="guide-layout">
+    <nav class="guide-index" aria-label="Guide contents">
+      <span class="index-label">In this guide</span
+      ><button
+        type="button"
+        *ngFor="let section of sections(); let i = index"
+        (click)="openSection(section.id)"
+      >
+        <i class="bi" [ngClass]="section.icon" aria-hidden="true"></i> {{ section.title }}
+      </button>
+    </nav>
+    <div class="guide-content">
+      <article
+        class="guide-step"
+        *ngFor="let section of sections(); let i = index"
+        [id]="'guide-' + section.id"
+        tabindex="-1"
+      >
+        <div class="step-number">{{ i + 1 | number: '2.0-0' }}</div>
+        <div>
+          <span class="step-kicker">{{ section.summary }}</span>
+          <h2>{{ section.title }}</h2>
+          <ol>
+            <li *ngFor="let step of section.steps">{{ step }}</li>
+          </ol>
+          <div class="tip">
+            <i class="bi bi-info-circle" aria-hidden="true"></i><span>{{ section.note }}</span>
+          </div>
+          <a class="open-workflow" [routerLink]="section.route"
+            >Open workflow <i class="bi bi-arrow-up-right" aria-hidden="true"></i
+          ></a>
+        </div>
+      </article>
+      <p role="status" *ngIf="!sections().length">
+        No workflows match. Try another word or clear the search.
+      </p>
+    </div>
+  </div>
+</section>

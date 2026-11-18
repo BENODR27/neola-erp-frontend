@@ -12,7 +12,7 @@
   max-height: 80vh;
   overflow: auto;
   border-radius: 18px;
-  background: #fff;
+  background: var(--app-surface);
   padding: 24px;
   box-shadow: 0 24px 70px #17233a3d;
 }
@@ -21,7 +21,7 @@
   justify-content: space-between;
   gap: 20px;
   align-items: flex-start;
-  border-bottom: 1px solid #edf0f5;
+  border-bottom: 1px solid var(--app-border);
   padding-bottom: 16px;
 }
 .history-dialog h2 {
@@ -30,28 +30,28 @@
 }
 .history-dialog p {
   margin: 0;
-  color: #7b879d;
+  color: var(--app-muted);
   font-size: 12px;
 }
 .history-dialog header button {
   border: 0;
-  background: #f3f6fa;
+  background: var(--app-surface);
   border-radius: 8px;
   width: 34px;
   height: 34px;
-  color: #526781;
+  color: var(--app-muted);
 }
 .history-empty {
   padding: 32px 10px;
   text-align: center;
-  color: #7b879d;
+  color: var(--app-muted);
   font-size: 13px;
 }
 .history-timeline {
   list-style: none;
   margin: 20px 0 0;
   padding: 0 0 0 10px;
-  border-left: 2px solid #e8edf4;
+  border-left: 2px solid var(--app-border);
 }
 .history-timeline li {
   position: relative;
@@ -78,6 +78,6 @@
 }
 .history-timeline small {
   margin-top: 4px;
-  color: #7b879d;
+  color: var(--app-muted);
   font-size: 11px;
 }

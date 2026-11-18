@@ -19,4 +19,6 @@ export const environment = {
   apiUrl: API_BASE_URL,
   apiServiceUrl: API_BASE_URL,
   authv2ApiUrl: `${AUTH_BASE_URL}/v3`,
+  MMMS_API_URL: `${API_BASE_URL}/v1`,
+  MMMS_USE_MOCK_DATA: false,
 } satisfies Environment;

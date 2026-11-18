@@ -1,27 +1,108 @@
-.animate-charcter
-{
-   text-transform: uppercase;
-  background-image: linear-gradient(
-    -225deg,
-    #231557 0%,
-    #44107a 29%,
-    #ff1361 67%,
-    #fff800 100%
-  );
-  background-size: auto auto;
-  background-clip: border-box;
-  background-size: 200% auto;
-  color: #fff;
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: textclip 2s linear infinite;
-  display: inline-block;
-      font-size: 300%;
+:host {
+  display: block;
+  font-family: var(--app-font);
+  color: var(--app-text);
 }
-
-@keyframes textclip {
-  to {
-    background-position: 200% center;
+.platform-home {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: clamp(16px, 3vw, 40px) 0;
+}
+.home-intro {
+  padding: clamp(24px, 5vw, 56px);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  background: linear-gradient(135deg, var(--app-surface), var(--app-surface-alt));
+}
+.eyebrow {
+  color: var(--app-primary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+}
+h1 {
+  margin: 14px 0;
+  font-size: clamp(28px, 4vw, 44px);
+  line-height: 1.15;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+}
+p {
+  color: var(--app-muted);
+  line-height: 1.65;
+  margin: 0;
+}
+.home-destinations {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-top: 24px;
+}
+.destination {
+  display: flex;
+  gap: 20px;
+  padding: clamp(20px, 3vw, 32px);
+  color: var(--app-text);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  text-decoration: none;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+}
+.destination > div {
+  min-width: 0;
+}
+.destination:hover {
+  border-color: var(--app-primary);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 6%);
+}
+.destination:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 4px;
+}
+.destination-icon {
+  display: grid;
+  flex: 0 0 48px;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border-radius: 12px;
+  color: var(--app-primary);
+  background: var(--app-surface-alt);
+  font-size: 22px;
+}
+h2 {
+  margin: 2px 0 10px;
+  font-size: 1.2rem;
+  font-weight: 650;
+}
+.destination p {
+  font-size: 0.9rem;
+}
+.destination-action {
+  display: inline-flex;
+  gap: 10px;
+  align-items: center;
+  color: var(--app-primary);
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 24px;
+}
+.access-note {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin: 24px 4px 0;
+  font-size: 0.8rem;
+}
+@media (max-width: 700px) {
+  .home-destinations {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+  }
+  .destination {
+    gap: 14px;
   }
 }

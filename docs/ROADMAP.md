@@ -1,4 +1,10 @@
-# ADMIN Delivery Roadmap
+# Platform Delivery Roadmap
+
+Shared appearance now provides Light, Dark, System and account defaults, with explicit vendor/customer branding membership in IAM. Components consume shared CSS tokens; see [appearance contracts](../../docs/PLATFORM-APPEARANCE.md). MMMS lists use a common pager, and its searchable How to use page follows the accepted server workflows.
+
+MMMS now has connected workflows across the five maintenance phases. See [workflow tests](../../docs/MMMS-TESTING.md) and [customization](../../docs/MMMS-CUSTOMIZATION.md). The unchecked items below concern the wider shared platform; MMMS acceptance evidence is recorded in its coverage guide.
+
+MMMS scope comes from [MMMS-NEW.MD](../../reqs/MMMS-NEW.MD). Follow its five phases and track actual gaps in [requirement coverage](../../docs/MMMS-REQUIREMENTS-COVERAGE.md). The MMMS backend exists and live data is the default. Keep related feature TypeScript together and reuse shared identity, shell and storage for additional apps. See [architecture](../../docs/ARCHITECTURE.md).
 
 This roadmap is based on the current codebase after the Angular 22 upgrade. It is intentionally sequenced so each phase leaves the application buildable.
 

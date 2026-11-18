@@ -1,4 +1,5 @@
 @import '../mmms-master-data/mmms-master-data.component.css';
+@import '../mmms-operations/mmms-forms.css';
 
 :host {
   display: block;
@@ -10,5 +11,5 @@
 }
 
 .master-page-configuration .kicker {
-  color: #2f6fb5;
+  color: var(--app-primary);
 }

@@ -1,0 +1,53 @@
+:host {
+  display: block;
+  --font-family: var(--app-font);
+}
+.pagination-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 16px 4px;
+  color: var(--app-muted);
+  font-size: 13px;
+}
+label,
+.page-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 400;
+}
+select,
+button {
+  min-height: 38px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  padding: 6px 10px;
+}
+button {
+  min-width: 38px;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+button:focus-visible,
+select:focus-visible {
+  outline: 3px solid #a9c9f7;
+  outline-offset: 2px;
+}
+@media (max-width: 600px) {
+  .pagination-bar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .page-controls {
+    flex-wrap: wrap;
+  }
+}

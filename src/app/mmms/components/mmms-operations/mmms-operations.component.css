@@ -1,1 +1,142 @@
-:host{display:block}.overdue{color:#d85d53;font-weight:700}.parts-grid,.report-options{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.part-card,.report-options article{border:1px solid #edf0f5;border-radius:13px;padding:16px}.part-heading{display:flex;justify-content:space-between;align-items:center}.part-icon{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;background:#eef4ff;color:#3b82f6}.part-card small{display:block;color:#8a98aa;font-size:10px;margin-top:16px}.part-card h3{font-size:15px;margin:6px 0 16px}.part-stock{display:flex;align-items:center;gap:10px}.part-stock strong{font-size:28px;letter-spacing:-.05em}.part-stock span{color:#7b879d;font-size:10px;line-height:1.4}.part-card footer{border-top:1px solid #f0f3f7;margin-top:16px;padding-top:12px;color:#7b879d;font-size:10px}.part-card footer strong{color:#253b5f}.low-stock{color:#d85d53}.low-stock i{background:#f26b5e}.report-hero{display:flex;justify-content:space-between;align-items:center;padding:26px;border-radius:13px;background:linear-gradient(120deg,#1f3155,#365987);color:#fff;margin-bottom:20px}.report-hero .section-kicker{color:#a9c6ed}.report-hero h2{font-size:25px;max-width:620px;margin:0 0 7px;letter-spacing:-.04em}.report-hero p{margin:0;color:#d7e3f4;font-size:12px}.report-hero>i{font-size:65px;color:#9ac0ef;opacity:.8}.report-options{grid-template-columns:repeat(3,1fr)}.report-options article>i{font-size:23px;color:#3b82f6}.report-options h3{font-size:15px;margin:15px 0 7px}.report-options p{color:#7b879d;font-size:12px;line-height:1.5;min-height:54px}.report-options button{border:0;background:transparent;color:#3b6fc1;font-size:11px;font-weight:700;padding:0}.report-options button i{margin-left:5px}@media(max-width:850px){.parts-grid,.report-options{grid-template-columns:1fr}.report-hero{align-items:flex-start}.report-hero>i{font-size:42px}}
+:host {
+  display: block;
+}
+.overdue {
+  color: #d85d53;
+  font-weight: 700;
+}
+.parts-grid,
+.report-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+}
+.part-card,
+.report-options article {
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  padding: 16px;
+}
+.part-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.part-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--app-surface);
+  color: var(--app-primary);
+}
+.part-card small {
+  display: block;
+  color: var(--app-muted);
+  font-size: 10px;
+  margin-top: 16px;
+}
+.part-card h3 {
+  font-size: 15px;
+  margin: 6px 0 16px;
+}
+.part-stock {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.part-stock strong {
+  font-size: 28px;
+  letter-spacing: -0.05em;
+}
+.part-stock span {
+  color: var(--app-muted);
+  font-size: 10px;
+  line-height: 1.4;
+}
+.part-card footer {
+  border-top: 1px solid var(--app-border);
+  margin-top: 16px;
+  padding-top: 12px;
+  color: var(--app-muted);
+  font-size: 10px;
+}
+.part-card footer strong {
+  color: var(--app-text);
+}
+.low-stock {
+  color: #d85d53;
+}
+.low-stock i {
+  background: #f26b5e;
+}
+.report-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 26px;
+  border-radius: 13px;
+  background: linear-gradient(120deg, var(--app-surface-alt), var(--app-surface-alt));
+  color: var(--app-text);
+  margin-bottom: 20px;
+}
+.report-hero .section-kicker {
+  color: var(--app-muted);
+}
+.report-hero h2 {
+  font-size: 25px;
+  max-width: 620px;
+  margin: 0 0 7px;
+  letter-spacing: -0.04em;
+}
+.report-hero p {
+  margin: 0;
+  color: var(--app-text);
+  font-size: 12px;
+}
+.report-hero > i {
+  font-size: 65px;
+  color: var(--app-primary);
+  opacity: 0.8;
+}
+.report-options {
+  grid-template-columns: repeat(3, 1fr);
+}
+.report-options article > i {
+  font-size: 23px;
+  color: var(--app-primary);
+}
+.report-options h3 {
+  font-size: 15px;
+  margin: 15px 0 7px;
+}
+.report-options p {
+  color: var(--app-muted);
+  font-size: 12px;
+  line-height: 1.5;
+  min-height: 54px;
+}
+.report-options button {
+  border: 0;
+  background: transparent;
+  color: var(--app-primary);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 0;
+}
+.report-options button i {
+  margin-left: 5px;
+}
+@media (max-width: 850px) {
+  .parts-grid,
+  .report-options {
+    grid-template-columns: 1fr;
+  }
+  .report-hero {
+    align-items: flex-start;
+  }
+  .report-hero > i {
+    font-size: 42px;
+  }
+}

@@ -2,6 +2,24 @@
 @import '../mmms-operations/mmms-editor.css';
 @import '../mmms-operations/mmms-actions.css';
 @import '../mmms-operations/mmms-history.css';
+@import '../mmms-operations/mmms-forms.css';
+.mmms-qr-labels {
+  display: none;
+}
+@media print {
+  .mmms-qr-labels {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12mm;
+  }
+  .mmms-qr-labels article {
+    display: grid;
+    justify-items: center;
+    border: 1px solid var(--app-border);
+    padding: 5mm;
+    break-inside: avoid;
+  }
+}
 
 :host {
   display: block;

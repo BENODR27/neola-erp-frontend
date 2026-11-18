@@ -1,17 +1,24 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
+import { finalize, forkJoin } from 'rxjs';
+import { AuthService } from '../../../auth/services/auth.service';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
-import { NotificationService } from '../../../shared/services/notification/notification.service';
-
-interface MasterField {
-  key: string;
-  label: string;
-  type?: string;
-  options?: string[];
-  required?: boolean;
-  relation?: string;
-}
-
-type MasterRecord = Record<string, string | number> & { id: string | number; status: string };
+import { MmmsContextService } from '../../services/mmms-context.service';
+import { MachineSummary } from '../../models/mmms.models';
+import {
+  ALLOCATION_TRANSITIONS,
+  TRANSFER_TRANSITIONS,
+  MachineMovement,
+  MovementDraft,
+  MovementUnit,
+} from '../../models/mmms-movement.models';
 
 @Component({
   selector: 'app-mmms-transfers',
@@ -21,124 +28,124 @@ type MasterRecord = Record<string, string | number> & { id: string | number; sta
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsTransfersComponent implements OnInit {
-  readonly pageCode = 'MMMS-TRANSFERS';
-  readonly apiResource = 'master-data/transfers';
-  readonly moduleCode = 'transfers';
-  readonly relationModules: Record<string, string> = {
-    machine: 'machines',
-    fromSite: 'factories',
-    toSite: 'factories',
-  };
-  readonly page = signal({
-    title: 'Machine Transfers',
-    icon: 'bi-arrow-left-right',
-    description: 'Record controlled equipment moves with approvals and an audit trail.',
-    singular: 'transfer',
-    fields: [{ key: 'machine', label: 'Machine', type: 'relation', relation: 'machines', required: true }, { key: 'fromSite', label: 'From site', type: 'relation', relation: 'factories', required: true }, { key: 'toSite', label: 'To site', type: 'relation', relation: 'factories', required: true }, { key: 'transferDate', label: 'Transfer date', type: 'date' }, { key: 'reason', label: 'Reason', type: 'text' }] as MasterField[],
-  });
-  readonly records = signal<MasterRecord[]>([]);
-  readonly relationOptions = signal<Record<string, string[]>>({});
-  readonly relationSearch = signal<Record<string, string>>({});
-  readonly query = signal('');
+  readonly pagination = new MmmsPagination();
+  readonly module = 'transfers' as const;
+  readonly title = 'Machine transfers';
+  readonly records = signal<MachineMovement[]>([]);
+  readonly machines = signal<MachineSummary[]>([]);
+  readonly units = signal<MovementUnit[]>([]);
+  readonly factories = computed(() => this.units().filter((row) => row.unitType === 'Factory'));
+  destinationUnits(type: string): MovementUnit[] {
+    return this.units().filter(
+      (row) => row.unitType === type && row.factoryId === this.draft.destination.factoryId,
+    );
+  }
+  resetDestination(): void {
+    this.draft.destination = { factoryId: this.draft.destination.factoryId, currentLocation: '' };
+  }
+  readonly loading = signal(false);
+  readonly saving = signal(false);
+  readonly error = signal('');
+  readonly search = signal('');
   readonly editorOpen = signal(false);
-  readonly editingId = signal<string | number | null>(null);
-  draft: MasterRecord = { id: '0', module: 'transfers', name: '', status: 'Active' };
-
+  readonly selected = signal<MachineMovement | null>(null);
+  readonly visible = computed(() =>
+    this.records().filter((row) =>
+      [row.machine, row.machineCode, row.status, row.reason].some((value) =>
+        String(value || '')
+          .toLowerCase()
+          .includes(this.search().toLowerCase()),
+      ),
+    ),
+  );
+  draft: MovementDraft = this.emptyDraft();
+  actionReason = '';
   private readonly facade = inject(MmmsFacadeService);
-  private readonly notifications = inject(NotificationService);
+  private readonly auth = inject(AuthService);
+  private readonly context = inject(MmmsContextService);
 
   ngOnInit(): void {
-    this.loadTransfers();
-    this.loadRelations();
+    this.load();
   }
-
-  get fields(): MasterField[] {
-    return this.page().fields;
-  }
-
-  get filtered(): MasterRecord[] {
-    const value = this.query().toLowerCase().trim();
-    return this.records().filter((record) => !value || Object.values(record).some((item) => String(item).toLowerCase().includes(value)));
-  }
-
-  loadTransfers(): void {
-    this.facade.getMasterRecords(this.moduleCode).subscribe({
-      next: (rows) => this.records.set(rows as MasterRecord[]),
-      error: () => this.records.set([]),
-    });
-  }
-
-  loadRelations(): void {
-    Object.entries(this.relationModules).forEach(([field, module]) => {
-      this.facade.getMasterRecords(module).subscribe({
-        next: (rows) => this.relationOptions.update((current) => ({
-          ...current,
-          [field]: rows.map((row) => String(row.name || row.code || row.id)),
-        })),
+  load(): void {
+    this.loading.set(true);
+    this.error.set('');
+    forkJoin({
+      rows: this.facade.getMovements(this.module),
+      machines: this.facade.getMachines(),
+      factories: this.facade.getMovementDestinations(),
+    })
+      .pipe(finalize(() => this.loading.set(false)))
+      .subscribe({
+        next: ({ rows, machines, factories }) => {
+          this.records.set(rows);
+          this.machines.set(machines);
+          this.units.set(factories);
+        },
+        error: (error: unknown) => this.error.set(this.message(error)),
       });
-    });
   }
-
-  optionsFor(field: MasterField): string[] {
-    return this.relationOptions()[field.key] ?? field.options ?? [];
-  }
-
-  filteredOptions(field: MasterField): string[] {
-    const value = (this.relationSearch()[field.key] ?? '').toLowerCase().trim();
-    return this.optionsFor(field).filter((option) => !value || option.toLowerCase().includes(value));
-  }
-
-  updateRelationSearch(field: string, value: string): void {
-    this.relationSearch.update((current) => ({ ...current, [field]: value }));
-  }
-
-  updateQuery(value: string): void {
-    this.query.set(value);
-  }
-
   openCreate(): void {
-    this.editingId.set(null);
-    this.draft = { id: '0', module: this.moduleCode, name: '', status: 'Active' };
+    this.selected.set(null);
+    this.draft = this.emptyDraft();
+    this.draft.destination.factoryId = this.context.context().factoryId || '';
     this.editorOpen.set(true);
   }
-
-  openEdit(record: MasterRecord): void {
-    this.editingId.set(record.id);
-    this.draft = { ...record };
-    this.editorOpen.set(true);
-  }
-
-  closeEditor(): void {
-    this.editorOpen.set(false);
-  }
-
   save(): void {
-    const requiredFields = this.fields.filter((field) => field.required);
-    if (!requiredFields.every((field) => String(this.draft[field.key] ?? '').trim())) { this.notifications.warning('Required fields missing', 'Complete the required fields before saving.'); return; }
-    const id = this.editingId() ? String(this.editingId()) : null;
-    const payload = { ...this.draft, module: this.moduleCode, status: this.draft.status || 'Active' };
-    this.facade.saveMasterRecord(this.moduleCode, id, payload).subscribe({
-      next: (response) => {
-        const saved = ((response as { result?: MasterRecord })?.result ?? payload) as MasterRecord;
-        this.records.update((rows) => id ? rows.map((row) => String(row.id) === id ? saved : row) : [saved, ...rows]);
-        this.closeEditor();
-        this.notifications.success(id ? 'Transfer updated' : 'Transfer created', 'The machine transfer is ready.');
-      },
-      error: (error) => this.notifications.handleError(error, 'Could not save transfer'),
-    });
-  }
-
-  remove(record: MasterRecord): void {
-    this.notifications.confirm(`Remove this ${this.page().singular}?`, 'Remove', 'Keep').then((result) => {
-      if (!result.isConfirmed) return;
-      this.facade.deleteMasterRecord(this.moduleCode, String(record.id)).subscribe({
-        next: () => { this.records.update((rows) => rows.filter((row) => String(row.id) !== String(record.id))); this.notifications.success('Transfer removed', 'The machine transfer was removed.'); },
-        error: (error) => this.notifications.handleError(error, 'Could not remove transfer'),
+    if (this.saving()) return;
+    this.saving.set(true);
+    this.error.set('');
+    this.facade
+      .createMovement(this.module, this.draft)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: () => {
+          this.editorOpen.set(false);
+          this.load();
+        },
+        error: (error: unknown) => this.error.set(this.message(error)),
       });
+  }
+  actions(row: MachineMovement): string[] {
+    const transitions = this.module === 'transfers' ? TRANSFER_TRANSITIONS : ALLOCATION_TRANSITIONS;
+    return (transitions[row.status] || []).filter((status) => {
+      if (status === 'Rejected')
+        return this.auth.hasPermission('MMMS-' + this.module.toUpperCase() + '-REJECT');
+      if (status === 'Approved')
+        return this.auth.hasPermission('MMMS-' + this.module.toUpperCase() + '-APPROVE');
+      if (status === 'Received') return this.auth.hasPermission('MMMS-TRANSFERS-RECEIVE');
+      return true;
     });
   }
-
-  value(record: MasterRecord, key: string): string {
-    return String(record[key] ?? '—');
+  transition(row: MachineMovement, status: string): void {
+    if (this.saving()) return;
+    this.saving.set(true);
+    this.error.set('');
+    this.facade
+      .transitionMovement(this.module, row.id, status, this.actionReason)
+      .pipe(finalize(() => this.saving.set(false)))
+      .subscribe({
+        next: () => {
+          this.actionReason = '';
+          this.selected.set(null);
+          this.load();
+        },
+        error: (error: unknown) => this.error.set(this.message(error)),
+      });
+  }
+  private emptyDraft(): MovementDraft {
+    return {
+      machineId: '',
+      reason: '',
+      expectedDate: '',
+      allocationType: 'Permanent',
+      destination: { factoryId: '', currentLocation: '', responsiblePerson: '', floor: '' },
+    };
+  }
+  private message(error: unknown): string {
+    return (
+      (error as { error?: { error?: { message?: string } } })?.error?.error?.message ||
+      'The request failed. Please retry.'
+    );
   }
 }

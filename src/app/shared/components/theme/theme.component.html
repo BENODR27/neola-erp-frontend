@@ -1,66 +1,174 @@
-<div class="theme-container container mt-4">
-  <h3 class="text-center mb-4">Theme Customization</h3>
-
-  <div class="row mb-3">
-    <div class="col-12 col-md-6">
-      <label for="secondaryColor" class="form-label">Sidebar Color:</label>
-      <input
-        id="secondaryColor"
-        type="color"
-        class="form-control form-control-color"
-        [(ngModel)]="colors.secondary"
-        (input)="updateColor('secondary', colors.secondary)"
-      />
-    </div>
-    <div class="col-12 col-md-6">
-      <label for="textColor" class="form-label">Sidebar Text Color:</label>
-      <input
-        id="textColor"
-        type="color"
-        class="form-control form-control-color"
-        [(ngModel)]="colors.sidebartextcolor"
-        (input)="updateColor('sidebartextcolor', colors.sidebartextcolor)"
-      />
-    </div>
-  </div>
-
-  <div class="row mb-3">
-    <div class="col-12 col-md-6">
-      <label for="backgroundColor" class="form-label">Background Color:</label>
-      <input
-        id="backgroundColor"
-        type="color"
-        class="form-control form-control-color"
-        [(ngModel)]="colors.background"
-        (input)="updateColor('background', colors.background)"
-      />
-    </div>
-    <div class="col-12 col-md-6">
-      <label for="textColor" class="form-label">Body Text Color:</label>
-      <input
-        id="textColor"
-        type="color"
-        class="form-control form-control-color"
-        [(ngModel)]="colors.bodytextcolor"
-        (input)="updateColor('bodytextcolor', colors.bodytextcolor)"
-      />
-    </div>
-    <div class="col-12 col-md-6">
-      <label for="primaryColor" class="form-label">Primary Color:</label>
-      <input
-        id="primaryColor"
-        type="color"
-        class="form-control form-control-color"
-        [(ngModel)]="colors.primary"
-        (input)="updateColor('primary', colors.primary)"
-      />
-    </div>
-  </div>
-
-  <div>
-    <button class="btn btn-primary" (click)="themeService.fetchColorsFromApi()">
-      Reset to Default
-    </button>
-    <button class="btn btn-success ms-2">Save</button>
-  </div>
-</div>
+<section class="appearance-page">
+  <header>
+    <span class="eyebrow">PERSONALIZATION</span>
+    <h1>Appearance</h1>
+    <p>A comfortable workspace, with consistent branding across your applications.</p>
+  </header>
+  <section class="appearance-card">
+    <h2>Your display</h2>
+    <p>
+      {{ theme.appearance().account?.name || 'Platform default' }} · Currently
+      {{ theme.resolvedMode() }}
+    </p>
+    <label for="display-mode">Color mode</label>
+    <select
+      id="display-mode"
+      [ngModel]="theme.mode()"
+      (ngModelChange)="changeMode($event)"
+      [disabled]="theme.saving()"
+    >
+      <option value="inherit">Account default</option>
+      <option value="light">Light</option>
+      <option value="dark">Dark</option>
+      <option value="system">System</option>
+    </select>
+    <p class="hint">System follows your device. Your preference is saved to your user account.</p>
+    @if (theme.error()) {
+      <p role="alert" class="error">{{ theme.error() }}</p>
+    }
+  </section>
+  @if (auth.hasPermission('themes:manage')) {
+    <section class="appearance-card">
+      <h2>Shared branding</h2>
+      <p>
+        Set a platform default or a vendor/customer account theme. Membership controls appearance
+        only; company and factory permissions stay independent.
+      </p>
+      @if (failure()) {
+        <p role="alert" class="error">{{ failure() }}</p>
+      }
+      @if (message()) {
+        <p role="status" class="success">{{ message() }}</p>
+      }
+      @if (!management()) {
+        <button type="button" (click)="load()" [disabled]="busy()">Reload branding</button>
+      }
+      @if (management(); as data) {
+        <fieldset [disabled]="busy()">
+          <label for="branding-account">Branding account</label>
+          <select
+            id="branding-account"
+            [ngModel]="selectedId"
+            (ngModelChange)="selectAccount($event)"
+          >
+            <option value="platform">Platform default</option>
+            @for (account of data.accounts; track account.id) {
+              <option [value]="account.id">{{ account.name }} ({{ account.code }})</option>
+            }
+            <option value="new">+ New vendor/customer account</option>
+          </select>
+          <div class="settings-grid">
+            <label>Account name<input [(ngModel)]="draft.name" maxlength="180" /></label>
+            @if (selectedId !== 'platform') {
+              <label
+                >Unique code<input
+                  [(ngModel)]="draft.code"
+                  [disabled]="selectedId !== 'new'"
+                  maxlength="80"
+              /></label>
+            }
+            <label
+              >Default mode<select [(ngModel)]="draft.theme.defaultMode">
+                <option value="system">System</option>
+                <option value="light">Light</option>
+                <option value="dark">Dark</option>
+              </select></label
+            >
+            <label
+              >Font<select [(ngModel)]="draft.theme.font">
+                <option value="system">System</option>
+                <option value="arial">Arial</option>
+                <option value="roboto">Roboto</option>
+                <option value="serif">Georgia</option>
+              </select></label
+            >
+            <label
+              >Card corner radius<input
+                type="number"
+                min="0"
+                max="28"
+                [(ngModel)]="draft.theme.cardRadius"
+            /></label>
+          </div>
+          <div class="palette-grid">
+            @for (mode of paletteModes; track mode) {
+              <section class="palette">
+                <h3>{{ mode === 'light' ? 'Light palette' : 'Dark palette' }}</h3>
+                @for (field of paletteKeys; track field.key) {
+                  <label
+                    >{{ field.label
+                    }}<span class="color-field"
+                      ><input
+                        type="color"
+                        [attr.aria-label]="mode + ' ' + field.label"
+                        [(ngModel)]="draft.theme[mode][field.key]"
+                      /><code>{{ draft.theme[mode][field.key] }}</code></span
+                    ></label
+                  >
+                }
+              </section>
+            }
+          </div>
+          <p class="hint">
+            Text and navigation colors must meet readable contrast. Changes are validated before
+            saving.
+          </p>
+          <div class="actions">
+            <button type="button" class="primary" (click)="save()">Save shared theme</button
+            ><button type="button" (click)="theme.preview(draft.theme)">
+              Preview on this device</button
+            ><button type="button" (click)="theme.cancelPreview()" [disabled]="!theme.previewing()">
+              End preview
+            </button>
+          </div>
+          @if (theme.previewing()) {
+            <p role="status">Preview is local and unsaved.</p>
+          }
+          @if (selectedId !== 'platform' && selectedId !== 'new') {
+            <section class="members">
+              <h3>Account members</h3>
+              <p>
+                Each user belongs to one branding account. Selecting a user moves their branding
+                membership here and preserves their display mode.
+              </p>
+              <label
+                >Find users<input
+                  [(ngModel)]="memberSearch"
+                  type="search"
+                  placeholder="Name or employee code"
+              /></label>
+              <div class="member-list">
+                @for (user of visibleUsers(); track user.id) {
+                  <label class="member"
+                    ><input
+                      type="checkbox"
+                      [checked]="memberIds.includes('' + user.id)"
+                      (change)="toggleMember(user.id, $any($event.target).checked)"
+                    /><span
+                      >{{ user.employeeName }}
+                      <small
+                        >{{ user.employeeCode
+                        }}{{
+                          user.accountId && user.accountId !== selectedId
+                            ? ' · another branding account'
+                            : ''
+                        }}</small
+                      ></span
+                    ></label
+                  >
+                } @empty {
+                  <p>No users match your search.</p>
+                }
+              </div>
+              <div class="actions">
+                <button type="button" class="primary" (click)="saveMembers()">
+                  Save members ({{ memberIds.length }})
+                </button>
+              </div>
+            </section>
+          }
+        </fieldset>
+      }
+    </section>
+  }
+</section>

@@ -6,7 +6,7 @@
   max-width: 1320px;
   margin: 0 auto;
   padding: 28px clamp(16px, 3vw, 38px) 56px;
-  color: #172b4d;
+  color: var(--app-text);
 }
 
 .page-heading {
@@ -19,7 +19,7 @@
 
 .eyebrow {
   margin: 0 0 6px;
-  color: #4773ae;
+  color: var(--app-primary);
   font-size: 0.72rem;
   font-weight: 800;
   letter-spacing: 0.13em;
@@ -27,7 +27,7 @@
 
 .page-heading h1 {
   margin: 0;
-  color: #132746;
+  color: var(--app-text);
   font-size: clamp(1.8rem, 3vw, 2.35rem);
   font-weight: 750;
   letter-spacing: -0.035em;
@@ -36,7 +36,7 @@
 .page-description {
   max-width: 680px;
   margin: 8px 0 0;
-  color: #65758b;
+  color: var(--app-muted);
 }
 
 .pallet-label-row {
@@ -51,9 +51,9 @@
   display: inline-flex;
   align-items: center;
   padding: 2px;
-  border: 1px solid #d9e1eb;
+  border: 1px solid var(--app-border);
   border-radius: 7px;
-  background: #f4f6f9;
+  background: var(--app-surface);
 }
 
 .pallet-mode-toggle button {
@@ -61,36 +61,36 @@
   border: 0;
   border-radius: 5px;
   background: transparent;
-  color: #68788e !important;
+  color: var(--app-muted) !important;
   font-size: 0.7rem;
   line-height: 1.25;
 }
 
 .pallet-mode-toggle button.active {
-  background: #315f9e !important;
-  color: #fff !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-text) !important;
   font-weight: 700;
   box-shadow: 0 1px 4px rgba(24, 47, 78, 0.24);
 }
 
 .pallet-mode-toggle button.auto-active {
   background: #c62828 !important;
-  color: #fff !important;
+  color: var(--app-text) !important;
 }
 
 .pallet-mode-toggle button.manual-active {
-  background: #278253 !important;
-  color: #fff !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-text) !important;
 }
 
 .split-roll-page .btn {
-  color: #344660 !important;
+  color: var(--app-text) !important;
 }
 
 .split-roll-page .btn-primary,
 .split-roll-page .btn-primary:hover,
 .split-roll-page .btn-primary:focus {
-  color: #fff !important;
+  color: var(--app-on-primary) !important;
 }
 
 .split-roll-page .btn-outline-primary,
@@ -99,7 +99,7 @@
 .split-roll-page .btn-outline-secondary,
 .split-roll-page .btn-outline-secondary:hover,
 .split-roll-page .btn-outline-secondary:focus {
-  color: #315f9e !important;
+  color: var(--app-primary) !important;
 }
 
 .split-roll-page .btn-outline-danger,
@@ -111,38 +111,38 @@
 .split-roll-page .btn-outline-success,
 .split-roll-page .btn-outline-success:hover,
 .split-roll-page .btn-outline-success:focus {
-  color: #267346 !important;
+  color: var(--app-text) !important;
 }
 
 .pallet-mode-toggle button:hover,
 .pallet-mode-toggle button:focus {
-  color: #315f9e !important;
+  color: var(--app-primary) !important;
 }
 
 .pallet-mode-toggle button.active:hover,
 .pallet-mode-toggle button.active:focus {
-  background: #244d80 !important;
-  color: #fff !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-text) !important;
 }
 
 .pallet-mode-toggle button.auto-active:hover,
 .pallet-mode-toggle button.auto-active:focus {
   background: #a61f1f !important;
-  color: #fff !important;
+  color: var(--app-text) !important;
 }
 
 .pallet-mode-toggle button.manual-active:hover,
 .pallet-mode-toggle button.manual-active:focus {
-  background: #1f6841 !important;
-  color: #fff !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-text) !important;
 }
 
 .panel-card {
   margin: 0 0 22px;
   padding: clamp(20px, 3vw, 30px);
-  border: 1px solid #e6ebf2;
-  border-radius: 16px;
-  background: #fff;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  background: var(--app-surface);
   box-shadow: 0 8px 24px rgba(24, 47, 78, 0.06);
 }
 
@@ -155,14 +155,14 @@
 
 .section-heading h2 {
   margin: 0;
-  color: #1d3557;
+  color: var(--app-text);
   font-size: 1.12rem;
   font-weight: 700;
 }
 
 .section-heading p {
   margin: 4px 0 0;
-  color: #78879a;
+  color: var(--app-muted);
   font-size: 0.9rem;
 }
 
@@ -173,32 +173,32 @@
   flex: 0 0 44px;
   place-items: center;
   border-radius: 12px;
-  background: #edf4ff;
-  color: #386ab0;
+  background: var(--app-surface);
+  color: var(--app-primary);
 }
 
 .split-icon {
-  background: #fff4e8;
+  background: var(--app-surface-alt);
   color: #c76a17;
 }
 
 .sticker-icon {
-  background: #eaf7f0;
-  color: #278253;
+  background: var(--app-surface-alt);
+  color: var(--app-text);
 }
 
 .form-label {
   margin-bottom: 7px;
-  color: #344660;
+  color: var(--app-text);
   font-size: 0.88rem;
 }
 
 .form-control,
 .form-select {
   min-height: 44px;
-  border-color: #d9e1eb;
+  border-color: var(--app-border);
   border-radius: 9px;
-  color: #23364f;
+  color: var(--app-text);
 }
 
 .form-control:focus,
@@ -221,15 +221,15 @@
   padding: 12px 15px;
   border: 1px solid #f0d49f;
   border-radius: 10px;
-  background: #fff9ed;
+  background: var(--app-surface);
   color: #805c1d;
   font-size: 0.9rem;
 }
 
 .source-roll-verified {
-  border-color: #c9e8d6;
-  background: #f0faf4;
-  color: #267346;
+  border-color: var(--app-border);
+  background: var(--app-surface-alt);
+  color: var(--app-text);
 }
 
 .alert-label {
@@ -256,7 +256,7 @@
   padding: 11px 14px;
   border: 1px solid #f2dfbd;
   border-radius: 10px;
-  background: #fff9ed;
+  background: var(--app-surface);
   color: #8a601f;
   font-size: 0.9rem;
 }
@@ -266,9 +266,9 @@
 }
 
 .quantity-valid {
-  border-color: #c9e8d6;
-  background: #f0faf4;
-  color: #287346;
+  border-color: var(--app-border);
+  background: var(--app-surface-alt);
+  color: var(--app-text);
 }
 
 .split-quantity-grid {
@@ -282,9 +282,9 @@
   align-items: center;
   gap: 13px;
   padding: 14px;
-  border: 1px solid #e6ebf2;
-  border-radius: 12px;
-  background: #fbfcfe;
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  background: var(--app-surface);
 }
 
 .split-quantity-card .form-label {
@@ -298,8 +298,8 @@
   flex: 0 0 40px;
   place-items: center;
   border-radius: 50%;
-  background: #eaf1fb;
-  color: #315f9e;
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
   font-size: 0.83rem;
   font-weight: 800;
 }
@@ -318,7 +318,7 @@
 }
 
 .split-validation-success {
-  color: #267346;
+  color: var(--app-text);
 }
 
 .sticker-grid {
@@ -329,9 +329,9 @@
 
 .sticker-card {
   padding: 17px;
-  border: 1px dashed #aebdd0;
-  border-radius: 12px;
-  background: #fff;
+  border: 1px dashed var(--app-border);
+  border-radius: var(--app-card-radius);
+  background: var(--app-surface);
   break-inside: avoid;
 }
 
@@ -340,19 +340,19 @@
   align-items: center;
   justify-content: space-between;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e9edf3;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .sticker-caption,
 .sticker-index {
-  color: #61748d;
+  color: var(--app-muted);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.1em;
 }
 
 .sticker-index {
-  color: #2d639f;
+  color: var(--app-primary);
 }
 
 .sticker-main {
@@ -379,7 +379,7 @@
 
 .sticker-details h3 {
   margin: 0 0 9px;
-  color: #1d3557;
+  color: var(--app-text);
   font-size: 1.08rem;
   font-weight: 800;
   overflow-wrap: anywhere;
@@ -390,13 +390,13 @@
   justify-content: space-between;
   gap: 10px;
   margin: 4px 0;
-  color: #53647b;
+  color: var(--app-muted);
   font-size: 0.78rem;
 }
 
 .sticker-details p strong {
   flex: 0 0 auto;
-  color: #354a65;
+  color: var(--app-text);
 }
 
 .sticker-details p span {
@@ -407,8 +407,8 @@
 .sticker-details .sticker-quantity {
   margin-top: 8px;
   padding-top: 7px;
-  border-top: 1px solid #e9edf3;
-  color: #1d3557;
+  border-top: 1px solid var(--app-border);
+  color: var(--app-text);
   font-size: 0.88rem;
 }
 
@@ -418,7 +418,7 @@
   gap: 10px;
   margin-top: 24px;
   padding-top: 18px;
-  border-top: 1px solid #edf0f5;
+  border-top: 1px solid var(--app-border);
 }
 
 .create-batch-button {
@@ -464,7 +464,7 @@
   .panel-card {
     margin-bottom: 10px;
     padding: 12px;
-    border-radius: 10px;
+    border-radius: var(--app-card-radius);
     box-shadow: 0 2px 8px rgba(24, 47, 78, 0.05);
   }
 
@@ -537,7 +537,7 @@
   .split-quantity-card {
     gap: 9px;
     padding: 8px;
-    border-radius: 8px;
+    border-radius: var(--app-card-radius);
   }
 
   .roll-number {

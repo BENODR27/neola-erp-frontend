@@ -1,49 +1,233 @@
-<section class="master-page master-page-vendors" data-page-code="MMMS-VENDORS">
+<section class="master-page">
   <header class="page-header">
     <div>
-      <a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a>
-      <span class="kicker"><i class="bi" [ngClass]="page().icon"></i> MMMS-VENDORS</span>
-      <h1>Vendors & Contractors</h1>
-      <p>{{ page().description }}</p>
+      <h1>Vendors and external maintenance</h1>
+      <p>
+        Shared supplier identities with MMMS contracts, warranty claims, invoices and service
+        history.
+      </p>
     </div>
-    <button class="primary-action" type="button" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add {{ page().singular }}</button>
+    <button
+      type="button"
+      class="primary-action"
+      (click)="catalog()"
+      *ngIf="auth.hasPermission('vendors:manage')"
+    >
+      New shared vendor</button
+    ><button type="button" (click)="service()">Assign service / claim</button>
   </header>
-  <section class="summary">
-    <div><span class="icon"><i class="bi" [ngClass]="page().icon"></i></span><div><strong>{{ records().length }}</strong><small>records in this workspace</small></div></div>
-    <label class="search"><i class="bi bi-search"></i><input #box [value]="query()" (input)="updateQuery(box.value)" placeholder="Search records"></label>
+  <p role="alert" *ngIf="error()">{{ error() }}</p>
+  <section class="table-card table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Vendor</th>
+          <th>Category</th>
+          <th>Contact</th>
+          <th>Status</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of pagination.slice(vendors())">
+          <td>{{ row.code }} · {{ row.name }}</td>
+          <td>{{ row.category }}</td>
+          <td>{{ row.contactName }} · {{ row.phone }} · {{ row.email }}</td>
+          <td>{{ row.status }}</td>
+          <td>
+            <button type="button" (click)="profile(row)">Contracts / documents</button
+            ><button
+              *ngIf="auth.hasPermission('vendors:manage')"
+              type="button"
+              (click)="catalog(row)"
+            >
+              Edit catalog
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <app-mmms-pagination
+      [pager]="pagination"
+      [total]="vendors().length"
+      label="Vendors"
+    ></app-mmms-pagination>
   </section>
-  <section class="table-card">
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th *ngFor="let field of fields">{{ field.label }}</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let record of filtered">
-            <td *ngFor="let field of fields"><strong *ngIf="field === fields[0]">{{ value(record, field.key) }}</strong><span *ngIf="field !== fields[0]">{{ value(record, field.key) }}</span></td>
-            <td><span class="status">{{ record.status }}</span></td>
-            <td class="actions"><button type="button" (click)="openEdit(record)" aria-label="Edit"><i class="bi bi-pencil"></i></button><button type="button" (click)="remove(record)" aria-label="Delete"><i class="bi bi-trash3"></i></button></td>
-          </tr>
-          <tr *ngIf="!filtered.length"><td class="empty" [attr.colspan]="fields.length + 2">No records match your search.</td></tr>
-        </tbody>
-      </table>
-    </div>
+  <section class="table-card table-scroll">
+    <h2>Service history and warranty claims</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Vendor / machine</th>
+          <th>Type / description</th>
+          <th>Status</th>
+          <th>Cost</th>
+          <th>Invoice / rating</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of servicePagination.slice(services())">
+          <td>{{ row.vendor }} · {{ row.machine }}</td>
+          <td>{{ row.type }} · {{ row.description }}</td>
+          <td>{{ row.status }}</td>
+          <td>{{ row.amount }} {{ row.currency }}</td>
+          <td>{{ row.invoiceReference }} · {{ row.rating || 'Not rated' }}</td>
+          <td><button type="button" (click)="service(row)">Review / progress</button></td>
+        </tr>
+        <tr *ngIf="!services().length">
+          <td colspan="6">No vendor services recorded.</td>
+        </tr>
+      </tbody>
+    </table>
+    <app-mmms-pagination
+      [pager]="servicePagination"
+      [total]="services().length"
+      label="Vendor services"
+    ></app-mmms-pagination>
   </section>
-  <div class="editor-backdrop" *ngIf="editorOpen()" (click)="closeEditor()">
-    <form class="editor" (submit)="$event.preventDefault(); save()" (click)="$event.stopPropagation()">
-      <header><div><span class="kicker">{{ editingId() ? 'EDIT' : 'NEW' }} {{ page().singular | uppercase }}</span><h2>{{ editingId() ? 'Update record' : 'Add record' }}</h2></div><button type="button" class="close" (click)="closeEditor()"><i class="bi bi-x-lg"></i></button></header>
-      <div class="form-grid">
-        <label *ngFor="let field of fields">{{ field.label }}
-          <ng-container *ngIf="field.type === 'relation'; else staticField">
-            <input *ngIf="optionsFor(field).length > 8" #relationSearchBox type="search" placeholder="Search options" [value]="relationSearch()[field.key] || ''" (input)="updateRelationSearch(field.key, relationSearchBox.value)">
-            <select [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"><option value="">Select...</option><option *ngFor="let option of filteredOptions(field)" [value]="option">{{ option }}</option></select>
-          </ng-container>
-          <ng-template #staticField>
-            <select *ngIf="field.type === 'select'; else inputField" [(ngModel)]="draft[field.key]" [name]="field.key"><option value="">Select...</option><option *ngFor="let option of optionsFor(field)" [value]="option">{{ option }}</option></select>
-            <ng-template #inputField><input [type]="field.type || 'text'" [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"></ng-template>
-          </ng-template>
-        </label>
-        <label>Status<select [(ngModel)]="draft.status" name="status"><option>Active</option><option>Planned</option><option>In progress</option><option>Approved</option><option>Valid</option><option>Expired</option></select></label>
-      </div>
-      <footer><button type="button" class="secondary" (click)="closeEditor()">Cancel</button><button type="submit" class="primary-action">Save record</button></footer>
+  <div class="editor-backdrop" *ngIf="editor()">
+    <form class="editor" (ngSubmit)="save()">
+      <p role="alert" *ngIf="error()">{{ error() }}</p>
+      <ng-container *ngIf="editor() === 'catalog'"
+        ><h2>Shared vendor catalog</h2>
+        <div class="form-grid">
+          <label>Code<input name="code" [(ngModel)]="vendorDraft.code" required /></label
+          ><label>Name<input name="name" [(ngModel)]="vendorDraft.name" required /></label
+          ><label>Category<input name="category" [(ngModel)]="vendorDraft.category" /></label
+          ><label
+            >Contact person<input name="contact" [(ngModel)]="vendorDraft.contactName" /></label
+          ><label>Phone<input name="phone" [(ngModel)]="vendorDraft.phone" /></label
+          ><label>Email<input type="email" name="email" [(ngModel)]="vendorDraft.email" /></label
+          ><label
+            >Status<select name="status" [(ngModel)]="vendorDraft.status">
+              <option>Active</option>
+              <option>Inactive</option>
+            </select></label
+          ><label
+            >Notes<textarea name="notes" [(ngModel)]="vendorDraft.notes"></textarea>
+          </label></div
+      ></ng-container>
+      <ng-container *ngIf="editor() === 'profile'"
+        ><h2>Maintenance vendor profile</h2>
+        <div class="form-grid">
+          <label
+            >Address<textarea name="address" [(ngModel)]="profileDraft.address"></textarea></label
+          ><label
+            >Service specializations<input
+              name="specializations"
+              [(ngModel)]="profileDraft.specializations" /></label
+          ><label
+            >Products supplied<input
+              name="products"
+              [(ngModel)]="profileDraft.productsSupplied" /></label
+          ><label
+            >Contract details<textarea
+              name="contract"
+              [(ngModel)]="profileDraft.contractDetails"
+            ></textarea></label
+          ><label
+            >Warranty details<textarea
+              name="warranty"
+              [(ngModel)]="profileDraft.warrantyDetails"
+            ></textarea>
+          </label>
+        </div>
+        <app-mmms-attachments
+          [files]="profileDraft.attachments"
+          (filesChange)="profileDraft.attachments = $event"
+        ></app-mmms-attachments
+      ></ng-container>
+      <ng-container *ngIf="editor() === 'service'"
+        ><h2>External service / warranty claim</h2>
+        <div class="form-grid">
+          <label
+            >Vendor<select
+              name="vendor"
+              [(ngModel)]="serviceDraft.vendorId"
+              [disabled]="!!selectedId()"
+              required
+            >
+              <option value="">Select vendor</option>
+              <option *ngFor="let vendor of vendors()" [value]="vendor.id">
+                {{ vendor.name }}
+              </option>
+            </select></label
+          ><label
+            >Machine<select
+              name="machine"
+              [(ngModel)]="serviceDraft.machineId"
+              [disabled]="!!selectedId()"
+              required
+            >
+              <option value="">Select machine</option>
+              <option *ngFor="let machine of machines()" [value]="machine.id">
+                {{ machine.name }}
+              </option>
+            </select></label
+          ><label
+            >Type<select name="type" [(ngModel)]="serviceDraft.type" [disabled]="!!selectedId()">
+              <option>External Service</option>
+              <option>Warranty Claim</option>
+            </select></label
+          ><label
+            >Description<textarea
+              name="description"
+              [(ngModel)]="serviceDraft.description"
+              [disabled]="!!selectedId()"
+              required
+            ></textarea></label
+          ><label
+            >Amount<input
+              name="amount"
+              type="number"
+              min="0"
+              step="0.01"
+              [(ngModel)]="serviceDraft.amount" /></label
+          ><label
+            >Currency<input
+              name="currency"
+              [(ngModel)]="serviceDraft.currency"
+              maxlength="3"
+              [disabled]="!!selectedId()" /></label
+          ><label
+            >Claim reference<input name="claim" [(ngModel)]="serviceDraft.claimReference" /></label
+          ><ng-container *ngIf="selectedId()"
+            ><label
+              >Next status<select name="serviceStatus" [(ngModel)]="serviceDraft.status">
+                <option *ngFor="let status of availableStates()">{{ status }}</option>
+              </select></label
+            ><label
+              >Remarks<textarea name="remarks" [(ngModel)]="serviceDraft.remarks"></textarea></label
+            ><label
+              >Invoice reference<input
+                name="invoice"
+                [(ngModel)]="serviceDraft.invoiceReference" /></label
+            ><label
+              >Performance rating<input
+                name="rating"
+                type="number"
+                min="1"
+                max="5"
+                [(ngModel)]="serviceDraft.rating" /></label
+          ></ng-container>
+        </div>
+        <app-mmms-attachments
+          [files]="serviceDraft.attachments || []"
+          (filesChange)="serviceDraft.attachments = $event"
+        ></app-mmms-attachments
+      ></ng-container>
+      <footer>
+        <button
+          type="submit"
+          [disabled]="
+            saving() || (editor() === 'service' && !!selectedId() && !availableStates().length)
+          "
+        >
+          Save</button
+        ><button type="button" (click)="editor.set(null)" [disabled]="saving()">Close</button>
+      </footer>
     </form>
   </div>
 </section>

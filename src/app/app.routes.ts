@@ -3,6 +3,49 @@ import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.co
 import { SigninComponent } from './auth/components/signin/signin.component';
 import { adminV2Guard, authGuard } from './auth/guards/auth.guard';
 export const routes: Routes = [
+  { path: '', pathMatch: 'full', redirectTo: 'home' },
+  {
+    path: 'home',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./shared/components/welcome/welcome.component').then((m) => m.WelcomeComponent),
+        data: { title: 'Home' },
+      },
+    ],
+  },
+  {
+    path: 'applications',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./shared/components/applications/applications.component').then(
+            (m) => m.ApplicationsComponent,
+          ),
+        data: { title: 'Applications' },
+      },
+    ],
+  },
+  { path: 'adminv2/applications', pathMatch: 'full', redirectTo: 'applications' },
+  {
+    path: 'appearance',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./shared/components/theme/theme.component').then((m) => m.ThemeComponent),
+        data: { title: 'Appearance' },
+      },
+    ],
+  },
   // Keep the legacy entry point working for older bookmarks.
   { path: 'signin', component: SigninComponent },
   { path: 'auth/login', component: SigninComponent },

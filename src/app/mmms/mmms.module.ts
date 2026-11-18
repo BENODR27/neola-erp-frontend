@@ -1,11 +1,14 @@
+import { MmmsPaginationComponent } from './components/mmms-pagination/mmms-pagination.component';
+import { MmmsStatusLabelPipe } from './components/mmms-configuration/mmms-status-label.pipe';
 import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { MmmsAttachmentsComponent } from './components/mmms-attachments/mmms-attachments.component';
+import { MmmsCustomFieldsComponent } from './components/mmms-custom-fields/mmms-custom-fields.component';
+import { QRCodeComponent } from 'angularx-qrcode';
+import { QrScannerComponent } from '../shared/components/qr-scanner/qr-scanner.component';
 import { MmmsRoutingModule } from './mmms-routing.module';
 import { MmmsDashboardComponent } from './components/mmms-dashboard/mmms-dashboard.component';
-import { MmmsOperationsComponent } from './components/mmms-operations/mmms-operations.component';
-import { MmmsRecordEditorComponent } from './components/mmms-operations/mmms-record-editor.component';
-import { MmmsMasterDataComponent } from './components/mmms-master-data/mmms-master-data.component';
 import { MmmsHelpComponent } from './components/mmms-help/mmms-help.component';
 import { MmmsMachinesComponent } from './components/mmms-machines/mmms-machines.component';
 import { MmmsTechniciansComponent } from './components/mmms-technicians/mmms-technicians.component';
@@ -33,7 +36,44 @@ import { MmmsConfigurationComponent } from './components/mmms-configuration/mmms
 import { MmmsContextSelectorComponent } from './components/mmms-context-selector/mmms-context-selector.component';
 
 @NgModule({
-  declarations: [MmmsDashboardComponent, MmmsOperationsComponent, MmmsRecordEditorComponent, MmmsMasterDataComponent, MmmsHelpComponent, MmmsMachinesComponent, MmmsTechniciansComponent, MmmsWorkOrdersComponent, MmmsPreventiveMaintenanceComponent, MmmsBreakdownsComponent, MmmsSparePartsComponent, MmmsCostsComponent, MmmsMobileComponent, MmmsQrManagementComponent, MmmsReportsComponent, MmmsProductionIntegrationComponent, MmmsOrganizationComponent, MmmsFactoriesComponent, MmmsDepartmentsComponent, MmmsProductionLinesComponent, MmmsMachineCategoriesComponent, MmmsAllocationsComponent, MmmsTransfersComponent, MmmsInspectionsComponent, MmmsVendorsComponent, MmmsCalibrationComponent, MmmsNotificationsComponent, MmmsConfigurationComponent],
-  imports: [CommonModule, FormsModule, MmmsRoutingModule, MmmsContextSelectorComponent],
+  declarations: [
+    MmmsDashboardComponent,
+    MmmsHelpComponent,
+    MmmsMachinesComponent,
+    MmmsTechniciansComponent,
+    MmmsWorkOrdersComponent,
+    MmmsPreventiveMaintenanceComponent,
+    MmmsBreakdownsComponent,
+    MmmsSparePartsComponent,
+    MmmsCostsComponent,
+    MmmsMobileComponent,
+    MmmsQrManagementComponent,
+    MmmsReportsComponent,
+    MmmsProductionIntegrationComponent,
+    MmmsOrganizationComponent,
+    MmmsFactoriesComponent,
+    MmmsDepartmentsComponent,
+    MmmsProductionLinesComponent,
+    MmmsMachineCategoriesComponent,
+    MmmsAllocationsComponent,
+    MmmsTransfersComponent,
+    MmmsInspectionsComponent,
+    MmmsVendorsComponent,
+    MmmsCalibrationComponent,
+    MmmsNotificationsComponent,
+    MmmsConfigurationComponent,
+  ],
+  imports: [
+    CommonModule,
+    MmmsPaginationComponent,
+    FormsModule,
+    MmmsRoutingModule,
+    MmmsContextSelectorComponent,
+    MmmsAttachmentsComponent,
+    MmmsCustomFieldsComponent,
+    MmmsStatusLabelPipe,
+    QRCodeComponent,
+    QrScannerComponent,
+  ],
 })
 export class MmmsModule {}

@@ -10,11 +10,13 @@
   min-height: 100vh;
   min-height: 100dvh;
   margin: 0 0 0 76px;
-  padding: 96px 32px 32px;
+  padding: calc(var(--app-header-height, 72px) + 24px) 32px 32px;
   width: calc(100% - 76px);
   max-width: calc(100% - 76px);
-  color: var(--shell-ink, #263650);
-  transition: margin-left 220ms ease, width 220ms ease;
+  color: var(--shell-ink, var(--app-text));
+  transition:
+    margin-left 220ms ease,
+    width 220ms ease;
 }
 
 .main-content.expanded {

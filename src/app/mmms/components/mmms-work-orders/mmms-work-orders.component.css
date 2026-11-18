@@ -2,6 +2,7 @@
 @import '../mmms-operations/mmms-editor.css';
 @import '../mmms-operations/mmms-actions.css';
 @import '../mmms-operations/mmms-history.css';
+@import '../mmms-operations/mmms-forms.css';
 
 :host {
   display: block;

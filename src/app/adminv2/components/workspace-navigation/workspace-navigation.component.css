@@ -11,13 +11,13 @@
 }
 
 .adminv2-page {
-  color: #202c42;
-  font-family: "Segoe UI", Arial, sans-serif;
+  color: var(--app-text);
+  font-family: var(--app-font);
 }
 
 .adminv2-page .navigation-layout,
 .adminv2-page .navigation-layout * {
-  font-family: inherit;
+  font-family: var(--app-font);
 }
 
 .adminv2-page .navigation-layout {
@@ -29,7 +29,7 @@
 .adminv2-page .navigation-layout h3,
 .adminv2-page .navigation-layout strong,
 .adminv2-page .navigation-layout label {
-  color: #202c42;
+  color: var(--app-text);
 }
 
 .adminv2-page .navigation-layout h2 {
@@ -45,7 +45,7 @@
 .adminv2-page .navigation-layout p,
 .adminv2-page .navigation-layout small,
 .adminv2-page .navigation-placeholder span {
-  color: #748198;
+  color: var(--app-muted);
   font-size: 12px;
   font-weight: 400;
 }
@@ -53,64 +53,64 @@
 .adminv2-page .navigation-layout .form-label {
   display: block;
   margin-bottom: 6px;
-  color: #59657a;
+  color: var(--app-muted);
   font-size: 11px;
   font-weight: 650;
 }
 
 .adminv2-page .navigation-layout .form-control {
-  color: #28364e;
-  font-family: inherit;
+  color: var(--app-text);
+  font-family: var(--app-font);
   font-size: 12px;
   font-weight: 400;
 }
 
 .adminv2-page .navigation-layout .form-control::placeholder {
-  color: #98a2b3;
+  color: var(--app-muted);
   font-weight: 400;
   opacity: 1;
 }
 
 .adminv2-page .navigation-layout .btn {
-  font-family: inherit;
+  font-family: var(--app-font);
   font-size: 12px;
   font-weight: 650;
 }
 
 .adminv2-page .navigation-layout .btn:not(.adminv2-primary-button) {
-  color: #52617a !important;
+  color: var(--app-on-primary) !important;
 }
 
 .adminv2-page .navigation-layout .btn-outline-primary {
-  color: #4565c5 !important;
-  background: #fff;
-  border-color: #b9c7ed;
+  color: var(--app-primary) !important;
+  background: var(--app-surface);
+  border-color: var(--app-border);
 }
 
 .adminv2-page .navigation-layout .btn-outline-danger {
   color: #b5475d !important;
-  background: #fff;
-  border-color: #e6bdc5;
+  background: var(--app-surface);
+  border-color: var(--app-border);
 }
 
 .adminv2-page .navigation-layout .btn-outline-secondary,
 .adminv2-page .navigation-layout .btn-light {
-  color: #52617a !important;
-  background: #f5f7fb;
-  border-color: #e1e6ef;
+  color: var(--app-muted) !important;
+  background: var(--app-surface);
+  border-color: var(--app-border);
 }
 
 .adminv2-page .navigation-layout .btn-outline-primary:hover,
 .adminv2-page .navigation-layout .btn-outline-danger:hover,
 .adminv2-page .navigation-layout .btn-outline-secondary:hover,
 .adminv2-page .navigation-layout .btn-light:hover {
-  background: #eef2fb !important;
-  color: #354b85 !important;
+  background: var(--app-surface-alt) !important;
+  color: var(--app-text) !important;
 }
 
 .adminv2-page .navigation-layout .adminv2-primary-button:hover {
-  color: #fff !important;
-  background: linear-gradient(135deg, #5273d4, #3c5cbd) !important;
+  color: var(--app-on-primary) !important;
+  background: var(--app-primary) !important;
 }
 
 .navigation-choice {
@@ -120,9 +120,9 @@
   gap: 0.75rem;
   padding: 0.85rem 1rem;
   border: 0;
-  border-top: 1px solid var(--bs-border-color, #dee2e6);
+  border-top: 1px solid var(--bs-border-color, var(--app-border));
   background: transparent;
-  color: #202c42;
+  color: var(--app-text);
   font-size: 12px;
   font-weight: 500;
   text-align: left;
@@ -130,8 +130,8 @@
 
 .navigation-choice:hover,
 .navigation-choice.active {
-  background: #f3f6fc !important;
-  color: #202c42 !important;
+  background: var(--app-surface) !important;
+  color: var(--app-text) !important;
 }
 
 .navigation-choice.active {
@@ -152,7 +152,7 @@
 .navigation-choice small,
 .navigation-empty,
 .navigation-placeholder span {
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--bs-secondary-color, var(--app-muted));
 }
 
 .navigation-choice-icon {
@@ -162,8 +162,8 @@
   flex: 0 0 auto;
   place-items: center;
   border-radius: 0.55rem;
-  background: #eef2fb;
-  color: #4565c5;
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
 }
 
 .navigation-editor > form {
@@ -198,7 +198,7 @@
 .navigation-items-heading p,
 .adminv2-panel-heading p {
   margin: 0.25rem 0 0;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--bs-secondary-color, var(--app-muted));
 }
 
 .navigation-items {
@@ -208,9 +208,9 @@
 
 .navigation-item {
   padding: 1rem;
-  border: 1px solid var(--bs-border-color, #dee2e6);
+  border: 1px solid var(--bs-border-color, var(--app-border));
   border-radius: 0.75rem;
-  background: #fbfcfe;
+  background: var(--app-surface);
 }
 
 .navigation-item-title {
@@ -234,13 +234,13 @@
   place-content: center;
   justify-items: center;
   gap: 0.5rem;
-  color: var(--bs-secondary-color, #6c757d);
+  color: var(--bs-secondary-color, var(--app-muted));
   text-align: center;
 }
 
 .navigation-placeholder i {
   font-size: 2rem;
-  color: var(--bs-primary, #0d6efd);
+  color: var(--bs-primary, var(--app-primary));
 }
 
 .navigation-actions {

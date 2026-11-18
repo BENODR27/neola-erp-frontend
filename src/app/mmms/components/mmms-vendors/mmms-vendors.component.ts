@@ -1,18 +1,10 @@
+import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
-import { NotificationService } from '../../../shared/services/notification/notification.service';
-
-interface MasterField {
-  key: string;
-  label: string;
-  type?: string;
-  options?: string[];
-  required?: boolean;
-  relation?: string;
-}
-
-type MasterRecord = Record<string, string | number> & { id: string | number; status: string };
-
+import { SharedVendor, VendorProfile, VendorService } from '../../models/mmms-vendor.models';
+import { MachineSummary } from '../../models/mmms.models';
+import { AuthService } from '../../../auth/services/auth.service';
 @Component({
   selector: 'app-mmms-vendors',
   standalone: false,
@@ -21,137 +13,135 @@ type MasterRecord = Record<string, string | number> & { id: string | number; sta
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsVendorsComponent implements OnInit {
-  readonly pageCode = 'MMMS-VENDORS';
-  readonly apiResource = 'master-data/vendors';
-  readonly moduleCode = 'vendors';
-  readonly relationModules: Record<string, string> = {
-    organization: 'organization',
-  };
-  readonly page = signal({
-    title: 'Vendors & Contractors',
-    icon: 'bi-person-lines-fill',
-    description: 'Maintain supplier contacts, service coverage and commercial readiness.',
-    singular: 'vendor',
-    fields: [
-      { key: 'name', label: 'Vendor name', type: 'text', required: true },
-      { key: 'category', label: 'Service category', type: 'text' },
-      { key: 'contact', label: 'Primary contact', type: 'text' },
-      { key: 'phone', label: 'Phone', type: 'text' },
-      { key: 'email', label: 'Email', type: 'email' },
-    ] as MasterField[],
-  });
-  readonly records = signal<MasterRecord[]>([]);
-  readonly relationOptions = signal<Record<string, string[]>>({});
-  readonly relationSearch = signal<Record<string, string>>({});
-  readonly query = signal('');
-  readonly editorOpen = signal(false);
-  readonly editingId = signal<string | number | null>(null);
-  draft: MasterRecord = { id: '0', module: 'vendors', name: '', status: 'Active' };
-
+  readonly pagination = new MmmsPagination();
+  readonly servicePagination = new MmmsPagination();
+  readonly vendors = signal<SharedVendor[]>([]);
+  readonly profiles = signal<VendorProfile[]>([]);
+  readonly services = signal<VendorService[]>([]);
+  readonly machines = signal<MachineSummary[]>([]);
+  readonly error = signal('');
+  readonly saving = signal(false);
+  readonly editor = signal<'catalog' | 'profile' | 'service' | null>(null);
+  readonly selectedId = signal<string | null>(null);
+  readonly auth = inject(AuthService);
+  vendorDraft: Partial<SharedVendor> = {};
+  profileDraft: VendorProfile = this.emptyProfile('');
+  serviceDraft: Partial<VendorService> = {};
   private readonly facade = inject(MmmsFacadeService);
-  private readonly notifications = inject(NotificationService);
-
   ngOnInit(): void {
-    this.loadVendors();
-    this.loadRelations();
+    this.load();
+    this.facade.getMachines().subscribe({
+      next: (rows) => this.machines.set(rows),
+      error: (error: unknown) => this.fail(error),
+    });
   }
-
-  get fields(): MasterField[] {
-    return this.page().fields;
+  load(): void {
+    this.facade.getSharedVendors().subscribe({
+      next: (rows) => this.vendors.set(rows),
+      error: (error: unknown) => this.fail(error),
+    });
+    this.facade.getVendorProfiles().subscribe({
+      next: (rows) => this.profiles.set(rows),
+      error: (error: unknown) => this.fail(error),
+    });
+    this.facade.getVendorServices().subscribe({
+      next: (rows) => this.services.set(rows),
+      error: (error: unknown) => this.fail(error),
+    });
   }
-
-  get filtered(): MasterRecord[] {
-    const value = this.query().toLowerCase().trim();
-    return this.records().filter(
-      (record) =>
-        !value || Object.values(record).some((item) => String(item).toLowerCase().includes(value)),
+  catalog(vendor?: SharedVendor): void {
+    this.selectedId.set(vendor?.id || null);
+    this.vendorDraft = vendor
+      ? { ...vendor }
+      : {
+          code: '',
+          name: '',
+          category: 'General',
+          contactName: '',
+          phone: '',
+          email: '',
+          status: 'Active',
+          notes: '',
+        };
+    this.editor.set('catalog');
+  }
+  profile(vendor: SharedVendor): void {
+    this.profileDraft = structuredClone(
+      this.profiles().find((row) => row.vendorId === vendor.id) || this.emptyProfile(vendor.id),
+    );
+    this.editor.set('profile');
+  }
+  service(row?: VendorService): void {
+    this.selectedId.set(row?.id || null);
+    this.serviceDraft = row
+      ? structuredClone(row)
+      : {
+          vendorId: '',
+          machineId: '',
+          type: 'External Service',
+          description: '',
+          amount: 0,
+          currency: 'USD',
+          attachments: [],
+        };
+    if (row) this.serviceDraft.status = this.nextStates(row.status)[0] || row.status;
+    this.editor.set('service');
+  }
+  nextStates(status: string): string[] {
+    return (
+      (
+        {
+          Scheduled: ['In Progress', 'Cancelled'],
+          'In Progress': ['On Hold', 'Completed'],
+          'On Hold': ['In Progress', 'Cancelled'],
+          Submitted: ['Approved', 'Rejected'],
+          Approved: ['Resolved', 'Cancelled'],
+        } as Record<string, string[]>
+      )[status] || []
     );
   }
-
-  loadVendors(): void {
-    this.facade.getMasterRecords(this.moduleCode).subscribe({
-      next: (rows) => this.records.set(rows as MasterRecord[]),
-      error: () => this.records.set([]),
-    });
+  availableStates(): string[] {
+    const row = this.services().find((row) => row.id === this.selectedId());
+    return row ? this.nextStates(row.status) : [];
   }
-
-  loadRelations(): void {
-    Object.entries(this.relationModules).forEach(([field, module]) => {
-      this.facade.getMasterRecords(module).subscribe({
-        next: (rows) => this.relationOptions.update((current) => ({
-          ...current,
-          [field]: rows.map((row) => String(row.name || row.code || row.id)),
-        })),
-      });
-    });
-  }
-
-  optionsFor(field: MasterField): string[] {
-    return this.relationOptions()[field.key] ?? field.options ?? [];
-  }
-
-  filteredOptions(field: MasterField): string[] {
-    const value = (this.relationSearch()[field.key] ?? '').toLowerCase().trim();
-    return this.optionsFor(field).filter((option) => !value || option.toLowerCase().includes(value));
-  }
-
-  updateRelationSearch(field: string, value: string): void {
-    this.relationSearch.update((current) => ({ ...current, [field]: value }));
-  }
-
-  updateQuery(value: string): void {
-    this.query.set(value);
-  }
-
-  openCreate(): void {
-    this.editingId.set(null);
-    this.draft = { id: '0', module: this.moduleCode, name: '', status: 'Active' };
-    this.editorOpen.set(true);
-  }
-
-  openEdit(record: MasterRecord): void {
-    this.editingId.set(record.id);
-    this.draft = { ...record };
-    this.editorOpen.set(true);
-  }
-
-  closeEditor(): void {
-    this.editorOpen.set(false);
-  }
-
   save(): void {
-    const requiredFields = this.fields.filter((field) => field.required);
-    if (!requiredFields.every((field) => String(this.draft[field.key] ?? '').trim())) { this.notifications.warning('Required fields missing', 'Complete the required fields before saving.'); return; }
-    const id = this.editingId() ? String(this.editingId()) : null;
-    const payload = {
-      ...this.draft,
-      module: this.moduleCode,
-      status: this.draft.status || 'Active',
-    };
-    this.facade.saveMasterRecord(this.moduleCode, id, payload).subscribe({
-      next: (response) => {
-        const saved = ((response as { result?: MasterRecord })?.result ?? payload) as MasterRecord;
-        this.records.update((rows) =>
-          id ? rows.map((row) => (String(row.id) === id ? saved : row)) : [saved, ...rows],
-        );
-        this.closeEditor();
-        this.notifications.success(id ? 'Vendor updated' : 'Vendor created', 'The vendor is ready for maintenance work.');
+    if (this.saving()) return;
+    this.saving.set(true);
+    this.error.set('');
+    const request =
+      this.editor() === 'catalog'
+        ? this.facade.saveSharedVendor(this.selectedId(), this.vendorDraft)
+        : this.editor() === 'profile'
+          ? this.facade.saveVendorProfile(this.profileDraft)
+          : this.selectedId()
+            ? this.facade.updateVendorService(this.selectedId() as string, this.serviceDraft)
+            : this.facade.createVendorService(this.serviceDraft);
+    request.pipe(finalize(() => this.saving.set(false))).subscribe({
+      next: () => {
+        this.editor.set(null);
+        this.load();
       },
-      error: (error) => this.notifications.handleError(error, 'Could not save vendor'),
+      error: (error: unknown) => this.fail(error),
     });
   }
-
-  remove(record: MasterRecord): void {
-    this.notifications.confirm(`Remove this ${this.page().singular}?`, 'Remove', 'Keep').then((result) => {
-      if (!result.isConfirmed) return;
-      this.facade.deleteMasterRecord(this.moduleCode, String(record.id)).subscribe({
-        next: () => { this.records.update((rows) => rows.filter((row) => String(row.id) !== String(record.id))); this.notifications.success('Vendor removed', 'The vendor was removed.'); },
-        error: (error) => this.notifications.handleError(error, 'Could not remove vendor'),
-      });
-    });
+  private emptyProfile(vendorId: string): VendorProfile {
+    return {
+      vendorId,
+      vendor: '',
+      address: '',
+      specializations: '',
+      productsSupplied: '',
+      contractDetails: '',
+      warrantyDetails: '',
+      attachments: [],
+    };
   }
-
-  value(record: MasterRecord, key: string): string {
-    return String(record[key] ?? '—');
+  private fail(error: unknown): void {
+    const response = error as { error?: { error?: { message?: string }; message?: string } };
+    this.error.set(
+      response?.error?.error?.message ||
+        response?.error?.message ||
+        'The vendor request could not be completed.',
+    );
   }
 }

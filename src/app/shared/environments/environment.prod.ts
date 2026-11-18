@@ -23,4 +23,5 @@ export const environment = {
   SS_API_URL: API_BASE_URL,
   FR_API_URL: API_BASE_URL,
   MMMS_API_URL: `${API_BASE_URL}/v1`,
+  MMMS_USE_MOCK_DATA: false,
 } satisfies Environment;

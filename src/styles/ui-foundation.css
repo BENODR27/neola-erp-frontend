@@ -1,0 +1,417 @@
+/* Shared controls and overlay bounds. Feature layouts stay in their own stylesheets. */
+:root {
+  --app-header-height: calc(72px + env(safe-area-inset-top, 0px));
+  --dialog-gutter: clamp(8px, 2.5vw, 24px);
+  --dialog-padding: clamp(16px, 3vw, 28px);
+  --dialog-top: max(var(--dialog-gutter), env(safe-area-inset-top, 0px));
+  --dialog-bottom: max(var(--dialog-gutter), env(safe-area-inset-bottom, 0px));
+  --dialog-left: max(var(--dialog-gutter), env(safe-area-inset-left, 0px));
+  --dialog-right: max(var(--dialog-gutter), env(safe-area-inset-right, 0px));
+  --app-danger: #b4233b;
+  --bs-font-sans-serif: var(--app-font);
+  --bs-body-font-family: var(--app-font);
+  --bs-link-color: var(--app-primary);
+  --bs-link-hover-color: var(--app-primary);
+  --bs-heading-color: var(--app-text);
+}
+:root[data-theme='dark'] {
+  --app-danger: #ff99aa;
+}
+body {
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background-color: var(--app-background);
+}
+button,
+input,
+select,
+textarea,
+optgroup {
+  font-family: inherit;
+}
+button,
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+.app-shell
+  :where(
+    input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='range']):not(
+        [type='file']
+      ),
+    select,
+    textarea
+  ) {
+  min-width: 0;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-family: var(--app-font);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  color: var(--app-text);
+  background: var(--app-surface);
+}
+.app-shell :where(input[type='checkbox'], input[type='radio']) {
+  accent-color: var(--app-primary);
+}
+.app-shell :where(button:not([class])) {
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  min-height: 38px;
+  color: var(--app-text);
+  background: var(--app-surface-alt);
+  font: inherit;
+  cursor: pointer;
+}
+body:has(.editor-backdrop, .history-backdrop, .record-editor-backdrop) {
+  overflow: hidden;
+}
+.app-shell :is(.form-control, .form-select) {
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background-color: var(--app-surface);
+  border-color: var(--app-border);
+}
+.app-shell :is(.form-control, .form-select):focus {
+  color: var(--app-text);
+  background-color: var(--app-surface);
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--app-primary) 18%, transparent);
+}
+.app-shell :is(input, textarea)::placeholder {
+  color: var(--app-muted);
+  opacity: 1;
+}
+.app-shell :is(.form-control, .form-select):disabled {
+  color: var(--app-muted);
+  background-color: var(--app-surface-alt);
+  opacity: 1;
+}
+.app-shell .btn-light {
+  --bs-btn-color: var(--app-text);
+  --bs-btn-bg: var(--app-surface-alt);
+  --bs-btn-border-color: var(--app-border);
+  --bs-btn-hover-color: var(--app-text);
+  --bs-btn-hover-bg: var(--app-surface);
+}
+.app-shell .btn-primary {
+  --bs-btn-color: var(--app-on-primary);
+  --bs-btn-bg: var(--app-primary);
+  --bs-btn-border-color: var(--app-primary);
+  --bs-btn-hover-color: var(--app-on-primary);
+  --bs-btn-hover-bg: var(--app-primary);
+}
+/* Bootstrap marks these utilities important; map their semantic colors to the active palette. */
+.app-shell :is(.text-dark, .text-black, .text-body) {
+  color: var(--app-text) !important;
+}
+.app-shell :is(.text-muted, .text-secondary, .text-body-secondary) {
+  color: var(--app-muted) !important;
+}
+.app-shell .bg-white {
+  background-color: var(--app-surface) !important;
+}
+.app-shell :is(.bg-light, .bg-body-secondary, .bg-body-tertiary) {
+  background-color: var(--app-surface-alt) !important;
+}
+.app-shell :is(.text-danger, .invalid-feedback) {
+  color: var(--app-danger) !important;
+}
+.app-shell .btn-primary.text-white {
+  color: var(--app-on-primary) !important;
+}
+.app-shell :is(.modal-content, .dropdown-menu, .list-group-item) {
+  color: var(--app-text);
+  background-color: var(--app-surface);
+  border-color: var(--app-border);
+}
+.app-shell .dropdown-item {
+  color: var(--app-text);
+}
+.app-shell .dropdown-item:hover {
+  color: var(--app-text);
+  background-color: var(--app-surface-alt);
+}
+.app-shell .table {
+  --bs-table-bg: var(--app-surface);
+  --bs-table-color: var(--app-text);
+  --bs-table-striped-bg: var(--app-surface-alt);
+  --bs-table-hover-bg: var(--app-surface-alt);
+  --bs-table-border-color: var(--app-border);
+}
+
+/* Bootstrap dialogs: viewport-bounded surface, scrollable body, persistent close control. */
+html body .modal {
+  height: 100vh;
+  height: 100dvh;
+  --bs-modal-margin: var(--dialog-gutter);
+}
+html body .modal-dialog {
+  width: calc(100% - var(--dialog-left) - var(--dialog-right));
+  max-width: var(--bs-modal-width, 500px);
+  margin: var(--dialog-top) auto var(--dialog-bottom);
+}
+html body .modal-dialog-centered {
+  min-height: calc(100dvh - var(--dialog-top) - var(--dialog-bottom));
+}
+html body .modal-content {
+  max-height: calc(100dvh - var(--dialog-top) - var(--dialog-bottom));
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  padding: 0;
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+}
+html body :is(.modal-header, .modal-footer) {
+  flex: 0 0 auto;
+  gap: 12px;
+  padding: 16px 20px;
+  border-color: var(--app-border);
+}
+html body .modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  overflow-wrap: anywhere;
+}
+html body .modal :is(input, select, textarea) {
+  min-width: 0;
+}
+html body .modal .modal-title {
+  color: var(--app-text);
+}
+html body .modal .btn-close {
+  flex-shrink: 0;
+}
+html[data-theme='dark'] .btn-close {
+  filter: invert(1) grayscale(1) brightness(2);
+}
+
+/* Existing MMMS editors/history use one viewport contract above the shared shell. */
+html body .app-shell :is(.editor-backdrop, .history-backdrop, .record-editor-backdrop) {
+  position: fixed;
+  inset: 0;
+  z-index: 1250;
+  display: grid;
+  place-items: center;
+  padding: var(--dialog-top) var(--dialog-right) var(--dialog-bottom) var(--dialog-left);
+  overflow: hidden;
+  background: rgb(8 17 31 / 55%);
+}
+html
+  body
+  .app-shell
+  :is(.editor-backdrop, .history-backdrop, .record-editor-backdrop)
+  > :is(.editor, .editor-dialog, .history-dialog, .record-editor) {
+  box-sizing: border-box;
+  width: min(860px, 100%);
+  min-width: 0;
+  max-width: 100%;
+  max-height: calc(100dvh - var(--dialog-top) - var(--dialog-bottom));
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: var(--dialog-padding);
+  color: var(--app-text);
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+  border-radius: var(--app-card-radius);
+  font-family: var(--app-font);
+  overflow-wrap: anywhere;
+  box-shadow: 0 24px 80px rgb(0 0 0 / 24%);
+}
+html body .app-shell :is(.editor, .editor-dialog, .history-dialog) > :is(header, footer) {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--app-text);
+  background: var(--app-surface);
+}
+html
+  body
+  .app-shell
+  :is(.editor-backdrop, .record-editor-backdrop)
+  :is(.editor, .editor-dialog)
+  > footer {
+  position: sticky;
+  bottom: calc(-1 * var(--dialog-padding));
+  z-index: 2;
+  margin-inline: calc(-1 * var(--dialog-padding));
+  margin-bottom: calc(-1 * var(--dialog-padding));
+  padding: 14px var(--dialog-padding);
+  border-top: 1px solid var(--app-border);
+  box-shadow: 0 -6px 16px rgb(0 0 0 / 4%);
+}
+html body .app-shell :is(.editor, .editor-dialog, .record-editor) :is(input, select, textarea) {
+  min-width: 0;
+  max-width: 100%;
+  font-family: var(--app-font);
+  color: var(--app-text);
+  background-color: var(--app-surface);
+}
+html
+  body
+  .app-shell
+  :is(.editor, .editor-dialog, .record-editor)
+  :is(label, fieldset, .form-grid > *) {
+  min-width: 0;
+}
+html body .app-shell :is(.editor, .editor-dialog, .record-editor) input[type='checkbox'] {
+  width: 18px;
+  height: 18px;
+}
+html body .swal2-container {
+  z-index: 1300;
+  font-family: var(--app-font);
+}
+html body .swal2-popup {
+  max-width: calc(100vw - 2 * var(--dialog-gutter));
+  max-height: calc(100dvh - var(--dialog-top) - var(--dialog-bottom));
+  color: var(--app-text);
+  background: var(--app-surface);
+  border-radius: var(--app-card-radius);
+}
+html body .swal2-html-container {
+  color: var(--app-muted);
+  overflow: auto;
+  max-height: 60dvh;
+}
+.cdk-overlay-container {
+  z-index: 1400;
+}
+@media (max-width: 767.98px) {
+  :root {
+    --app-header-height: calc(64px + env(safe-area-inset-top, 0px));
+  }
+  html body .modal :is(.form-control, .form-select),
+  html
+    body
+    .app-shell
+    :is(.editor, .editor-dialog, .record-editor)
+    :is(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+    font-size: 16px;
+  }
+  html body .app-shell :is(.editor, .editor-dialog, .record-editor) .form-grid,
+  html body .modal .adminv2-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html body .modal :is(.adminv2-form-grid, .row) {
+    min-width: 0;
+  }
+  html body :is(.modal-header, .modal-body, .modal-footer) {
+    padding: 16px;
+  }
+  html body .app-shell :is(.editor, .editor-dialog) > footer button {
+    min-height: 44px;
+    flex: 1 1 auto;
+  }
+}
+@media (max-height: 500px) {
+  :root {
+    --dialog-gutter: 8px;
+    --dialog-padding: 14px;
+  }
+}
+
+html body .app-shell :is(.primary-action, .adminv2-primary-button) {
+  background: var(--app-primary);
+  color: var(--app-on-primary);
+}
+@media (pointer: coarse) {
+  html
+    body
+    .app-shell
+    :is(
+      .form-control,
+      .form-select,
+      .editor input:not([type='checkbox']),
+      .editor select,
+      .editor textarea
+    ) {
+    font-size: 16px;
+  }
+}
+
+/* Material typography shorthand tokens must use the selected application font too. */
+:root {
+  --mat-sys-body-large: 400 1rem / 1.5rem var(--app-font);
+  --mat-sys-body-large-font: var(--app-font);
+  --mat-sys-body-medium: 400 0.875rem / 1.25rem var(--app-font);
+  --mat-sys-body-medium-font: var(--app-font);
+  --mat-sys-body-small: 400 0.75rem / 1rem var(--app-font);
+  --mat-sys-body-small-font: var(--app-font);
+  --mat-sys-display-large: 400 3.562rem / 4rem var(--app-font);
+  --mat-sys-display-large-font: var(--app-font);
+  --mat-sys-display-medium: 400 2.812rem / 3.25rem var(--app-font);
+  --mat-sys-display-medium-font: var(--app-font);
+  --mat-sys-display-small: 400 2.25rem / 2.75rem var(--app-font);
+  --mat-sys-display-small-font: var(--app-font);
+  --mat-sys-headline-large: 400 2rem / 2.5rem var(--app-font);
+  --mat-sys-headline-large-font: var(--app-font);
+  --mat-sys-headline-medium: 400 1.75rem / 2.25rem var(--app-font);
+  --mat-sys-headline-medium-font: var(--app-font);
+  --mat-sys-headline-small: 400 1.5rem / 2rem var(--app-font);
+  --mat-sys-headline-small-font: var(--app-font);
+  --mat-sys-label-large: 500 0.875rem / 1.25rem var(--app-font);
+  --mat-sys-label-large-font: var(--app-font);
+  --mat-sys-label-medium: 500 0.75rem / 1rem var(--app-font);
+  --mat-sys-label-medium-font: var(--app-font);
+  --mat-sys-label-small: 500 0.688rem / 1rem var(--app-font);
+  --mat-sys-label-small-font: var(--app-font);
+  --mat-sys-title-large: 400 1.375rem / 1.75rem var(--app-font);
+  --mat-sys-title-large-font: var(--app-font);
+  --mat-sys-title-medium: 500 1rem / 1.5rem var(--app-font);
+  --mat-sys-title-medium-font: var(--app-font);
+  --mat-sys-title-small: 500 0.875rem / 1.25rem var(--app-font);
+  --mat-sys-title-small-font: var(--app-font);
+}
+body.mat-typography {
+  font-family: var(--app-font);
+}
+
+/* Long custom forms retain a visible title, close action and action footer. */
+html body .app-shell .editor > .dialog-header {
+  position: sticky;
+  top: calc(-1 * var(--dialog-padding));
+  z-index: 3;
+  flex-wrap: nowrap;
+  align-items: flex-start;
+  margin: calc(-1 * var(--dialog-padding)) calc(-1 * var(--dialog-padding)) 20px;
+  padding: 16px var(--dialog-padding);
+  border-bottom: 1px solid var(--app-border);
+  background: var(--app-surface);
+}
+html body .app-shell .dialog-header h2 {
+  flex: 1;
+  min-width: 0;
+  margin: 2px 0 0;
+  font-size: 1.2rem;
+  line-height: 1.4;
+}
+html body .app-shell .dialog-close {
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+  width: 40px;
+  min-height: 40px;
+  padding: 8px;
+  border: 1px solid var(--app-border);
+  border-radius: 8px;
+  color: var(--app-text);
+  background: var(--app-surface-alt);
+}
+html body .app-shell .dialog-actions button[type='submit'] {
+  color: var(--app-on-primary);
+  background: var(--app-primary);
+  border-color: var(--app-primary);
+}

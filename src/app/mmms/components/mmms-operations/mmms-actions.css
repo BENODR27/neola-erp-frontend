@@ -1,1 +1,17 @@
-.header-actions{display:flex;align-items:center;gap:9px}.header-actions .filter-button{background:#fff;border:1px solid #dfe7f1}@media(max-width:850px){.header-actions{width:100%}.header-actions>*{flex:1}}
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.header-actions .filter-button {
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
+}
+@media (max-width: 850px) {
+  .header-actions {
+    width: 100%;
+  }
+  .header-actions > * {
+    flex: 1;
+  }
+}

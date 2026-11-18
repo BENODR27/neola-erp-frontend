@@ -14,7 +14,9 @@ export default [
     files: ['src/**/*.ts'],
     languageOptions: {
       parser: typescriptParser,
-      parserOptions: { project: './tsconfig.json', ecmaVersion: 'latest', sourceType: 'module' },
+      // These syntax-only rules do not need a TypeScript program for the whole app.
+      // Strict type checking remains enforced by the Angular production build.
+      parserOptions: { ecmaVersion: 'latest', sourceType: 'module' },
     },
     plugins: { '@angular-eslint': angular, '@typescript-eslint': tsPlugin },
     rules: {

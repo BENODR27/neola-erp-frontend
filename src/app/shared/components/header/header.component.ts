@@ -1,4 +1,4 @@
-import { Component, EventEmitter, HostListener, Output , signal} from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, Output, signal } from '@angular/core';
 import { filter, map } from 'rxjs/operators';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, NavigationEnd, Router, RouterLink } from '@angular/router';
@@ -7,18 +7,21 @@ import { AuthService } from '../../../auth/services/auth.service';
 import { LocalStorageService } from '../../services/local-storage/local-storage.service';
 import { APP_CONFIG } from '../../config/app-config';
 import { APP_CONSTANTS } from '../../config/app-constants';
+import { SecondNavbarComponent } from '../second-navbar/second-navbar.component';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink],
+  imports: [RouterLink, SecondNavbarComponent],
   templateUrl: './header.component.html',
   styleUrl: './header.component.css',
 })
 export class HeaderComponent {
   readonly appConfig = APP_CONFIG;
+  readonly appRoutes = APP_CONSTANTS.routes;
+  @Input() navigationOpen = false;
   @Output() toggleSidebar = new EventEmitter<void>();
-  readonly isProfileMenuOpen = signal(false)
-  readonly currentEmpName = signal('')
+  readonly isProfileMenuOpen = signal(false);
+  readonly currentEmpName = signal('');
 
   toggle() {
     this.toggleSidebar.emit();
@@ -31,10 +34,7 @@ export class HeaderComponent {
   @HostListener('document:click', ['$event'])
   closeProfileMenuOnOutsideClick(event: MouseEvent): void {
     const target = event.target;
-    if (
-      target instanceof Element &&
-      !target.closest('.profile-control')
-    ) {
+    if (target instanceof Element && !target.closest('.profile-control')) {
       this.isProfileMenuOpen.set(false);
     }
   }
@@ -63,7 +63,12 @@ export class HeaderComponent {
   pageTitle = APP_CONFIG.defaultTitle;
 
   get workspaceBrand(): string {
-    return this.router.url.startsWith('/adminv2') ? 'IAM' : APP_CONFIG.name;
+    const section = this.router.url.split('/')[1]?.split(/[?#]/, 1)[0];
+    return section === 'adminv2'
+      ? 'IAM'
+      : section && !['appearance', 'home', 'applications'].includes(section)
+        ? section.toUpperCase()
+        : APP_CONFIG.name;
   }
 
   constructor(
@@ -83,8 +88,13 @@ export class HeaderComponent {
           while (child?.firstChild) {
             child = child.firstChild;
           }
-          return child?.snapshot.data['title'] || APP_CONFIG.defaultTitle;
-        })
+          const page =
+            this.router.url.split(/[?#]/, 1)[0].split('/').filter(Boolean).pop() || 'Workspace';
+          return (
+            child?.snapshot.data['title'] ||
+            page.replace(/-/g, ' ').replace(/^./, (letter) => letter.toUpperCase())
+          );
+        }),
       )
       .subscribe((title) => {
         this.refreshCurrentEmployeeName();
@@ -94,6 +104,9 @@ export class HeaderComponent {
   }
 
   private refreshCurrentEmployeeName(): void {
-    this.currentEmpName.set(this.localStorageService.getItem<string>(APP_CONSTANTS.storage.currentEmployeeName)?.trim() || '');
+    this.currentEmpName.set(
+      this.localStorageService.getItem<string>(APP_CONSTANTS.storage.currentEmployeeName)?.trim() ||
+        '',
+    );
   }
 }

@@ -17,5 +17,7 @@ export interface Environment {
   WU_API_URL?: string;
   SS_API_URL?: string;
   FR_API_URL?: string;
-  MMMS_API_URL?: string;
+  MMMS_API_URL: string;
+  /** Development-only preview switch. Production environments must keep this false. */
+  MMMS_USE_MOCK_DATA: boolean;
 }

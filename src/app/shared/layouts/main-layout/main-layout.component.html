@@ -26,9 +26,14 @@
       🪧 Any help required? <span class="dog-board-action">click here!</span>
     </div>
   </div> -->
-  <app-header (toggleSidebar)="toggleSidebar()"></app-header>
+  <app-header
+    [navigationOpen]="isMobileSidebarOpen() || shouldExpandSidebar"
+    (toggleSidebar)="toggleSidebar()"
+  ></app-header>
   <app-sidebar
     [isExpanded]="shouldExpandSidebar"
+    [isMobileSidebarOpen]="isMobileSidebarOpen()"
+    (mobileClosed)="isMobileSidebarOpen.set(false)"
     (mouseenter)="onSidebarMouseEnter()"
     (mouseleave)="onSidebarMouseLeave()"
   ></app-sidebar>

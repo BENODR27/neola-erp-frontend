@@ -1,49 +1,121 @@
-<section class="master-page master-page-calibration" data-page-code="MMMS-CALIBRATION">
+<section class="master-page">
   <header class="page-header">
     <div>
-      <a routerLink="/mmms" class="back-link"><i class="bi bi-arrow-left"></i> Command center</a>
-      <span class="kicker"><i class="bi" [ngClass]="page().icon"></i> MMMS-CALIBRATION</span>
       <h1>Calibration</h1>
-      <p>{{ page().description }}</p>
+      <p>Schedule calibration and preserve results and certificates.</p>
     </div>
-    <button class="primary-action" type="button" (click)="openCreate()"><i class="bi bi-plus-lg"></i> Add {{ page().singular }}</button>
+    <button type="button" class="primary-action" (click)="edit()">Schedule calibration</button>
   </header>
-  <section class="summary">
-    <div><span class="icon"><i class="bi" [ngClass]="page().icon"></i></span><div><strong>{{ records().length }}</strong><small>records in this workspace</small></div></div>
-    <label class="search"><i class="bi bi-search"></i><input #box [value]="query()" (input)="updateQuery(box.value)" placeholder="Search records"></label>
+  <p role="alert" *ngIf="error()">{{ error() }}</p>
+  <section class="table-card table-scroll">
+    <table>
+      <thead>
+        <tr>
+          <th>Machine</th>
+          <th>Type</th>
+          <th>Agency</th>
+          <th>Due</th>
+          <th>Status / result</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let row of pagination.slice(rows())">
+          <td>{{ row.machine }}</td>
+          <td>{{ row.type }}</td>
+          <td>{{ row.agency }}</td>
+          <td>{{ row.dueAt | date: 'mediumDate' }}</td>
+          <td>{{ row.status }} · {{ row.result }}</td>
+          <td><button type="button" (click)="edit(row)">Certificate / completion</button></td>
+        </tr>
+        <tr *ngIf="!rows().length">
+          <td colspan="6">No calibrations scheduled.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <app-mmms-pagination
+      [pager]="pagination"
+      [total]="rows().length"
+      label="Calibration records"
+    ></app-mmms-pagination>
   </section>
-  <section class="table-card">
-    <div class="table-scroll">
-      <table>
-        <thead><tr><th *ngFor="let field of fields">{{ field.label }}</th><th>Status</th><th>Actions</th></tr></thead>
-        <tbody>
-          <tr *ngFor="let record of filtered">
-            <td *ngFor="let field of fields"><strong *ngIf="field === fields[0]">{{ value(record, field.key) }}</strong><span *ngIf="field !== fields[0]">{{ value(record, field.key) }}</span></td>
-            <td><span class="status">{{ record.status }}</span></td>
-            <td class="actions"><button type="button" (click)="openEdit(record)" aria-label="Edit"><i class="bi bi-pencil"></i></button><button type="button" (click)="remove(record)" aria-label="Delete"><i class="bi bi-trash3"></i></button></td>
-          </tr>
-          <tr *ngIf="!filtered.length"><td class="empty" [attr.colspan]="fields.length + 2">No records match your search.</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </section>
-  <div class="editor-backdrop" *ngIf="editorOpen()" (click)="closeEditor()">
-    <form class="editor" (submit)="$event.preventDefault(); save()" (click)="$event.stopPropagation()">
-      <header><div><span class="kicker">{{ editingId() ? 'EDIT' : 'NEW' }} {{ page().singular | uppercase }}</span><h2>{{ editingId() ? 'Update record' : 'Add record' }}</h2></div><button type="button" class="close" (click)="closeEditor()"><i class="bi bi-x-lg"></i></button></header>
+  <div class="editor-backdrop" *ngIf="editorOpen()">
+    <form
+      class="editor"
+      (ngSubmit)="save()"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="mmms-calibration-dialog-1-title"
+    >
+      <header class="dialog-header">
+        <h2 id="mmms-calibration-dialog-1-title">
+          {{ selectedId() ? 'Calibration results' : 'Schedule calibration' }}
+        </h2>
+        <button
+          class="dialog-close"
+          aria-label="Close dialog"
+          type="button"
+          (click)="editorOpen.set(false)"
+          [disabled]="saving()"
+        >
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
       <div class="form-grid">
-        <label *ngFor="let field of fields">{{ field.label }}
-          <ng-container *ngIf="field.type === 'relation'; else staticField">
-            <input *ngIf="optionsFor(field).length > 8" #relationSearchBox type="search" placeholder="Search options" [value]="relationSearch()[field.key] || ''" (input)="updateRelationSearch(field.key, relationSearchBox.value)">
-            <select [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"><option value="">Select...</option><option *ngFor="let option of filteredOptions(field)" [value]="option">{{ option }}</option></select>
-          </ng-container>
-          <ng-template #staticField>
-            <select *ngIf="field.type === 'select'; else inputField" [(ngModel)]="draft[field.key]" [name]="field.key"><option value="">Select...</option><option *ngFor="let option of optionsFor(field)" [value]="option">{{ option }}</option></select>
-            <ng-template #inputField><input [type]="field.type || 'text'" [(ngModel)]="draft[field.key]" [name]="field.key" [required]="!!field.required"></ng-template>
-          </ng-template>
+        <ng-container *ngIf="!selectedId()"
+          ><label
+            >Machine<select name="machine" [(ngModel)]="draft.machineId" required>
+              <option value="">Select machine</option>
+              <option *ngFor="let machine of machines()" [value]="machine.id">
+                {{ machine.name }}
+              </option>
+            </select></label
+          ><label>Type<input name="type" [(ngModel)]="draft.type" required /></label
+          ><label
+            >Due date<input name="dueAt" type="date" [(ngModel)]="draft.dueAt" required /></label
+          ><label>Agency<input name="agency" [(ngModel)]="draft.agency" /></label
+          ><label
+            >Responsible person<input
+              name="responsible"
+              [(ngModel)]="draft.responsiblePerson" /></label></ng-container
+        ><ng-container *ngIf="selectedId()"
+          ><label
+            >Result<select
+              name="result"
+              [(ngModel)]="draft.result"
+              [disabled]="draft.status === 'Completed'"
+              required
+            >
+              <option value="">Select result</option>
+              <option>Pass</option>
+              <option>Fail</option>
+            </select></label
+          ><label
+            >Certificate number<input
+              name="certificate"
+              [(ngModel)]="draft.certificateNumber"
+              [disabled]="draft.status === 'Completed'"
+              required /></label></ng-container
+        ><label
+          >Remarks<textarea
+            name="remarks"
+            [(ngModel)]="draft.remarks"
+            [disabled]="draft.status === 'Completed'"
+          ></textarea>
         </label>
-        <label>Status<select [(ngModel)]="draft.status" name="status"><option>Active</option><option>Planned</option><option>In progress</option><option>Approved</option><option>Valid</option><option>Expired</option></select></label>
       </div>
-      <footer><button type="button" class="secondary" (click)="closeEditor()">Cancel</button><button type="submit" class="primary-action">Save record</button></footer>
+      <app-mmms-attachments
+        [files]="draft.attachments || []"
+        (filesChange)="draft.attachments = $event"
+        [readonly]="draft.status === 'Completed'"
+      ></app-mmms-attachments
+      ><button *ngIf="draft.status !== 'Completed'" type="submit" [disabled]="saving()">
+        {{ selectedId() ? 'Complete calibration' : 'Schedule' }}
+      </button>
+      <footer class="dialog-actions">
+        <button type="button" (click)="editorOpen.set(false)" [disabled]="saving()">Close</button>
+      </footer>
     </form>
   </div>
 </section>

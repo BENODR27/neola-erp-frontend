@@ -8,6 +8,7 @@ import { AuthService } from '../../services/auth.service';
 import { HttpService } from '../../../shared/services/http/http.service';
 import { environment } from '../../../shared/environments/environment';
 import { APP_CONFIG } from '../../../shared/config/app-config';
+import { APP_CONSTANTS } from '../../../shared/config/app-constants';
 import { LocalStorageService } from '../../../shared/services/local-storage/local-storage.service';
 import Swal from 'sweetalert2';
 
@@ -73,7 +74,9 @@ export class SigninComponent {
           }
 
           const result = payload.result ?? payload.user ?? {};
-          const roles = (result as { roles?: unknown[] }).roles ?? [];
+          const roles = ((result as { roles?: unknown[] }).roles ?? []).filter(
+            (role) => typeof role === 'string' || (role as { enabled?: boolean }).enabled !== false,
+          );
           const userRoles = roles
             .map((role) => (typeof role === 'string' ? role : (role as { name?: unknown }).name))
             .filter((role): role is string => Boolean(role));
@@ -81,6 +84,11 @@ export class SigninComponent {
             typeof role === 'string'
               ? []
               : ((role as { permissions?: unknown[] }).permissions ?? [])
+                  .filter(
+                    (permission) =>
+                      typeof permission === 'string' ||
+                      (permission as { enabled?: boolean }).enabled !== false,
+                  )
                   .map((permission) =>
                     typeof permission === 'string'
                       ? permission
@@ -122,7 +130,7 @@ export class SigninComponent {
             icon: 'success',
             showConfirmButton: false,
           });
-          void this.router.navigate(['/adminv2/welcome']);
+          void this.router.navigateByUrl(APP_CONSTANTS.routes.home);
         },
         error: (error: { error?: LoginResponse; message?: string }) => {
           this.errorMessage.set(

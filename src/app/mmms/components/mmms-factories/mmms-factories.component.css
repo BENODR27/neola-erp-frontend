@@ -10,5 +10,5 @@
 }
 
 .master-page-factories .kicker {
-  color: #2f6fb5;
+  color: var(--app-primary);
 }

@@ -1,6 +1,12 @@
 <div class="mmms-context-anchor">
   <div class="mmms-context-backdrop" *ngIf="selectionRequired()"></div>
-  <button class="mmms-context-trigger" type="button" (click)="toggle()" aria-label="Change organization and factory context" title="Organization and factory context">
+  <button
+    class="mmms-context-trigger"
+    type="button"
+    (click)="toggle()"
+    aria-label="Change organization and factory context"
+    title="Organization and factory context"
+  >
     <i class="bi bi-chevron-left"></i>
   </button>
 
@@ -10,28 +16,75 @@
         <span class="eyebrow">Data scope</span>
         <strong>Organization &amp; factory</strong>
       </div>
-      <button *ngIf="!selectionRequired()" type="button" class="btn-close" aria-label="Close" (click)="toggle()"></button>
+      <button
+        *ngIf="!selectionRequired()"
+        type="button"
+        class="btn-close"
+        aria-label="Close"
+        (click)="toggle()"
+      ></button>
     </div>
-    <p class="context-help">Choose the site whose maintenance data you want to work with. Access remains controlled by IAM permissions.</p>
+    <p class="context-help">
+      Choose the site whose maintenance data you want to work with. Access remains controlled by IAM
+      permissions.
+    </p>
 
-    <label>Organization</label>
-    <input class="form-control form-control-sm" [ngModel]="organizationSearch()" (ngModelChange)="organizationSearch.set($event)" placeholder="Search organizations" />
-    <select class="form-select form-select-sm" [ngModel]="contextService.context().organizationId || ''" (ngModelChange)="selectOrganization($event)">
+    <label for="mmms-organization-context">Organization</label>
+    <input
+      class="form-control form-control-sm"
+      [ngModel]="organizationSearch()"
+      (ngModelChange)="organizationSearch.set($event)"
+      aria-label="Search organizations"
+      placeholder="Search organizations"
+    />
+    <select
+      id="mmms-organization-context"
+      aria-label="Organization"
+      class="form-select form-select-sm"
+      [ngModel]="contextService.context().organizationId || ''"
+      (ngModelChange)="selectOrganization($event)"
+    >
       <option value="">All permitted organizations</option>
-      <option *ngFor="let item of filteredOrganizations" [value]="item.id">{{ item.name }}<span *ngIf="item.code"> · {{ item.code }}</span></option>
+      <option *ngFor="let item of filteredOrganizations" [value]="item.id">
+        {{ item.name }}<span *ngIf="item.code"> · {{ item.code }}</span>
+      </option>
     </select>
 
-    <label>Factory / site</label>
-    <input class="form-control form-control-sm" [ngModel]="factorySearch()" (ngModelChange)="factorySearch.set($event)" placeholder="Search factories" />
-    <select class="form-select form-select-sm" [ngModel]="contextService.context().factoryId || ''" (ngModelChange)="selectFactory($event)">
+    <label for="mmms-factory-context">Factory / site</label>
+    <input
+      class="form-control form-control-sm"
+      [ngModel]="factorySearch()"
+      (ngModelChange)="factorySearch.set($event)"
+      aria-label="Search factories"
+      placeholder="Search factories"
+    />
+    <select
+      id="mmms-factory-context"
+      aria-label="Factory / site"
+      class="form-select form-select-sm"
+      [ngModel]="contextService.context().factoryId || ''"
+      (ngModelChange)="selectFactory($event)"
+    >
       <option value="">All permitted factories</option>
-      <option *ngFor="let item of filteredFactories" [value]="item.id">{{ item.name }}<span *ngIf="item.code"> · {{ item.code }}</span></option>
+      <option *ngFor="let item of filteredFactories" [value]="item.id">
+        {{ item.name }}<span *ngIf="item.code"> · {{ item.code }}</span>
+      </option>
     </select>
 
     <div class="context-current">
       <i class="bi bi-shield-check"></i>
-      <span>{{ contextService.context().organizationName || 'All permitted organizations' }} / {{ contextService.context().factoryName || 'All permitted factories' }}</span>
+      <span
+        >{{ contextService.context().organizationName || 'All permitted organizations' }} /
+        {{ contextService.context().factoryName || 'All permitted factories' }}</span
+      >
     </div>
-    <button *ngIf="!selectionRequired()" class="btn btn-link btn-sm clear-context" type="button" (click)="clear()">Clear selection</button>
+    <button
+      *ngIf="!selectionRequired()"
+      class="btn btn-link btn-sm clear-context"
+      type="button"
+      (click)="clear()"
+    >
+      Clear selection
+    </button>
   </section>
 </div>

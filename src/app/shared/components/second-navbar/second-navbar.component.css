@@ -1,58 +1,51 @@
-.second-nav {
-  position: static;
-  display: flex;
-  justify-content: flex-start;
+:host {
+  display: block;
   min-width: 0;
+}
+.workspace-nav {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface-alt);
+}
+.workspace-nav a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   gap: 8px;
-  width: 100%;
-  margin: 0 0 24px;
-  padding: 0 0 14px;
-  overflow-x: auto;
-  overflow-y: hidden;
-  overscroll-behavior-x: contain;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  background: transparent;
-  border-bottom: 1px solid var(--shell-border, #e5eaf3);
-}
-
-.second-nav::-webkit-scrollbar {
-  display: none;
-}
-
-.second-nav .nav-link {
-  flex: 0 0 auto;
-  padding: 9px 14px;
-  color: var(--shell-muted, #74819a) !important;
-  background: transparent;
-  border: 0;
-  border-radius: 9px;
-  font-size: 13px;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 8px 12px;
+  color: var(--app-muted);
+  border-radius: 8px;
+  font-family: var(--app-font);
+  font-size: 0.8rem;
   font-weight: 600;
-  text-align: center;
   text-decoration: none;
-  transition: color 160ms ease, background 160ms ease;
+  white-space: nowrap;
 }
-
-.second-nav .nav-link:hover {
-  color: var(--shell-primary-strong, #3454b8) !important;
-  background: var(--shell-primary-soft, #edf2ff);
+.workspace-nav a:hover,
+.workspace-nav a.active {
+  color: var(--app-primary);
+  background: var(--app-surface);
 }
-
-.second-nav .nav-link.active {
-  color: var(--shell-primary-strong, #3454b8) !important;
-  background: var(--shell-primary-soft, #edf2ff);
+.workspace-nav a:focus-visible {
+  outline: 2px solid var(--app-primary);
+  outline-offset: 2px;
 }
-
-@media (max-width: 575.98px) {
-  .second-nav {
-    gap: 4px;
-    margin-bottom: 18px;
-    padding-bottom: 10px;
+@media (max-width: 767.98px) {
+  .workspace-nav {
+    padding: 2px;
+    gap: 2px;
   }
-
-  .second-nav .nav-link {
-    padding: 8px 12px;
-    font-size: 12px;
+  .workspace-nav a {
+    min-height: 36px;
+    width: 36px;
+    padding: 7px;
+  }
+  .workspace-nav span {
+    display: none;
   }
 }

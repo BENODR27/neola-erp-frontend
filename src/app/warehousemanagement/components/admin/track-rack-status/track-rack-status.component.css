@@ -40,18 +40,18 @@
   width: 100%; /* Adjust width as needed */
   max-width: 300px; /* Optional: Set a maximum width for the text box */
   padding: 0px; /* Adds padding inside the text box */
-  border: 1px solid #ccc; /* Optional: Border styling */
+  border: 1px solid var(--app-border); /* Optional: Border styling */
   border-radius: 4px; /* Optional: Rounded corners */
   font-size: 16px; /* Font size */
   background: rgba(0,0,0,0.7);
-  color: #fff;
+  color: var(--app-text);
   font-weight: 500;
   box-shadow: 0 2px 8px rgba(44, 62, 80, 0.08);
   transition: background 0.2s;
 }
 .text-box:hover {
   background: rgba(33, 190, 2, 0.8);
-  color: #fff;
+  color: var(--app-text);
 }
 .image-container {
   
@@ -61,7 +61,7 @@
   transition: box-shadow 0.2s cubic-bezier(.4,0,.2,1), transform 0.2s cubic-bezier(.4,0,.2,1);
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   border-radius: 12px;
-  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+  background: linear-gradient(135deg, var(--app-surface) 0%, var(--app-surface-alt) 100%);
 }
 
 .image-container:hover {
@@ -112,8 +112,8 @@
   /* width: 100%; */
   margin-bottom: 1rem;
   background: black;
-  border: 10px black solid;
-  border-bottom: 30px black solid;
+  border: 10px var(--app-border) solid;
+  border-bottom: 30px var(--app-border) solid;
   border-radius: 18px 18px 32px 32px;
   box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18);
   overflow: hidden;
@@ -254,7 +254,7 @@
   height: 50px;
   line-height: 50px;
   margin: 0;
-  color: #fff;
+  color: var(--app-text);
   font-weight: bold;
   font-size: 1.6rem;
   border-bottom: 0 !important;
@@ -265,7 +265,7 @@
 }
 .blocks .block:nth-child(odd) {
   background: #ffe6a8;
-  border: 2px solid #cbdcff;
+  border: 2px solid var(--app-border);
 }
 
 .warning {
@@ -274,8 +274,8 @@
   font-weight: bold;
 }
 h2 {
-    color: #fff;
-    font-family: 'Quicksand', 'Segoe UI', Arial, sans-serif;
+    color: var(--app-text);
+    font-family: var(--app-font);
     font-weight: 700;
     letter-spacing: 1px;
     text-shadow: 0 2px 8px rgba(0,0,0,0.18);
@@ -311,28 +311,28 @@ h2 {
   max-height: 600px; /* Adjust the height as needed */
   max-width: 100%; /* Ensures the table doesn't overflow parent */
   display: block; /* Ensures the container behaves as a block element */
-  border: 1px solid #ccc; /* Optional: Border styling */
+  border: 1px solid var(--app-border); /* Optional: Border styling */
 }
 thead th {
   position: sticky; /* Fix the header */
   top: 0; /* Stick the header at the top */
   z-index: 1; /* Ensure it stays above the body rows */
-  background-color: #4caf50; /* Header background color */
-  color: white;
+  background-color: var(--app-surface-alt); /* Header background color */
+  color: var(--app-text);
   text-align: left;
   padding: 10px;
   font-weight: 600;
-  border-bottom: 2px solid #ddd;
+  border-bottom: 2px solid var(--app-border);
 }
 
 /* Table container styles */
 .table-responsive {
   margin: 20px auto;
   padding: 10px;
-  border: 1px solid #ccc;
+  border: 1px solid var(--app-border);
   border-radius: 8px;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-  background-color: #f9f9f9;
+  background-color: var(--app-surface);
   animation: fadeIn 0.7s cubic-bezier(.4,0,.2,1);
 }
 
@@ -354,15 +354,15 @@ table {
   width: 100%;
   border-collapse: collapse;
   text-align: left;
-  font-family: 'Quicksand', sans-serif;
+  font-family: var(--app-font);
   font-size: 14px;
-  background-color: #4caf50;
+  background-color: var(--app-surface-alt);
 }
 
 th,
 td {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--app-border);
   vertical-align: middle;
   transition: background 0.2s, color 0.2s;
 }
@@ -370,19 +370,19 @@ td {
 /* Header row styles */
 thead th {
   background-color: black;
-  color: white;
+  color: var(--app-text);
   text-transform: uppercase;
   font-weight: 600;
 }
 
 /* Alternating row colors */
 tbody tr:nth-child(odd) {
-  background-color: #e8f4e8;
+  background-color: var(--app-surface-alt);
 }
 
 tbody tr:hover {
-  background-color: #d0f5d0 !important;
-  color: #222;
+  background-color: var(--app-surface-alt) !important;
+  color: var(--app-text);
 }
 
 /* QR code column adjustments */
@@ -415,7 +415,7 @@ td:last-child {
 }
 
 .table-scroll-container::-webkit-scrollbar-track {
-  background-color: #f9f9f9;
+  background-color: var(--app-surface);
 }
 .tablesettings{
   opacity: 0.8;
@@ -453,7 +453,7 @@ td:last-child {
   border-radius: 50%;
   transform: scale(0);
   animation: ripple 0.6s linear;
-  background-color: rgba(255,255,255,0.5);
+  background-color: var(--app-surface);
   pointer-events: none;
   width: 100px;
   height: 100px;

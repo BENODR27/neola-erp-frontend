@@ -1,13 +1,6 @@
-<div class="mobile-menu d-lg-none">
-  <button
-    class="menu-btn"
-    type="button"
-    aria-label="Toggle navigation menu"
-    [attr.aria-expanded]="isMobileSidebarOpen"
-    (click)="toggleMobileSidebar()"
-  >
-    <i class="bi bi-list"></i>
-  </button>
+<div *ngIf="sharedService.navigationError()" role="alert" class="navigation-error">
+  <span>{{ sharedService.navigationError() }}</span
+  ><button type="button" (click)="sharedService.reloadNavigation()">Retry navigation</button>
 </div>
 
 <button
@@ -15,7 +8,7 @@
   class="mobile-sidebar-backdrop"
   type="button"
   aria-label="Close navigation menu"
-  (click)="isMobileSidebarOpen = false"
+  (click)="closeMobileSidebarOnEscape()"
 ></button>
 
 <div
@@ -25,36 +18,18 @@
   aria-label="Mobile navigation"
 >
   <div class="sidebar-items">
-    <a
-      [routerLink]="['/adminv2/welcome']"
-      class="dropdown-item"
-      (click)="isMobileSidebarOpen = false"
-    >
-      <i class="bi bi-house"></i>
-      <span>Home</span>
-    </a>
-    <a
-      [routerLink]="['/adminv2/applications']"
-      class="dropdown-item"
-      (click)="isMobileSidebarOpen = false"
-    >
-      <i class="bi bi-grid"></i>
-      <span>Applications</span>
-    </a>
-  </div>
-
-  <div class="sidebar-items">
     <ng-container *ngFor="let item of navbarItems()">
       <a
         [routerLink]="item.link"
+        [attr.aria-label]="item.label"
         *ngIf="authService.hasPermission(item.permission)"
-        (click)="isMobileSidebarOpen = false"
+        (click)="closeMobileSidebarOnEscape()"
       >
-        <i class="bi" [ngClass]="item.icon"></i>
+        <i class="bi" [ngClass]="item.icon" aria-hidden="true"></i>
         <span>{{ item.label }}</span>
       </a>
     </ng-container>
-    <a class="nav-link" (click)="logout(); isMobileSidebarOpen = false">
+    <a class="nav-link" (click)="logout(); closeMobileSidebarOnEscape()">
       <i class="bi bi-box-arrow-left"></i>
       <span>Sign Out</span>
     </a>
@@ -72,11 +47,12 @@
       <ng-container *ngFor="let item of navbarItems()">
         <a
           [routerLink]="item.link"
+          [attr.aria-label]="item.label"
           matTooltip="{{ item.label }}"
           *ngIf="authService.hasPermission(item.permission)"
           [matTooltipDisabled]="isExpanded"
         >
-          <i class="bi" [ngClass]="item.icon"></i>
+          <i class="bi" [ngClass]="item.icon" aria-hidden="true"></i>
           <span class="sidebarmoblabel" [hidden]="!isExpanded">
             {{ item.label }}
           </span>

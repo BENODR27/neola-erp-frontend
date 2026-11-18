@@ -2,22 +2,22 @@ thead th {
     position: sticky; /* Fix the header */
     top: 0; /* Stick the header at the top */
     z-index: 1; /* Ensure it stays above the body rows */
-    background-color: #4caf50; /* Header background color */
-    color: white;
+    background-color: var(--app-surface-alt); /* Header background color */
+    color: var(--app-text);
     text-align: left;
     padding: 10px;
     font-weight: 600;
-    border-bottom: 2px solid #ddd;
+    border-bottom: 2px solid var(--app-border);
   }
   
   /* Table container styles */
   .table-responsive {
     margin: 20px auto;
     padding: 10px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--app-border);
     border-radius: 8px;
     box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-    background-color: #f9f9f9;
+    background-color: var(--app-surface);
   }
   
   /* Scroll container for the table */
@@ -30,33 +30,33 @@ thead th {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-family: 'Quicksand', sans-serif;
+    font-family: var(--app-font);
     font-size: 14px;
-    background-color: #4caf50;
+    background-color: var(--app-surface-alt);
   }
   
   th,
   td {
     padding: 10px;
-    border: 1px solid #ddd;
+    border: 1px solid var(--app-border);
     vertical-align: middle;
   }
   
   /* Header row styles */
   thead th {
     background-color:#000000;
-  color: #ffffff !important;
+  color: var(--app-text) !important;
     text-transform: uppercase;
     font-weight: 600;
   }
   
   /* Alternating row colors */
   tbody tr:nth-child(odd) {
-    background-color: #e8f4e8;
+    background-color: var(--app-surface-alt);
   }
   
   tbody tr:hover {
-    background-color: #e8f4e8;
+    background-color: var(--app-surface-alt);
   }
   
   /* QR code column adjustments */
@@ -89,7 +89,7 @@ thead th {
   }
   
   .table-scroll-container::-webkit-scrollbar-track {
-    background-color: #f9f9f9;
+    background-color: var(--app-surface);
   }
   .tablesettings{
     opacity: 0.8;
@@ -105,8 +105,8 @@ thead th {
   position: absolute;
   top: 100%;
   left: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: var(--app-surface);
+  border: 1px solid var(--app-border);
   z-index: 10;
   min-width: 150px;
   max-height: 250px;
@@ -122,5 +122,5 @@ thead th {
 }
 
 .dropdown-item:hover {
-  background: #f1f1f1;
+  background: var(--app-surface-alt);
 }

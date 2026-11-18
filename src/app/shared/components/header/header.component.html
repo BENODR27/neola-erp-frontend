@@ -1,18 +1,35 @@
 <header class="header">
+  <button
+    class="menu-toggle"
+    type="button"
+    aria-label="Toggle navigation menu"
+    title="Toggle navigation"
+    [attr.aria-expanded]="navigationOpen"
+    (click)="toggle()"
+  >
+    <i class="bi bi-list" aria-hidden="true"></i>
+  </button>
+  <a class="brand" [routerLink]="appRoutes.home" [attr.aria-label]="appConfig.shortName + ' home'"
+    ><img [src]="appConfig.logo" [alt]="workspaceBrand" class="brand-logo" width="42" height="42"
+  /></a>
+  <div class="header-heading">
+    <span class="workspace-name">{{ workspaceBrand }}</span
+    ><span class="page-title">{{ pageTitle }}</span>
+  </div>
+  <app-second-navbar></app-second-navbar>
   <div class="profile-control">
     <button
       class="profile-toggle"
       type="button"
       aria-label="Open profile menu"
-      title="Profile"
+      title="Profile and appearance"
       [attr.aria-expanded]="isProfileMenuOpen()"
       aria-haspopup="true"
       (click)="toggleProfileMenu()"
     >
-      <span class="profile-name" [hidden]="!currentEmpName()">
-        {{ currentEmpName() }}
-      </span>
-      <i class="bi bi-person-circle" aria-hidden="true"></i>
+      <i class="bi bi-person-circle" aria-hidden="true"></i
+      ><span class="profile-name">{{ currentEmpName() || 'My account' }}</span
+      ><i class="bi bi-chevron-down profile-chevron" aria-hidden="true"></i>
     </button>
     <div
       class="profile-menu"
@@ -20,34 +37,16 @@
       role="menu"
       aria-label="Profile options"
     >
-      <button type="button" class="profile-menu-item" role="menuitem" (click)="logout()">
-        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
-        <span>Sign out</span>
+      <a
+        class="profile-menu-item"
+        role="menuitem"
+        routerLink="/appearance"
+        (click)="isProfileMenuOpen.set(false)"
+        ><i class="bi bi-palette" aria-hidden="true"></i><span>Appearance</span></a
+      >
+      <button type="button" class="profile-menu-item sign-out" role="menuitem" (click)="logout()">
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i><span>Sign out</span>
       </button>
     </div>
   </div>
-
-  <button
-    class="menu-toggle"
-    type="button"
-    aria-label="Toggle sidebar"
-    title="Toggle sidebar"
-    (click)="toggle()"
-  >
-    <i class="bi bi-layout-sidebar-inset"></i>
-  </button>
-
-  <a class="brand" [routerLink]="['/adminv2/welcome']" [attr.aria-label]="workspaceBrand + ' home'">
-    <!-- <span class="brand-mark">S</span>
-    <span class="brand-name">ADMIN</span> -->
-    <img [src]="appConfig.logo" [alt]="workspaceBrand" class="brand-logo" height="60" />
-  </a>
-
-  <span class="header-divider" aria-hidden="true"></span>
-  <h1 class="page-title" [hidden]="pageTitle === 'ADMIN'">{{ pageTitle }}</h1>
-
-  <!-- <div class="header-context">
-    <span class="status-dot" aria-hidden="true"></span>
-    <span> workspace</span>
-  </div> -->
 </header>

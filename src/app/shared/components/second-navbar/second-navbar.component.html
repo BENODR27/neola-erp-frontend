@@ -1,16 +1,20 @@
-<nav class="second-nav" aria-label="Workspace sections">
+<nav class="workspace-nav" aria-label="Workspace sections">
   <a
-    [routerLink]="['/adminv2/welcome']"
-    class="nav-link"
-    [class.active]="isActive('/adminv2/welcome')"
-    >Home</a
+    [routerLink]="routes.home"
+    aria-label="Home"
+    title="Home"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    ariaCurrentWhenActive="page"
+    ><i class="bi bi-house-door" aria-hidden="true"></i><span>Home</span></a
   >
   <a
-    [routerLink]="['/adminv2/applications']"
-    class="nav-link"
-    [class.active]="isActive('/adminv2/applications')"
-    >Applications</a
+    [routerLink]="routes.applications"
+    aria-label="Applications"
+    title="Applications"
+    routerLinkActive="active"
+    [routerLinkActiveOptions]="{ exact: true }"
+    ariaCurrentWhenActive="page"
+    ><i class="bi bi-grid" aria-hidden="true"></i><span>Applications</span></a
   >
-  <!-- <a class="nav-link col">Reports</a>
-  <a class="nav-link col">Dashboards</a> -->
 </nav>

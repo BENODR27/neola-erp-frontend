@@ -1,0 +1,5 @@
+{
+  "/v3/api/auth": { "target": "http://localhost:7001", "secure": false },
+  "/v1": { "target": "http://localhost:7010", "secure": false },
+  "/api/ss": { "target": "http://localhost:3052", "secure": false }
+}

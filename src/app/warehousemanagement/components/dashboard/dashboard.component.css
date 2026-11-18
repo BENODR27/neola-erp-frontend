@@ -7,9 +7,9 @@
   }
 .statcard{
     padding: 18px 20px;
-    background: linear-gradient(135deg, #c4c4c4 0%, #7e7e7e 100%);
+    background: linear-gradient(135deg, var(--app-surface-alt) 0%, #7e7e7e 100%);
     opacity: 0.95;
-    border-radius: 16px;
+    border-radius: var(--app-card-radius);
     box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     transition: box-shadow 0.3s, transform 0.3s;
 }
@@ -20,13 +20,13 @@
 }
 .progress, .progress-stacked{
     --bs-progress-bg: #e0e0e0;
-    background-color: #e0e0e0;
+    background-color: var(--app-surface-alt);
     border-radius: 8px;
     height: 18px;
 }
 .bg-success {
     --bs-bg-opacity: 1;
-    background: linear-gradient(90deg, #34fda9 0%, #00c6fb 100%) !important;
+    background: linear-gradient(90deg, var(--app-surface-alt) 0%, #00c6fb 100%) !important;
 }
 .progress.progress-md {
     height: 18px;
@@ -37,8 +37,8 @@
     border-radius: 6px;
 }
 .card{
-    background: linear-gradient(135deg, #fff7f0 0%, #f3f3f3 100%);
-    border-radius: 18px;
+    background: linear-gradient(135deg, var(--app-surface) 0%, var(--app-surface-alt) 100%);
+    border-radius: var(--app-card-radius);
     box-shadow: 0 4px 24px rgba(0,0,0,0.10);
     transition: box-shadow 0.3s, transform 0.3s;
 }
@@ -47,13 +47,13 @@
     transform: translateY(-2px) scale(1.01);
 }
 .card-racks{
-    background: linear-gradient(135deg, #f3aaaa 0%, #ffe6e6 100%);
+    background: linear-gradient(135deg, #f3aaaa 0%, var(--app-surface-alt) 100%);
 }
 .card-bays{
-    background: linear-gradient(135deg, #91ccfc 0%, #e6f7ff 100%);
+    background: linear-gradient(135deg, var(--app-surface-alt) 0%, var(--app-surface-alt) 100%);
 }
 .card-bins{
-    background: linear-gradient(135deg, #34fda9 0%, #e6fff7 100%);
+    background: linear-gradient(135deg, var(--app-surface-alt) 0%, var(--app-surface-alt) 100%);
 }
 .display-4 {
     font-size: 2.8rem;
@@ -77,19 +77,19 @@
     font-weight: 600 !important;
 }
 .text-primary {
-    color: #007bff !important;
+    color: var(--app-primary) !important;
 }
 .text-info {
-    color: #17a2b8 !important;
+    color: var(--app-primary) !important;
 }
 .text-success {
-    color: #28a745 !important;
+    color: var(--app-primary) !important;
 }
 .text-secondary {
-    color: #6c757d !important;
+    color: var(--app-muted) !important;
 }
 .text-dark {
-    color: #343a40 !important;
+    color: var(--app-text) !important;
 }
 .shadow-lg {
     box-shadow: 0 8px 32px rgba(0,0,0,0.16) !important;

@@ -35,22 +35,39 @@ export class MmmsContextSelectorComponent implements OnInit {
 
   get filteredOrganizations(): MmmsScopeOption[] {
     const query = this.organizationSearch().toLowerCase().trim();
-    return this.contextService.organizations().filter((item) => !query || `${item.name} ${item.code || ''}`.toLowerCase().includes(query));
+    return this.contextService
+      .organizations()
+      .filter((item) => !query || `${item.name} ${item.code || ''}`.toLowerCase().includes(query));
   }
 
   get filteredFactories(): MmmsScopeOption[] {
     const context = this.contextService.context();
     const query = this.factorySearch().toLowerCase().trim();
     return this.contextService.factories().filter((item) => {
-      const belongs = !context.organizationId || !item.organizationId || item.organizationId === context.organizationId;
+      const belongs =
+        !context.organizationId ||
+        !item.organizationId ||
+        item.organizationId === context.organizationId;
       return belongs && (!query || `${item.name} ${item.code || ''}`.toLowerCase().includes(query));
     });
   }
 
-  toggle(): void { this.open.update((value) => !value); }
-  selectOrganization(id: string): void { this.contextService.selectOrganization(this.contextService.organizations().find((item) => item.id === id) || null); }
-  selectFactory(id: string): void { this.contextService.selectFactory(this.contextService.factories().find((item) => item.id === id) || null); }
-  clear(): void { this.contextService.clear(); }
+  toggle(): void {
+    this.open.update((value) => !value);
+  }
+  selectOrganization(id: string): void {
+    this.contextService.selectOrganization(
+      this.contextService.organizations().find((item) => item.id === id) || null,
+    );
+  }
+  selectFactory(id: string): void {
+    this.contextService.selectFactory(
+      this.contextService.factories().find((item) => item.id === id) || null,
+    );
+  }
+  clear(): void {
+    this.contextService.clear();
+  }
 
   private isAdministrativeRoute(): boolean {
     const path = this.router.url.split('?')[0].replace(/\/$/, '');

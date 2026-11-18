@@ -4,7 +4,6 @@ import { Subscription, filter } from 'rxjs';
 import { SidebarComponent } from '../../components/sidebar/sidebar.component';
 import { CommonModule } from '@angular/common';
 import { HeaderComponent } from '../../components/header/header.component';
-import { SecondNavbarComponent } from '../../components/second-navbar/second-navbar.component';
 import { MainContentComponent } from '../../components/main-content/main-content.component';
 import { ChatComponent } from '../../components/chat/chat.component';
 import { MmmsContextSelectorComponent } from '../../../mmms/components/mmms-context-selector/mmms-context-selector.component';
@@ -26,6 +25,7 @@ import { MmmsContextSelectorComponent } from '../../../mmms/components/mmms-cont
 export class MainLayoutComponent implements OnInit, OnDestroy {
   readonly isSidebarExpanded = signal(false);
   readonly isSidebarHovered = signal(false);
+  readonly isMobileSidebarOpen = signal(false);
   readonly isChatEnabled = signal(false);
   readonly isMmmsRoute = signal(false);
   private routeSubscription?: Subscription;
@@ -35,17 +35,17 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   raindrops: { left: string; delay: string }[] = [];
-  readonly thunderActive = signal(false)
-  readonly showSun = signal(false)
+  readonly thunderActive = signal(false);
+  readonly showSun = signal(false);
   // Placeholder for future live weather state
   weather: 'rain' | 'sunny' | 'cloudy' = 'rain';
-  readonly sunLeft = signal('50vw') // Default center
+  readonly sunLeft = signal('50vw'); // Default center
   manVisible = false;
   manGesture: 'wave' | 'point' | 'idle' = 'idle';
   manLeft = 24;
-  readonly jerryVisible = signal(false)
-  readonly jerryGesture = signal<'wave' | 'point' | 'idle'>('idle')
-  readonly jerryLeft = signal(24)
+  readonly jerryVisible = signal(false);
+  readonly jerryGesture = signal<'wave' | 'point' | 'idle'>('idle');
+  readonly jerryLeft = signal(24);
 
   constructor(private router: Router) {
     // Generate 60 random raindrops with random horizontal positions and animation delays
@@ -68,7 +68,10 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
     this.routeSubscription.add(
       this.router.events
         .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-        .subscribe((event) => this.updateMmmsVisibility(event.urlAfterRedirects)),
+        .subscribe((event) => {
+          this.updateMmmsVisibility(event.urlAfterRedirects);
+          this.isMobileSidebarOpen.set(false);
+        }),
     );
   }
 
@@ -86,15 +89,15 @@ export class MainLayoutComponent implements OnInit, OnDestroy {
   }
 
   toggleSidebar() {
+    if (window.matchMedia('(max-width: 991.98px)').matches) {
+      this.isMobileSidebarOpen.update((open) => !open);
+      return;
+    }
     this.isSidebarExpanded.update((expanded) => !expanded);
   }
 
   onSidebarMouseEnter(): void {
-    if (
-      window.matchMedia(
-        '(min-width: 768px) and (hover: hover) and (pointer: fine)',
-      ).matches
-    ) {
+    if (window.matchMedia('(min-width: 768px) and (hover: hover) and (pointer: fine)').matches) {
       this.isSidebarHovered.set(true);
     }
   }

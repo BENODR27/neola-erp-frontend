@@ -1,7 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { trigger, transition, style, animate, state } from '@angular/animations';
-import { SharedServiceService } from '../../services/shared-service/shared-service.service';
 import { AuthService } from '../../../auth/services/auth.service';
 import { Router } from '@angular/router';
 import { ApiService } from '../../services/api/api.service';
@@ -34,19 +33,6 @@ interface WorkspaceNavigation {
   navbarItems?: WorkspaceNavigationItem[] | null;
 }
 
-const IAM_NAVIGATION: WorkspaceNavigationItem[] = [
-  { icon: 'bi-activity', link: '/adminv2/error/logs', label: 'Error Logs', permission: 'admin-logs' },
-  { icon: 'bi-wrench-adjustable', link: '/adminv2/webutil', label: 'WebUtil', permission: 'admin-user' },
-  { icon: 'bi-palette', link: '/adminv2/theme', label: 'Theme', permission: 'admin-user' },
-  { icon: 'bi-person-vcard', link: '/adminv2/user', label: 'User', permission: 'admin-user' },
-  { icon: 'bi-grid', link: '/adminv2/application', label: 'Applications', permission: 'applications:manage' },
-  { icon: 'bi-key', link: '/adminv2/permission', label: 'Permission', permission: 'admin-permission' },
-  { icon: 'bi-people', link: '/adminv2/role', label: 'Role', permission: 'admin-role' },
-  { icon: 'bi-person-lines-fill', link: '/adminv2/employees', label: 'Employees', permission: 'admin-user' },
-  { icon: 'bi-list-nested', link: '/adminv2/workspace-navigation', label: 'Workspace navigation', permission: 'applications:manage' },
-  { icon: 'bi-person-lines-fill', link: '/adminv2/vendors', label: 'Vendors', permission: 'vendors:manage' },
-];
-
 @Component({
   selector: 'app-applications',
   imports: [CommonModule],
@@ -65,6 +51,11 @@ export class ApplicationsComponent implements OnInit {
   readonly hasSearched = signal(false);
   readonly applications = signal<WorkspaceApplication[]>([]);
   readonly workspaceNavigation = signal<WorkspaceNavigation[]>([]);
+  readonly iamWorkspace = computed(() =>
+    this.workspaceNavigation().find(
+      (entry) => entry.applicationName?.trim().toLowerCase() === 'superadminv2',
+    ),
+  );
   readonly applicationLoadError = signal(false);
   readonly isLoadingApplications = signal(false);
   readonly deletingApplicationId = signal<number | null>(null);
@@ -83,13 +74,10 @@ export class ApplicationsComponent implements OnInit {
   });
 
   constructor(
-    private sharedService: SharedServiceService,
     public authService: AuthService,
     private router: Router,
     private apiService: ApiService,
-  ) {
-    this.sharedService.updateNavbarItems([]);
-  }
+  ) {}
 
   ngOnInit(): void {
     this.isLoadingApplications.set(true);
@@ -108,8 +96,11 @@ export class ApplicationsComponent implements OnInit {
               (application: unknown): application is Omit<WorkspaceApplication, 'name' | 'icon'> =>
                 !!application &&
                 typeof application === 'object' &&
-                typeof (application as { applicationName?: unknown }).applicationName === 'string' &&
-                (application as { applicationName: string }).applicationName.trim().toLocaleLowerCase() !== 'root',
+                typeof (application as { applicationName?: unknown }).applicationName ===
+                  'string' &&
+                (application as { applicationName: string }).applicationName
+                  .trim()
+                  .toLocaleLowerCase() !== 'root',
             )
             .map((application: Omit<WorkspaceApplication, 'name' | 'icon'>) => ({
               ...application,
@@ -163,12 +154,8 @@ export class ApplicationsComponent implements OnInit {
   }
 
   openAdminV2Workspace(): void {
-    const configuration = this.workspaceNavigation().find(
-      (entry) => entry.applicationName?.trim().toLocaleLowerCase() === 'superadminv2',
-    );
-
-        this.sharedService.updateNavbarItems(configuration?.navbarItems?.length ? configuration.navbarItems : IAM_NAVIGATION);
-    void this.router.navigateByUrl('/adminv2/welcome');
+    const destination = this.iamWorkspace()?.landingRoute;
+    if (destination) void this.router.navigateByUrl(this.normalizeAdminRoute(destination));
   }
 
   async onApplicationClick(appName: string): Promise<void> {
@@ -177,28 +164,32 @@ export class ApplicationsComponent implements OnInit {
       (entry) => entry.applicationName?.trim().toLocaleLowerCase() === requestedName,
     );
 
-    if (!configuration) {
+    if (!configuration?.landingRoute) {
       console.error('No workspace navigation configured for application:', appName);
+      void Swal.fire({
+        icon: 'info',
+        title: 'Workspace unavailable',
+        text: 'Ask an administrator to configure this application.',
+      });
       return;
     }
 
-    const navigated = await this.router.navigateByUrl(
-      this.normalizeAdminRoute(configuration.landingRoute) || '/adminv2/welcome',
-    );
-
-    if (navigated) {
-      this.sharedService.updateNavbarItems(configuration.navbarItems ?? []);
-    }
+    await this.router.navigateByUrl(this.normalizeAdminRoute(configuration.landingRoute));
   }
 
   async deleteApplication(event: Event, application: WorkspaceApplication): Promise<void> {
     event.stopPropagation();
-    if (!this.authService.hasPermission('applications:manage') || this.deletingApplicationId() !== null) {
+    if (
+      !this.authService.hasPermission('applications:manage') ||
+      this.deletingApplicationId() !== null
+    ) {
       return;
     }
 
     const navigation = this.workspaceNavigation().find(
-      (entry) => entry.applicationName?.trim().toLocaleLowerCase() === application.name.trim().toLocaleLowerCase(),
+      (entry) =>
+        entry.applicationName?.trim().toLocaleLowerCase() ===
+        application.name.trim().toLocaleLowerCase(),
     );
     const theme = application.applicationTheme?.theme;
     const navigationSummary = navigation
@@ -229,7 +220,9 @@ export class ApplicationsComponent implements OnInit {
           this.applications.set(this.applications().filter((item) => item.id !== application.id));
           this.workspaceNavigation.set(
             this.workspaceNavigation().filter(
-              (item) => item.applicationName?.trim().toLocaleLowerCase() !== application.name.trim().toLocaleLowerCase(),
+              (item) =>
+                item.applicationName?.trim().toLocaleLowerCase() !==
+                application.name.trim().toLocaleLowerCase(),
             ),
           );
           Swal.fire({
@@ -252,13 +245,17 @@ export class ApplicationsComponent implements OnInit {
   }
 
   private escapeHtml(value: string): string {
-    return value.replace(/[&<>'"]/g, (character) => ({
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      "'": '&#39;',
-      '"': '&quot;',
-    })[character] ?? character);
+    return value.replace(
+      /[&<>'"]/g,
+      (character) =>
+        ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;',
+        })[character] ?? character,
+    );
   }
 
   private normalizeAdminRoute(route: string | null | undefined): string {

@@ -1,1 +1,114 @@
-.editor-backdrop{position:fixed;inset:0;z-index:1050;display:grid;place-items:center;padding:20px;background:#14233a73;backdrop-filter:blur(4px)}.editor-dialog{width:min(680px,100%);max-height:90vh;overflow:auto;border:1px solid #e1e8f3;border-radius:20px;background:#fff;box-shadow:0 24px 70px #14233a45;padding:24px}.editor-dialog header{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:20px}.editor-dialog h2{margin:3px 0 5px;color:#1f3155;font-size:24px;letter-spacing:-.04em}.editor-dialog p{margin:0;color:#7b879d;font-size:12px}.dialog-close{border:0;background:#f2f5f9;color:#637792;width:34px;height:34px;border-radius:9px}.json-editor{display:grid;gap:8px;color:#536984;font-size:11px;font-weight:800}.json-editor textarea{width:100%;resize:vertical;border:1px solid #dfe7f1;border-radius:12px;background:#f8faff;color:#203452;padding:14px;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;outline:none}.json-editor textarea:focus{border-color:#5c8de8;box-shadow:0 0 0 3px #5c8de822}.editor-dialog footer{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}.row-actions,.card-actions{display:flex;justify-content:flex-end;gap:5px}.row-actions button,.card-actions button{border:0;border-radius:7px;background:#f3f6fa;color:#68809d;padding:6px 8px;font-size:11px}.row-actions button:hover,.card-actions button:hover{background:#e6effd;color:#3674e9}.card-actions{border-top:1px solid #f0f3f7;margin-top:14px;padding-top:12px}.card-actions button:first-child{margin-right:auto}@media(max-width:600px){.editor-dialog{padding:18px}.editor-dialog h2{font-size:20px}}
+.editor-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1050;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: #14233a73;
+  backdrop-filter: blur(4px);
+}
+.editor-dialog {
+  width: min(680px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  border: 1px solid var(--app-border);
+  border-radius: 20px;
+  background: var(--app-surface);
+  box-shadow: 0 24px 70px #14233a45;
+  padding: 24px;
+}
+.editor-dialog header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.editor-dialog h2 {
+  margin: 3px 0 5px;
+  color: var(--app-text);
+  font-size: 24px;
+  letter-spacing: -0.04em;
+}
+.editor-dialog p {
+  margin: 0;
+  color: var(--app-muted);
+  font-size: 12px;
+}
+.dialog-close {
+  border: 0;
+  background: var(--app-surface);
+  color: var(--app-muted);
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+}
+.json-editor {
+  display: grid;
+  gap: 8px;
+  color: var(--app-muted);
+  font-size: 11px;
+  font-weight: 800;
+}
+.json-editor textarea {
+  width: 100%;
+  resize: vertical;
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  color: var(--app-text);
+  padding: 14px;
+  font:
+    12px/1.55 ui-monospace,
+    SFMono-Regular,
+    Consolas,
+    monospace;
+  outline: none;
+}
+.json-editor textarea:focus {
+  border-color: #5c8de8;
+  box-shadow: 0 0 0 3px #5c8de822;
+}
+.editor-dialog footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.row-actions,
+.card-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 5px;
+}
+.row-actions button,
+.card-actions button {
+  border: 0;
+  border-radius: var(--app-card-radius);
+  background: var(--app-surface);
+  color: var(--app-muted);
+  padding: 6px 8px;
+  font-size: 11px;
+}
+.row-actions button:hover,
+.card-actions button:hover {
+  background: var(--app-surface-alt);
+  color: var(--app-primary);
+}
+.card-actions {
+  border-top: 1px solid var(--app-border);
+  margin-top: 14px;
+  padding-top: 12px;
+}
+.card-actions button:first-child {
+  margin-right: auto;
+}
+@media (max-width: 600px) {
+  .editor-dialog {
+    padding: 18px;
+  }
+  .editor-dialog h2 {
+    font-size: 20px;
+  }
+}

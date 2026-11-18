@@ -15,12 +15,7 @@ import { Title } from '@angular/platform-browser';
 import { APP_CONFIG } from './shared/config/app-config';
 @Component({
   selector: 'app-root',
-  imports: [
-    RouterOutlet,
-    CommonModule,
-    PreloaderComponent,
-    CustomCursorComponent,
-  ],
+  imports: [RouterOutlet, CommonModule, PreloaderComponent, CustomCursorComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
 })
@@ -37,7 +32,6 @@ export class AppComponent {
     private titleService: Title,
   ) {
     this.titleService.setTitle(APP_CONFIG.defaultTitle);
-    this.themeService.fetchColorsFromApi();
   }
 
   ngOnInit(): void {

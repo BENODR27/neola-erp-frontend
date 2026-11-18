@@ -1,7 +1,34 @@
-<div class="container h-100 d-flex justify-content-center align-items-center">
-  <div class="row mt-5">
-    <div class="col-md-12 text-center">
-      <h3 class="animate-charcter">WELCOME TO {{ title }}</h3>
-    </div>
-  </div>
-</div>
+<main class="platform-home">
+  <header class="home-intro">
+    <span class="eyebrow">{{ appConfig.shortName }} WORKSPACE</span>
+    <h1>Your workspace</h1>
+    <p>
+      Welcome{{ employeeName() ? ', ' + employeeName() : '' }}. Choose an application to get
+      started.
+    </p>
+  </header>
+  <section class="home-destinations" aria-label="Workspace destinations">
+    <a class="destination" routerLink="/applications"
+      ><span class="destination-icon"><i class="bi bi-grid-1x2" aria-hidden="true"></i></span>
+      <div>
+        <h2>Applications</h2>
+        <p>Open the applications available to your account.</p>
+        <span class="destination-action"
+          >Explore applications <i class="bi bi-arrow-up-right" aria-hidden="true"></i
+        ></span></div
+    ></a>
+    <a class="destination" routerLink="/appearance"
+      ><span class="destination-icon"><i class="bi bi-palette" aria-hidden="true"></i></span>
+      <div>
+        <h2>Make it yours</h2>
+        <p>Choose light, dark or system mode and manage your display preferences.</p>
+        <span class="destination-action"
+          >Appearance <i class="bi bi-arrow-up-right" aria-hidden="true"></i
+        ></span></div
+    ></a>
+  </section>
+  <p class="access-note">
+    <i class="bi bi-shield-check" aria-hidden="true"></i> Your applications and actions follow the
+    access assigned to your account.
+  </p>
+</main>
