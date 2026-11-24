@@ -1,0 +1,149 @@
+<main class="masters-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">NeoLA · Shared masters</span>
+      <h1>Contacts</h1>
+      <p>Business contacts connected to the correct company and factory.</p>
+    </div>
+    @if (catalog.canManage) {
+      <button class="btn btn-primary" (click)="edit()">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> Add contact
+      </button>
+    }
+  </header>
+  <p class="form-note">
+    Choose the company responsible for this contact. Factory assignment is optional.
+  </p>
+  @if (catalog.lookupError()) {
+    <p class="alert alert-warning" role="alert">
+      {{ catalog.lookupError() }}
+      <button class="btn btn-sm btn-outline-secondary" (click)="catalog.loadHierarchy()">
+        Retry company data
+      </button>
+    </p>
+  }
+  <app-master-catalog-table
+    [catalog]="catalog"
+    [hierarchy]="false"
+    [people]="true"
+    (editRecord)="edit($event)"
+  />
+  @if (catalog.open()) {
+    <div class="editor-backdrop">
+      <section
+        class="editor"
+        role="dialog"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        (keydown.escape)="catalog.close()"
+        aria-modal="true"
+        aria-labelledby="contacts-title"
+      >
+        <header>
+          <h2 id="contacts-title">{{ catalog.draft.id ? 'Edit contact' : 'Add contact' }}</h2>
+          <button
+            type="button"
+            class="btn btn-outline-secondary"
+            (click)="catalog.close()"
+            [disabled]="catalog.saving()"
+            aria-label="Close editor"
+          >
+            ×
+          </button>
+        </header>
+        <form #editorForm="ngForm" (ngSubmit)="editorForm.valid && catalog.save()">
+          @if (catalog.error()) {
+            <p class="alert alert-danger" role="alert">{{ catalog.error() }}</p>
+          }
+          <fieldset [disabled]="catalog.saving()">
+            <div class="fields">
+              <label
+                >Contact name<input
+                  class="form-control"
+                  name="name"
+                  [(ngModel)]="catalog.draft.name"
+                  required
+                  maxlength="180" /></label
+              ><label
+                >Code<input
+                  class="form-control"
+                  name="code"
+                  [(ngModel)]="catalog.draft.code"
+                  required
+                  maxlength="100" /></label
+              ><label
+                >Company<select
+                  class="form-select"
+                  name="company"
+                  [(ngModel)]="catalog.draft.organizationId"
+                  (ngModelChange)="catalog.draft.factoryId = null"
+                  [disabled]="!!catalog.draft.id && !!catalog.draft.organizationId"
+                  required
+                >
+                  <option [ngValue]="null">Choose company</option>
+                  @for (company of catalog.companies(); track company.id) {
+                    <option [value]="company.id">{{ company.name }}</option>
+                  }
+                </select></label
+              ><label
+                >Factory<select
+                  class="form-select"
+                  name="factory"
+                  [(ngModel)]="catalog.draft.factoryId"
+                  [disabled]="!catalog.draft.organizationId"
+                >
+                  <option [ngValue]="null">All factories in company</option>
+                  @for (factory of catalog.factories(); track factory.id) {
+                    <option [value]="factory.id">{{ factory.name }}</option>
+                  }
+                </select></label
+              ><label
+                >Status<select class="form-select" name="status" [(ngModel)]="catalog.draft.status">
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select></label
+              ><label
+                >Email<input
+                  class="form-control"
+                  name="email"
+                  [(ngModel)]="catalog.draft.email"
+                  type="email"
+                  email /></label
+              ><label
+                >Phone<input
+                  class="form-control"
+                  name="phone"
+                  [(ngModel)]="catalog.draft.phone"
+                  type="tel" /></label
+              ><label
+                >Contact person / manager<input
+                  class="form-control"
+                  name="manager"
+                  [(ngModel)]="catalog.draft.manager" /></label
+              ><label class="full-width"
+                >Description<textarea
+                  class="form-control"
+                  name="description"
+                  [(ngModel)]="catalog.draft.description"
+                  rows="3"
+                ></textarea>
+              </label>
+            </div>
+          </fieldset>
+          <footer>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="catalog.close()"
+              [disabled]="catalog.saving()"
+            >
+              Cancel</button
+            ><button class="btn btn-primary" [disabled]="catalog.saving() || editorForm.invalid">
+              {{ catalog.saving() ? 'Saving…' : 'Save contact' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</main>

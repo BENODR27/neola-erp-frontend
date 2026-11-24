@@ -12,16 +12,50 @@ import { EmployeesComponent } from './components/employees/employees.component';
 import { ApplicationManagementComponent } from './components/application-management/application-management.component';
 import { WorkspaceNavigationComponent } from './components/workspace-navigation/workspace-navigation.component';
 import { VendorsComponent } from './components/vendors/vendors.component';
+import { subscriptionManagementGuard } from './subscription-management.guard';
+import { permissionGuard } from '../auth/guards/auth.guard';
 
 const routes: Routes = [
-  { path: 'user', component: UserComponent },
-  { path: 'role', component: RoleComponent },
-  { path: 'permission', component: PermissionComponent },
-  { path: 'application', component: ApplicationManagementComponent },
-  { path: 'workspace-navigation', component: WorkspaceNavigationComponent },
-  { path: 'vendors', component: VendorsComponent },
+  {
+    path: 'user',
+    component: UserComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'users:manage' },
+  },
+  {
+    path: 'role',
+    component: RoleComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'roles:manage' },
+  },
+  {
+    path: 'permission',
+    component: PermissionComponent,
+    canActivate: [subscriptionManagementGuard],
+  },
+  {
+    path: 'application',
+    component: ApplicationManagementComponent,
+    canActivate: [subscriptionManagementGuard],
+  },
+  {
+    path: 'workspace-navigation',
+    component: WorkspaceNavigationComponent,
+    canActivate: [subscriptionManagementGuard],
+  },
+  {
+    path: 'vendors',
+    component: VendorsComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'vendors:manage' },
+  },
   { path: 'welcome', component: WelcomeComponent },
-  { path: 'theme', component: ThemeComponent },
+  {
+    path: 'theme',
+    component: ThemeComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'themes:manage' },
+  },
 
   {
     path: 'applications',
@@ -29,15 +63,21 @@ const routes: Routes = [
   },
   {
     path: 'webutil',
-      component: UsageDashboardComponent,
+    component: UsageDashboardComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'usage:read' },
   },
   {
     path: 'error/logs',
-      component: ErrorLogDashboardComponent,
+    component: ErrorLogDashboardComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'admin-logs' },
   },
   {
     path: 'employees',
     component: EmployeesComponent,
+    canActivate: [permissionGuard],
+    data: { permission: 'users:manage' },
   },
 ];
 

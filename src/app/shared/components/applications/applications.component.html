@@ -30,7 +30,7 @@
       </div>
 
       <button
-        *ngIf="authService.hasPermission('applications:manage')"
+        *ngIf="!subscriptionManaged() && authService.hasPermission('applications:manage')"
         type="button"
         class="application-create-button"
         (click)="openApplicationManagement()"
@@ -99,7 +99,7 @@
           </span>
           <i class="bi bi-arrow-up-right card-arrow" aria-hidden="true"></i>
           <button
-            *ngIf="authService.hasPermission('applications:manage')"
+            *ngIf="!subscriptionManaged() && authService.hasPermission('applications:manage')"
             type="button"
             class="application-delete-button"
             [disabled]="deletingApplicationId() !== null"

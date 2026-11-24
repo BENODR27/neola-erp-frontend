@@ -1,0 +1,131 @@
+<main class="masters-page">
+  <header class="page-header">
+    <div>
+      <span class="eyebrow">NeoLA · Organization setup</span>
+      <h1>Sections</h1>
+      <p>Define production sections within a department.</p>
+    </div>
+    @if (catalog.canManage) {
+      <button class="btn btn-primary" (click)="edit()">
+        <i class="bi bi-plus-lg" aria-hidden="true"></i> Add section
+      </button>
+    }
+  </header>
+  <p class="form-note">
+    Choose an active parent. Company and factory ownership are derived and validated by IAM. This
+    page only manages sections.
+  </p>
+  @if (catalog.lookupError()) {
+    <p class="alert alert-warning" role="alert">
+      {{ catalog.lookupError() }}
+      <button class="btn btn-sm btn-outline-secondary" (click)="catalog.loadHierarchy()">
+        Retry parent data
+      </button>
+    </p>
+  }
+  <app-master-catalog-table [catalog]="catalog" [hierarchy]="true" (editRecord)="edit($event)" />
+  @if (catalog.open()) {
+    <div class="editor-backdrop">
+      <section
+        class="editor"
+        role="dialog"
+        cdkTrapFocus
+        [cdkTrapFocusAutoCapture]="true"
+        (keydown.escape)="catalog.close()"
+        aria-modal="true"
+        aria-labelledby="sections-title"
+      >
+        <header>
+          <h2 id="sections-title">{{ catalog.draft.id ? 'Edit section' : 'Add section' }}</h2>
+          <button
+            class="btn btn-outline-secondary"
+            type="button"
+            (click)="catalog.close()"
+            [disabled]="catalog.saving()"
+            aria-label="Close editor"
+          >
+            ×
+          </button>
+        </header>
+        <form #editorForm="ngForm" (ngSubmit)="editorForm.valid && catalog.save()">
+          @if (catalog.error()) {
+            <p class="alert alert-danger" role="alert">{{ catalog.error() }}</p>
+          }
+          <fieldset [disabled]="catalog.saving()">
+            <div class="fields">
+              <label
+                >Section name<input
+                  class="form-control"
+                  name="name"
+                  [(ngModel)]="catalog.draft.name"
+                  required
+                  maxlength="180"
+              /></label>
+              <label
+                >Code<input
+                  class="form-control"
+                  name="code"
+                  [(ngModel)]="catalog.draft.code"
+                  required
+                  maxlength="100"
+              /></label>
+              <label
+                >Parent<select
+                  class="form-select"
+                  name="parent"
+                  [(ngModel)]="catalog.draft.parentId"
+                  required
+                >
+                  <option [ngValue]="null">Choose parent</option>
+                  @for (parent of parentOptions(); track parent.id) {
+                    <option [value]="parent.id">{{ parent.name }} · {{ parent.unitType }}</option>
+                  }
+                </select></label
+              >
+              <label
+                >Status<select class="form-select" name="status" [(ngModel)]="catalog.draft.status">
+                  <option>Active</option>
+                  <option>Inactive</option>
+                </select></label
+              >
+              <label
+                >Manager<input
+                  class="form-control"
+                  name="manager"
+                  [(ngModel)]="catalog.draft.manager"
+              /></label>
+              <label
+                >Contact email<input
+                  class="form-control"
+                  name="email"
+                  [(ngModel)]="catalog.draft.email"
+                  type="email"
+                  email
+              /></label>
+              <label class="full-width"
+                >Description<textarea
+                  class="form-control"
+                  name="description"
+                  [(ngModel)]="catalog.draft.description"
+                  rows="3"
+                ></textarea>
+              </label>
+            </div>
+          </fieldset>
+          <footer>
+            <button
+              type="button"
+              class="btn btn-outline-secondary"
+              (click)="catalog.close()"
+              [disabled]="catalog.saving()"
+            >
+              Cancel</button
+            ><button class="btn btn-primary" [disabled]="catalog.saving() || editorForm.invalid">
+              {{ catalog.saving() ? 'Saving…' : 'Save section' }}
+            </button>
+          </footer>
+        </form>
+      </section>
+    </div>
+  }
+</main>

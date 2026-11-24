@@ -3,6 +3,7 @@ import { Router } from '@angular/router';
 import { AuthSession, AuthUser } from '../models/auth.models';
 import { APP_CONSTANTS } from '../../shared/config/app-constants';
 import { LocalStorageService } from '../../shared/services/local-storage/local-storage.service';
+import { coversHierarchyPermission } from '../../shared/services/masters/masters-permissions';
 import {
   clearAuthStorage,
   readAuthSession,
@@ -68,7 +69,8 @@ export class AuthService {
     return (
       permissions.includes('*') ||
       permissions.includes('superadmin') ||
-      permissions.includes(permission)
+      permissions.includes(permission) ||
+      coversHierarchyPermission(permissions, permission)
     );
   }
 

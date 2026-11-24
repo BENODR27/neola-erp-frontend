@@ -11,10 +11,16 @@
       type="button"
       class="primary-action"
       (click)="catalog()"
-      *ngIf="auth.hasPermission('vendors:manage')"
+      *ngIf="!sharedCatalog() && auth.hasPermission('vendors:manage')"
     >
       New shared vendor</button
     ><button type="button" (click)="service()">Assign service / claim</button>
+    <a
+      *ngIf="sharedCatalog() && auth.hasPermission('MASTERS-APP')"
+      routerLink="/masters"
+      [queryParams]="{ catalog: 'vendors' }"
+      >Manage shared vendor catalog</a
+    >
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
   <section class="table-card table-scroll">
@@ -37,7 +43,7 @@
           <td>
             <button type="button" (click)="profile(row)">Contracts / documents</button
             ><button
-              *ngIf="auth.hasPermission('vendors:manage')"
+              *ngIf="!sharedCatalog() && auth.hasPermission('vendors:manage')"
               type="button"
               (click)="catalog(row)"
             >

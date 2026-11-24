@@ -22,15 +22,15 @@ interface PermissionRecord {
   styleUrl: './role.component.css',
 })
 export class RoleComponent {
-  readonly datas = signal<any[]>([])
-  readonly permissions = signal<PermissionRecord[]>([])
+  readonly datas = signal<any[]>([]);
+  readonly permissions = signal<PermissionRecord[]>([]);
   readonly applications = signal<ApplicationRecord[]>([]);
   form: FormGroup;
   selectedPermissions: number[] = [];
   selectedRoleId: number = 0;
   constructor(
     private formBuilder: FormBuilder,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {
     this.form = this.formBuilder.group({
       name: ['', Validators.required],
@@ -83,17 +83,12 @@ export class RoleComponent {
   get availableApplications(): ApplicationRecord[] {
     const applications = [...this.applications()];
     const registeredNames = new Set(
-      applications.map((application) =>
-        application.applicationName.trim().toLocaleLowerCase()
-      )
+      applications.map((application) => application.applicationName.trim().toLocaleLowerCase()),
     );
 
     for (const permission of this.permissions()) {
       const applicationName = permission.appname?.trim();
-      if (
-        applicationName &&
-        !registeredNames.has(applicationName.toLocaleLowerCase())
-      ) {
+      if (applicationName && !registeredNames.has(applicationName.toLocaleLowerCase())) {
         applications.push({ id: 0, applicationName });
         registeredNames.add(applicationName.toLocaleLowerCase());
       }
@@ -109,8 +104,7 @@ export class RoleComponent {
     }
     return this.permissions().filter(
       (permission) =>
-        permission.appname?.trim().toLocaleLowerCase() ===
-        selectedName.trim().toLocaleLowerCase()
+        permission.appname?.trim().toLocaleLowerCase() === selectedName.trim().toLocaleLowerCase(),
     );
   }
 
@@ -144,7 +138,7 @@ export class RoleComponent {
         console.error('Error:', error);
         Swal.fire({
           title: 'Error!',
-          text: 'Something went wrong!',
+          text: error?.error?.message || 'Unable to save this role.',
           icon: 'error',
           timer: 1500,
         });
@@ -159,29 +153,27 @@ export class RoleComponent {
         permissionIds: this.selectedPermissions, // Use the array of selected permissions
       };
 
-      this.apiService
-        .updateData(this.selectedRoleId, payload, AAC.API_URL + AAC.ROLES)
-        .subscribe({
-          next: (response) => {
-            console.log('Role Created:', response);
-            Swal.fire({
-              title: 'Success!',
-              text: 'Role created successfully!',
-              icon: 'success',
-              timer: 1500,
-            });
-            this.fetchAllRoles();
-          },
-          error: (error) => {
-            console.error('Error:', error);
-            Swal.fire({
-              title: 'Error!',
-              text: 'Something went wrong!',
-              icon: 'error',
-              timer: 1500,
-            });
-          },
-        });
+      this.apiService.updateData(this.selectedRoleId, payload, AAC.API_URL + AAC.ROLES).subscribe({
+        next: (response) => {
+          console.log('Role Created:', response);
+          Swal.fire({
+            title: 'Success!',
+            text: 'Role created successfully!',
+            icon: 'success',
+            timer: 1500,
+          });
+          this.fetchAllRoles();
+        },
+        error: (error) => {
+          console.error('Error:', error);
+          Swal.fire({
+            title: 'Error!',
+            text: error?.error?.message || 'Unable to save this role.',
+            icon: 'error',
+            timer: 1500,
+          });
+        },
+      });
     }
   }
   onPermissionChange(event: Event) {
@@ -193,9 +185,7 @@ export class RoleComponent {
         this.selectedPermissions.push(value);
       }
     } else {
-      this.selectedPermissions = this.selectedPermissions.filter(
-        (id) => id !== value
-      ); // Remove permission ID from array
+      this.selectedPermissions = this.selectedPermissions.filter((id) => id !== value); // Remove permission ID from array
     }
     console.log('Selected Permissions:', this.selectedPermissions);
   }
@@ -213,8 +203,7 @@ export class RoleComponent {
   onEdit(row: any) {
     this.selectedRoleId = row?.id; // Store the selected role ID
     const firstApplicationName = Array.isArray(row?.permissions)
-      ? row.permissions.find((permission: PermissionRecord) => permission.appname)
-          ?.appname ?? ''
+      ? (row.permissions.find((permission: PermissionRecord) => permission.appname)?.appname ?? '')
       : '';
     this.form.reset({
       name: row?.name,

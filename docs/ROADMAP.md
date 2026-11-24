@@ -1,5 +1,21 @@
 # Platform Delivery Roadmap
 
+Existing deployables now have per-folder `compose.independent.yaml` files and
+runtime-configurable frontend API proxies; see the
+[independent deployment guide](../../docs/INDEPENDENT-DEPLOYMENT.md). These remove
+sibling startup coupling while retaining existing combined profiles. The confirmed
+six-package design intentionally keeps Home, IAM, Masters, MMMS and WMS together
+in this ERP frontend. Each deployable owns its environment templates, deployment
+guide and `docker:*` commands; workspace frontend extraction is outside this scope.
+
+Masters now has separate lazy pages for Organization, Units, Currencies, Employees, Contacts and Vendors. Each owns its component/template/styles and explicit editor; shared request and table controls retain server pagination, theme tokens and IAM permissions. See [page structure and menu migration](../../docs/SHARED-MASTERS.md#dedicated-catalog-pages).
+
+Organization setup is further split into nine independent pages: Companies, Business units, Factories, Buildings, Floors, Departments, Sections, Lines and Locations. Each has a fixed record type, per-page read/manage permissions, server pagination and validated scoped parent selection. IAM/provider migrations register the navigation and permissions without rewriting existing grants or commercial snapshots.
+
+The [IAM workspace](../../docs/IAM-ACCESS.md) is restored inside ERP for user, role and company/factory access management, with purchased permission/seat limits enforced by the server. Commercial plans, subscriptions and approvals stay in the independent console, whose duplicate ERP employee/customer-role/migration screens have been removed. Menus remain database-driven through IAM.
+
+The independent [NeoLA Subscription Console](../../docs/SUBSCRIPTION-MANAGEMENT.md) owns commercial plans/trials/manual approvals and can take over ERP access management after an explicit per-installation cutover. ERP employee identity and runtime menus remain served by IAM. MMMS and shared Masters are verified locally. Legacy IAM adoption/rollback, security recovery/MFA, invoices, scheduled renewals and key rotation are implemented and integration-tested. Additional ERP domain adapters remain release work. Common hierarchy, people, units, currencies, contacts and vendors are owned by the independent [Masters workspace](../../docs/SHARED-MASTERS.md).
+
 NeoLA's product direction is an end-to-end **Apparel & Textiles ERP**. The woven-thread brand is shared across the application. Future ERP domains should retain independent feature/API ownership and shared IAM/storage boundaries; enabled modules and verified functional coverage remain the source of truth for available capabilities.
 
 MMMS operational lists now use [server pagination](../../docs/MMMS-PAGINATION.md), including independent histories, shared vendors, report rows and dashboard tasks.

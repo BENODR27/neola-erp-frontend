@@ -16,6 +16,7 @@ export interface MechanicRecord {
   completedJobs: number;
   laborMinutes: number;
   details: {
+    employeeId?: string;
     userCode?: string;
     userId?: string;
     department?: string;

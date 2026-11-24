@@ -57,6 +57,7 @@ export class ApplicationsComponent implements OnInit {
     ),
   );
   readonly applicationLoadError = signal(false);
+  readonly subscriptionManaged = signal(false);
   readonly isLoadingApplications = signal(false);
   readonly deletingApplicationId = signal<number | null>(null);
 
@@ -89,6 +90,7 @@ export class ApplicationsComponent implements OnInit {
           this.isLoadingApplications.set(false);
           return;
         }
+        this.subscriptionManaged.set(response.managed === true);
         console.log('applications loaded');
         this.applications.set(
           response.result

@@ -51,7 +51,10 @@ export const adminV2Guard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  if (authService.isLoggedIn() && authService.hasPermission('*')) {
+  if (
+    authService.isLoggedIn() &&
+    (authService.hasPermission('*') || authService.hasPermission('IAM-APP'))
+  ) {
     return true;
   }
 

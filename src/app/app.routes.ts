@@ -1,8 +1,31 @@
 import { Routes } from '@angular/router';
 import { MainLayoutComponent } from './shared/layouts/main-layout/main-layout.component';
 import { SigninComponent } from './auth/components/signin/signin.component';
-import { adminV2Guard, authGuard } from './auth/guards/auth.guard';
+import { adminV2Guard, authGuard, permissionGuard } from './auth/guards/auth.guard';
 export const routes: Routes = [
+  {
+    path: 'masters',
+    component: MainLayoutComponent,
+    canActivate: [authGuard, permissionGuard],
+    data: { permission: 'MASTERS-APP' },
+    loadChildren: () =>
+      import('./platform-masters/masters.routes').then((module) => module.MASTERS_ROUTES),
+  },
+  {
+    path: 'subscription-management',
+    component: MainLayoutComponent,
+    canActivate: [authGuard],
+    children: [
+      {
+        path: '',
+        loadComponent: () =>
+          import('./shared/components/subscription-management/subscription-management.component').then(
+            (m) => m.SubscriptionManagementComponent,
+          ),
+        data: { title: 'Subscription management' },
+      },
+    ],
+  },
   { path: '', pathMatch: 'full', redirectTo: 'home' },
   {
     path: 'home',

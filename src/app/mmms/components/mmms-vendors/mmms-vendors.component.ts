@@ -12,6 +12,7 @@ import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { SharedVendor, VendorProfile, VendorService } from '../../models/mmms-vendor.models';
 import { MachineSummary } from '../../models/mmms.models';
 import { AuthService } from '../../../auth/services/auth.service';
+import { MastersFacade } from '../../../shared/services/masters/masters.facade';
 @Component({
   selector: 'app-mmms-vendors',
   standalone: false,
@@ -36,11 +37,17 @@ export class MmmsVendorsComponent implements OnInit {
   readonly editor = signal<'catalog' | 'profile' | 'service' | null>(null);
   readonly selectedId = signal<string | null>(null);
   readonly auth = inject(AuthService);
+  readonly sharedCatalog = signal(true);
+  private readonly masters = inject(MastersFacade);
   vendorDraft: Partial<SharedVendor> = {};
   profileDraft: VendorProfile = this.emptyProfile('');
   serviceDraft: Partial<VendorService> = {};
   private readonly facade = inject(MmmsFacadeService);
   ngOnInit(): void {
+    this.masters.settings().subscribe({
+      next: (settings) => this.sharedCatalog.set(settings.sharedMasters),
+      error: (error: unknown) => this.fail(error),
+    });
     this.load();
     this.facade.getMachines().subscribe({
       next: (rows) => this.machines.set(rows),
@@ -74,6 +81,7 @@ export class MmmsVendorsComponent implements OnInit {
       });
   }
   catalog(vendor?: SharedVendor): void {
+    if (this.sharedCatalog()) return;
     this.selectedId.set(vendor?.id || null);
     this.vendorDraft = vendor
       ? { ...vendor }

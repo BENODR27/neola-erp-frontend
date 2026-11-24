@@ -3,7 +3,10 @@
     <div>
       <span class="adminv2-eyebrow"><i class="bi bi-people"></i> ACCESS MANAGEMENT</span>
       <h1>Users</h1>
-      <p>Manage user accounts and their access to ADMIN workspaces.</p>
+      <p>
+        Manage ERP users, roles and company/factory access. Purchased applications and seat limits
+        remain controlled by the Subscription Console.
+      </p>
     </div>
     <div class="adminv2-header-meta">
       <span class="adminv2-count">{{ datas().length }}</span>
@@ -43,7 +46,7 @@
       <label class="user-filter">
         <span class="visually-hidden">Filter users by role</span>
         <select class="form-select" [value]="roleFilter()" (change)="onRoleFilterChange($event)">
-          <option value="all">All roles()</option>
+          <option value="all">All roles</option>
           <option *ngFor="let role of assignedRoles" [value]="role.id">
             {{ role.name }}
           </option>
@@ -137,9 +140,7 @@
                     />
                   </label>
                   <p class="adminv2-field-hint" *ngIf="selectedRoles().length">
-                    {{ selectedRoles().length }} role{{
-                      selectedRoles().length === 1 ? '' : 's'
-                    }}
+                    {{ selectedRoles().length }} role{{ selectedRoles().length === 1 ? '' : 's' }}
                     selected
                   </p>
                   <div class="adminv2-choice-list" *ngIf="!isLoadingRoles() && roles().length">
@@ -299,6 +300,7 @@
               </button>
               <button
                 class="btn btn-sm btn-outline-danger adminv2-action-button"
+                *ngIf="!managed()"
                 type="button"
                 (click)="deleteUser(row)"
               >
@@ -326,37 +328,147 @@
         </tbody>
       </table>
     </div>
-    <div class="modal fade" id="userscopes" tabindex="-1" aria-labelledby="scopeModalLabel" aria-hidden="true">
+    <div
+      class="modal fade"
+      id="userscopes"
+      tabindex="-1"
+      aria-labelledby="scopeModalLabel"
+      aria-hidden="true"
+    >
       <div class="modal-dialog modal-dialog-centered modal-lg">
         <div class="modal-content">
           <div class="modal-header">
             <div>
               <span class="adminv2-eyebrow">IAM DATA ACCESS</span>
               <h2 class="modal-title" id="scopeModalLabel">Organization and factory scope</h2>
-              <p class="adminv2-field-hint mb-0">Application permission is still required. These assignments limit the records that permission can see.</p>
+              <p class="adminv2-field-hint mb-0">
+                Application permission is still required. These assignments limit the records that
+                permission can see.
+              </p>
             </div>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
           </div>
           <div class="modal-body">
             <form [formGroup]="scopeForm" class="adminv2-form-grid" (ngSubmit)="addScope()">
-              <div><label class="form-label">Application</label><input class="form-control" formControlName="applicationName" placeholder="MMMS or WMS" /></div>
-              <div><label class="form-label">Organization ID</label><input class="form-control" formControlName="organizationId" placeholder="Organization code" /></div>
-              <div><label class="form-label">Organization name</label><input class="form-control" formControlName="organizationName" placeholder="Optional display name" /></div>
-              <div><label class="form-label">Factory ID</label><input class="form-control" formControlName="factoryId" placeholder="Factory code (optional)" /></div>
-              <div><label class="form-label">Factory name</label><input class="form-control" formControlName="factoryName" placeholder="Factory name (optional)" /></div>
-              <div class="adminv2-form-actions"><button class="btn btn-outline-primary" type="submit"><i class="bi bi-plus-lg"></i> Add boundary</button></div>
+              @if (managed()) {
+                <div>
+                  <label class="form-label" for="iam-scope-app">Application</label
+                  ><select id="iam-scope-app" class="form-select" formControlName="applicationName">
+                    <option value="">Choose application</option>
+                    <option *ngFor="let app of scopeOptions()?.applications" [value]="app">
+                      {{ app }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="iam-scope-company">Company</label
+                  ><select
+                    id="iam-scope-company"
+                    class="form-select"
+                    formControlName="organizationId"
+                    (change)="scopeForm.patchValue({ factoryId: '' })"
+                  >
+                    <option value="">Choose company</option>
+                    <option
+                      *ngFor="let company of scopeOptions()?.organizations"
+                      [value]="company.id"
+                    >
+                      {{ company.name }}
+                    </option>
+                  </select>
+                </div>
+                <div>
+                  <label class="form-label" for="iam-scope-factory">Factory</label
+                  ><select id="iam-scope-factory" class="form-select" formControlName="factoryId">
+                    <option value="">Choose factory</option>
+                    <option *ngFor="let factory of scopeFactories()" [value]="factory.id">
+                      {{ factory.name }}
+                    </option>
+                  </select>
+                </div>
+              } @else {
+                <div>
+                  <label class="form-label">Application</label
+                  ><input
+                    class="form-control"
+                    formControlName="applicationName"
+                    placeholder="MMMS or WMS"
+                  />
+                </div>
+                <div>
+                  <label class="form-label">Organization ID</label
+                  ><input
+                    class="form-control"
+                    formControlName="organizationId"
+                    placeholder="Organization code"
+                  />
+                </div>
+                <div>
+                  <label class="form-label">Organization name</label
+                  ><input
+                    class="form-control"
+                    formControlName="organizationName"
+                    placeholder="Optional display name"
+                  />
+                </div>
+                <div>
+                  <label class="form-label">Factory ID</label
+                  ><input
+                    class="form-control"
+                    formControlName="factoryId"
+                    placeholder="Factory code (optional)"
+                  />
+                </div>
+                <div>
+                  <label class="form-label">Factory name</label
+                  ><input
+                    class="form-control"
+                    formControlName="factoryName"
+                    placeholder="Factory name (optional)"
+                  />
+                </div>
+              }
+              <div class="adminv2-form-actions">
+                <button class="btn btn-outline-primary" type="submit">
+                  <i class="bi bi-plus-lg"></i> Add boundary
+                </button>
+              </div>
             </form>
             <div class="adminv2-scope-list mt-3" *ngIf="!isLoadingScopes()">
-              <div class="adminv2-scope-row" *ngFor="let scope of selectedScopes(); let index = index">
+              <div
+                class="adminv2-scope-row"
+                *ngFor="let scope of selectedScopes(); let index = index"
+              >
                 <span><i class="bi bi-shield-check"></i> {{ scopeSummary(scope) }}</span>
-                <button type="button" class="btn btn-sm btn-outline-danger" (click)="removeScope(index)"><i class="bi bi-trash"></i></button>
+                <button
+                  type="button"
+                  class="btn btn-sm btn-outline-danger"
+                  (click)="removeScope(index)"
+                >
+                  <i class="bi bi-trash"></i>
+                </button>
               </div>
-              <p class="adminv2-field-hint" *ngIf="!selectedScopes().length">No boundaries assigned. This user will receive no MMMS data until a boundary is added, unless their role has global access.</p>
+              <p class="adminv2-field-hint" *ngIf="!selectedScopes().length">
+                No boundaries assigned. This user will receive no MMMS data until a boundary is
+                added, unless their role has global access.
+              </p>
             </div>
             <p class="adminv2-field-hint" *ngIf="isLoadingScopes()">Loading current boundaries…</p>
             <div class="adminv2-form-actions mt-4">
               <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-              <button type="button" class="btn btn-primary adminv2-primary-button" [disabled]="isSavingScopes() || isLoadingScopes()" (click)="saveScopes()">{{ isSavingScopes() ? 'Saving…' : 'Save data scope' }}</button>
+              <button
+                type="button"
+                class="btn btn-primary adminv2-primary-button"
+                [disabled]="isSavingScopes() || isLoadingScopes()"
+                (click)="saveScopes()"
+              >
+                {{ isSavingScopes() ? 'Saving…' : 'Save data scope' }}
+              </button>
             </div>
           </div>
         </div>

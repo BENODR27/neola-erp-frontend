@@ -1,0 +1,136 @@
+<form class="toolbar" (ngSubmit)="catalog.load()">
+  <label
+    >Search records<input
+      class="form-control"
+      name="search"
+      [(ngModel)]="catalog.search"
+      placeholder="Search by name or code"
+      type="search"
+  /></label>
+  <button class="btn btn-primary" [disabled]="catalog.loading()">Search</button>
+  <button
+    type="button"
+    class="btn btn-outline-secondary"
+    (click)="catalog.search = ''; catalog.load()"
+    [disabled]="catalog.loading()"
+  >
+    Reset
+  </button>
+</form>
+@if (catalog.notice()) {
+  <p class="alert alert-success" role="status">{{ catalog.notice() }}</p>
+}
+@if (catalog.error() && !catalog.open()) {
+  <p class="alert alert-danger" role="alert">
+    {{ catalog.error() }}
+    <button class="btn btn-sm btn-outline-danger" (click)="catalog.load(catalog.page())">
+      Retry
+    </button>
+  </p>
+}
+<section class="master-card" [attr.aria-busy]="catalog.loading()">
+  <div class="table-scroll">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Name</th>
+          <th scope="col">Code</th>
+          <th scope="col">{{ hierarchy ? 'Hierarchy type' : 'Company' }}</th>
+          <th scope="col">{{ hierarchy ? 'Parent' : people ? 'Email' : 'Description' }}</th>
+          <th scope="col">Status</th>
+          @if (catalog.canManage) {
+            <th scope="col">Actions</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (row of catalog.rows(); track row.id) {
+          <tr>
+            <td>
+              <strong>{{ row.name }}</strong>
+              @if (row.data?.['migrationIssue']) {
+                <small class="review">Needs hierarchy review</small>
+              }
+            </td>
+            <td>{{ row.code }}</td>
+            <td>{{ hierarchy ? row.unitType : catalog.label(row.organizationId) }}</td>
+            <td>
+              {{
+                hierarchy
+                  ? row.parentId
+                    ? catalog.label(row.parentId)
+                    : row.unitType === 'Company'
+                      ? 'Root company'
+                      : 'Parent needs review'
+                  : people
+                    ? row.email || '—'
+                    : row.description || '—'
+              }}
+            </td>
+            <td>
+              <span class="status" [class.inactive]="row.status !== 'Active'">{{
+                row.status
+              }}</span>
+            </td>
+            @if (catalog.canManage) {
+              <td>
+                <button
+                  class="btn btn-sm btn-outline-primary"
+                  [attr.aria-label]="'Edit ' + row.name"
+                  (click)="editRecord.emit(row)"
+                >
+                  Edit
+                </button>
+              </td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+  @if (catalog.loading()) {
+    <p class="empty-state" role="status">Loading records…</p>
+  } @else if (!catalog.error() && !catalog.rows().length) {
+    <div class="empty-state">
+      <strong>{{ catalog.search ? 'No matching records' : 'No records yet' }}</strong>
+      <p>
+        {{
+          catalog.search
+            ? 'Try another name or code.'
+            : 'Add the first record to make it available across your ERP.'
+        }}
+      </p>
+    </div>
+  }
+  <footer>
+    <span>{{ catalog.total() }} records · Page {{ catalog.page() }} of {{ catalog.pages() }}</span>
+    <label
+      >Rows<select
+        class="form-select"
+        [(ngModel)]="catalog.pageSize"
+        (ngModelChange)="catalog.load()"
+        [disabled]="catalog.loading()"
+      >
+        <option [ngValue]="10">10</option>
+        <option [ngValue]="20">20</option>
+        <option [ngValue]="50">50</option>
+        <option [ngValue]="100">100</option>
+      </select></label
+    >
+    <div class="page-actions">
+      <button
+        class="btn btn-outline-secondary"
+        [disabled]="catalog.loading() || catalog.page() <= 1"
+        (click)="catalog.load(catalog.page() - 1)"
+      >
+        Previous</button
+      ><button
+        class="btn btn-outline-secondary"
+        [disabled]="catalog.loading() || catalog.page() >= catalog.pages()"
+        (click)="catalog.load(catalog.page() + 1)"
+      >
+        Next
+      </button>
+    </div>
+  </footer>
+</section>

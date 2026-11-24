@@ -1,8 +1,9 @@
-import { Component, OnInit , signal} from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ApiService } from '../../../shared/services/api/api.service';
 import { NotificationService } from '../../../shared/services/notification/notification.service';
 import { ADMIN_API_CONSTANTS as AAC } from '../../constants/admin-api.constants';
+import { IamAccessFacade, IamScopeOptions } from '../../services/iam-access.facade';
 
 interface ManagedUser {
   id: number;
@@ -35,30 +36,33 @@ interface ManagedScope {
   styleUrl: './user.component.css',
 })
 export class UserComponent implements OnInit {
-  readonly datas = signal<ManagedUser[]>([])
-  readonly roles = signal<ManagedRole[]>([])
+  readonly managed = signal(false);
+  readonly scopeOptions = signal<IamScopeOptions | null>(null);
+  readonly datas = signal<ManagedUser[]>([]);
+  readonly roles = signal<ManagedRole[]>([]);
   form: FormGroup;
-  readonly selectedRoles = signal<number[]>([])
+  readonly selectedRoles = signal<number[]>([]);
   selectedUserId: number | null = null;
-  readonly roleSearch = signal('')
-  readonly userSearch = signal('')
-  readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all')
-  readonly roleFilter = signal('all')
+  readonly roleSearch = signal('');
+  readonly userSearch = signal('');
+  readonly statusFilter = signal<'all' | 'active' | 'inactive'>('all');
+  readonly roleFilter = signal('all');
   currentPage = 1;
-  readonly pageSize = signal(10)
+  readonly pageSize = signal(10);
   readonly pageSizeOptions = [10, 25, 50];
-  readonly isSaving = signal(false)
+  readonly isSaving = signal(false);
   isLoadingUsers = false;
-  readonly isLoadingRoles = signal(false)
-  readonly selectedScopes = signal<ManagedScope[]>([])
-  readonly isLoadingScopes = signal(false)
-  readonly isSavingScopes = signal(false)
+  readonly isLoadingRoles = signal(false);
+  readonly selectedScopes = signal<ManagedScope[]>([]);
+  readonly isLoadingScopes = signal(false);
+  readonly isSavingScopes = signal(false);
   scopeForm: FormGroup;
 
   constructor(
     private formBuilder: FormBuilder,
     private apiService: ApiService,
     private notificationService: NotificationService,
+    private iamAccess: IamAccessFacade,
   ) {
     this.form = this.formBuilder.group({
       employeeCode: ['', Validators.required],
@@ -68,7 +72,10 @@ export class UserComponent implements OnInit {
     });
     this.scopeForm = this.formBuilder.group({
       applicationName: ['MMMS', Validators.required],
-      organizationId: [''], organizationName: [''], factoryId: [''], factoryName: [''],
+      organizationId: [''],
+      organizationName: [''],
+      factoryId: [''],
+      factoryName: [''],
     });
   }
 
@@ -81,11 +88,9 @@ export class UserComponent implements OnInit {
     return this.datas().filter((user) => {
       const matchesSearch =
         !query ||
-        [
-          user.employeeName,
-          user.employeeCode,
-          ...user.roles.map((role) => role.name),
-        ].some((value) => value?.toLocaleLowerCase().includes(query));
+        [user.employeeName, user.employeeCode, ...user.roles.map((role) => role.name)].some(
+          (value) => value?.toLocaleLowerCase().includes(query),
+        );
       const matchesStatus =
         this.statusFilter() === 'all' ||
         (this.statusFilter() === 'active' && user.isActive) ||
@@ -108,9 +113,7 @@ export class UserComponent implements OnInit {
   }
 
   get pageStart(): number {
-    return this.filteredUsers.length === 0
-      ? 0
-      : (this.currentPage - 1) * this.pageSize() + 1;
+    return this.filteredUsers.length === 0 ? 0 : (this.currentPage - 1) * this.pageSize() + 1;
   }
 
   get pageEnd(): number {
@@ -131,9 +134,7 @@ export class UserComponent implements OnInit {
 
   get filteredAssignableRoles(): ManagedRole[] {
     const query = this.roleSearch().trim().toLocaleLowerCase();
-    return this.roles().filter((role) =>
-      role.name.toLocaleLowerCase().includes(query),
-    );
+    return this.roles().filter((role) => role.name.toLocaleLowerCase().includes(query));
   }
 
   onRoleSearch(event: Event): void {
@@ -204,6 +205,19 @@ export class UserComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.iamAccess.settings().subscribe({
+      next: (settings) => {
+        this.managed.set(settings.managed);
+        if (settings.managed)
+          this.iamAccess
+            .scopeOptions()
+            .subscribe({
+              next: (r) => this.scopeOptions.set(r.result),
+              error: (error) => this.showError(error, 'Unable to load company/factory choices.'),
+            });
+      },
+      error: (error) => this.showError(error, 'Unable to load IAM settings.'),
+    });
     this.fetchAllUsers();
     this.fetchAllRoles();
   }
@@ -252,9 +266,11 @@ export class UserComponent implements OnInit {
   onRoleChange(event: Event): void {
     const checkbox = event.target as HTMLInputElement;
     const roleId = Number(checkbox.value);
-    this.selectedRoles.set(checkbox.checked
-      ? [...new Set([...this.selectedRoles(), roleId])]
-      : this.selectedRoles().filter((id) => id !== roleId));
+    this.selectedRoles.set(
+      checkbox.checked
+        ? [...new Set([...this.selectedRoles(), roleId])]
+        : this.selectedRoles().filter((id) => id !== roleId),
+    );
   }
 
   isSelected(roleId: number): boolean {
@@ -292,22 +308,17 @@ export class UserComponent implements OnInit {
     if (values.authCode) payload.authCode = values.authCode;
 
     this.isSaving.set(true);
-    const request = userId !== null
-      ? this.apiService.updateData(
-          userId,
-          payload,
-          AAC.API_URL + AAC.USERS,
-        )
-      : this.apiService.addData(payload, AAC.API_URL + AAC.USERS);
+    const request =
+      userId !== null
+        ? this.apiService.updateData(userId, payload, AAC.API_URL + AAC.USERS)
+        : this.apiService.addData(payload, AAC.API_URL + AAC.USERS);
 
     request.subscribe({
       next: () => {
         this.isSaving.set(false);
         this.notificationService.success(
           'User saved',
-          this.isEditing
-            ? 'The user account was updated.'
-            : 'The user account was created.',
+          this.isEditing ? 'The user account was updated.' : 'The user account was created.',
         );
         this.closeModal();
         this.startCreate();
@@ -325,39 +336,101 @@ export class UserComponent implements OnInit {
     this.selectedScopes.set([]);
     this.isLoadingScopes.set(true);
     this.apiService.getDatas(`${AAC.API_URL}${AAC.USERS}/${user.id}${AAC.USER_SCOPES}`).subscribe({
-      next: (response) => { this.selectedScopes.set(response.result ?? []); this.isLoadingScopes.set(false); },
-      error: (error) => { this.isLoadingScopes.set(false); this.showError(error, 'Unable to load data access scopes.'); },
+      next: (response) => {
+        this.selectedScopes.set(response.result ?? []);
+        this.isLoadingScopes.set(false);
+      },
+      error: (error) => {
+        this.isLoadingScopes.set(false);
+        this.showError(error, 'Unable to load data access scopes.');
+      },
     });
   }
 
   addScope(): void {
     const value = this.scopeForm.getRawValue() as ManagedScope;
-    if (!value.organizationId && !value.organizationName && !value.factoryId && !value.factoryName) {
+    if (this.managed()) {
+      const organization = this.scopeOptions()?.organizations.find(
+        (r) => r.id === value.organizationId,
+      );
+      const factory = this.scopeOptions()?.factories.find(
+        (r) => r.id === value.factoryId && r.organization_id === value.organizationId,
+      );
+      if (
+        !organization ||
+        !factory ||
+        !this.scopeOptions()?.applications.includes(value.applicationName)
+      ) {
+        this.showError(null, 'Choose an application, company and matching factory.');
+        return;
+      }
+      value.organizationName = organization.name;
+      value.factoryName = factory.name;
+    }
+    if (
+      !value.organizationId &&
+      !value.organizationName &&
+      !value.factoryId &&
+      !value.factoryName
+    ) {
       this.scopeForm.markAllAsTouched();
       this.showError(null, 'Enter an organization or factory boundary for this assignment.');
       return;
     }
     this.selectedScopes.set([...this.selectedScopes(), { ...value, enabled: true }]);
-    this.scopeForm.patchValue({ organizationId: '', organizationName: '', factoryId: '', factoryName: '' });
+    this.scopeForm.patchValue({
+      organizationId: '',
+      organizationName: '',
+      factoryId: '',
+      factoryName: '',
+    });
   }
 
-  removeScope(index: number): void { this.selectedScopes.set(this.selectedScopes().filter((_, itemIndex) => itemIndex !== index)); }
+  removeScope(index: number): void {
+    this.selectedScopes.set(this.selectedScopes().filter((_, itemIndex) => itemIndex !== index));
+  }
+  scopeFactories(): IamScopeOptions['factories'] {
+    return (
+      this.scopeOptions()?.factories.filter(
+        (r) => r.organization_id === this.scopeForm.get('organizationId')?.value,
+      ) || []
+    );
+  }
 
   saveScopes(): void {
     if (this.selectedUserId === null) return;
     this.isSavingScopes.set(true);
-    this.apiService.putAtUrl(`${AAC.API_URL}${AAC.USERS}/${this.selectedUserId}${AAC.USER_SCOPES}`, { scopes: this.selectedScopes() }).subscribe({
-      next: () => { this.isSavingScopes.set(false); this.notificationService.success('Access scope saved', 'The user can now see only the assigned organization or factory data.'); this.closeScopeModal(); },
-      error: (error) => { this.isSavingScopes.set(false); this.showError(error, 'Unable to save data access scopes.'); },
-    });
+    this.apiService
+      .putAtUrl(`${AAC.API_URL}${AAC.USERS}/${this.selectedUserId}${AAC.USER_SCOPES}`, {
+        scopes: this.selectedScopes(),
+      })
+      .subscribe({
+        next: () => {
+          this.isSavingScopes.set(false);
+          this.notificationService.success(
+            'Access scope saved',
+            'The user can now see only the assigned organization or factory data.',
+          );
+          this.closeScopeModal();
+        },
+        error: (error) => {
+          this.isSavingScopes.set(false);
+          this.showError(error, 'Unable to save data access scopes.');
+        },
+      });
   }
 
   scopeSummary(scope: ManagedScope): string {
-    const boundary = scope.factoryName || scope.factoryId ? `Factory: ${scope.factoryName || scope.factoryId}` : `Organization: ${scope.organizationName || scope.organizationId}`;
+    const boundary =
+      scope.factoryName || scope.factoryId
+        ? `Factory: ${scope.factoryName || scope.factoryId}`
+        : `Organization: ${scope.organizationName || scope.organizationId}`;
     return `${scope.applicationName} · ${boundary}`;
   }
 
-  private closeScopeModal(): void { document.querySelector<HTMLButtonElement>('#userscopes [data-bs-dismiss="modal"]')?.click(); }
+  private closeScopeModal(): void {
+    document.querySelector<HTMLButtonElement>('#userscopes [data-bs-dismiss="modal"]')?.click();
+  }
 
   toggleStatus(user: ManagedUser): void {
     const enabled = !user.isActive;
@@ -384,10 +457,7 @@ export class UserComponent implements OnInit {
 
     this.apiService.deleteData(user.id, AAC.API_URL + AAC.USERS).subscribe({
       next: () => {
-        this.notificationService.success(
-          'User deleted',
-          'The user account was removed.',
-        );
+        this.notificationService.success('User deleted', 'The user account was removed.');
         this.fetchAllUsers();
       },
       error: (error) => this.showError(error, 'Unable to delete this user.'),
@@ -395,11 +465,7 @@ export class UserComponent implements OnInit {
   }
 
   private closeModal(): void {
-    document
-      .querySelector<HTMLButtonElement>(
-        '#useraddedit [data-bs-dismiss="modal"]',
-      )
-      ?.click();
+    document.querySelector<HTMLButtonElement>('#useraddedit [data-bs-dismiss="modal"]')?.click();
   }
 
   private showError(error: any, fallback: string): void {

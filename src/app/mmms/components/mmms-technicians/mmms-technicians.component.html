@@ -64,17 +64,63 @@
         </button>
       </header>
       <p role="alert" *ngIf="error()">{{ error() }}</p>
+      @if (sharedPeople()) {
+        <p>
+          Employee identity is maintained in Platform Masters; skills and availability are managed
+          here.
+        </p>
+        <label
+          >Find employee<input
+            name="employeeSearch"
+            [(ngModel)]="employeeSearch"
+            (keyup.enter)="loadEmployees()" /></label
+        ><button type="button" (click)="loadEmployees()">Find</button
+        ><label
+          >Shared employee<select
+            name="sharedEmployee"
+            [ngModel]="draft.employeeNumber"
+            (ngModelChange)="chooseEmployee($event)"
+          >
+            <option value="">Select employee</option>
+            @if (draft.employeeNumber) {
+              <option [value]="draft.employeeNumber">
+                {{ draft.employeeNumber }} · {{ draft.name }}
+              </option>
+            }
+            @for (employee of employees(); track employee.id) {
+              @if (employee.code !== draft.employeeNumber) {
+                <option [value]="employee.code">{{ employee.code }} · {{ employee.name }}</option>
+              }
+            }
+          </select></label
+        >
+      }
       <div class="form-grid">
         <label
-          >Employee ID<input name="employee" [(ngModel)]="draft.employeeNumber" required /></label
-        ><label>Name<input name="name" [(ngModel)]="draft.name" required /></label
+          >Employee ID<input
+            name="employee"
+            [(ngModel)]="draft.employeeNumber"
+            [readonly]="sharedPeople()"
+            required /></label
+        ><label
+          >Name<input
+            name="name"
+            [(ngModel)]="draft.name"
+            [readonly]="sharedPeople()"
+            required /></label
         ><label
           >Skills / specializations (comma separated)<input
             name="skills"
             [(ngModel)]="skills" /></label
         ><label>Shift<input name="shift" [(ngModel)]="draft.shift" /></label
-        ><label>Phone<input name="phone" [(ngModel)]="draft.phone" /></label
-        ><label>Email<input type="email" name="email" [(ngModel)]="draft.email" /></label
+        ><label
+          >Phone<input name="phone" [(ngModel)]="draft.phone" [readonly]="sharedPeople()" /></label
+        ><label
+          >Email<input
+            type="email"
+            name="email"
+            [(ngModel)]="draft.email"
+            [readonly]="sharedPeople()" /></label
         ><label>Active<input type="checkbox" name="active" [(ngModel)]="draft.active" /></label
         ><ng-container *ngIf="draft.details as details"
           ><label

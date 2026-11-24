@@ -1,3 +1,4 @@
+import { sharedMastersGuard } from '../platform-masters/shared-masters.guard';
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { MmmsDashboardComponent } from './components/mmms-dashboard/mmms-dashboard.component';
@@ -127,19 +128,19 @@ const routes: Routes = [
   {
     path: 'organization',
     component: MmmsOrganizationComponent,
-    canActivate: [permissionGuard],
+    canActivate: [sharedMastersGuard, permissionGuard],
     data: { pageCode: 'MMMS-ORGANIZATION', permission: 'MMMS-ORGANIZATION' },
   },
   {
     path: 'factories',
     component: MmmsFactoriesComponent,
-    canActivate: [permissionGuard],
+    canActivate: [sharedMastersGuard, permissionGuard],
     data: { pageCode: 'MMMS-FACTORIES', permission: 'MMMS-FACTORIES' },
   },
   {
     path: 'departments',
     component: MmmsDepartmentsComponent,
-    canActivate: [permissionGuard, mmmsContextGuard],
+    canActivate: [sharedMastersGuard, permissionGuard, mmmsContextGuard],
     data: {
       pageCode: 'MMMS-DEPARTMENTS',
       permission: 'MMMS-DEPARTMENTS',
@@ -149,7 +150,7 @@ const routes: Routes = [
   {
     path: 'production-lines',
     component: MmmsProductionLinesComponent,
-    canActivate: [permissionGuard, mmmsContextGuard],
+    canActivate: [sharedMastersGuard, permissionGuard, mmmsContextGuard],
     data: {
       pageCode: 'MMMS-PRODUCTION-LINES',
       permission: 'MMMS-PRODUCTION-LINES',

@@ -1,3 +1,4 @@
+import { MastersFacade, SharedMaster } from '../../../shared/services/masters/masters.facade';
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
 import {
   ChangeDetectionStrategy,
@@ -33,7 +34,34 @@ export class MmmsTechniciansComponent implements OnInit {
   draft: Partial<MechanicRecord> = {};
   skills = '';
   private readonly facade = inject(MmmsFacadeService);
+  private readonly masterFacade = inject(MastersFacade);
+  readonly sharedPeople = signal(false);
+  readonly employees = signal<SharedMaster[]>([]);
+  employeeSearch = '';
+  loadEmployees(): void {
+    this.masterFacade
+      .page('employees', 1, this.employeeSearch)
+      .subscribe({ next: (p) => this.employees.set(p.items), error: (e) => this.fail(e) });
+  }
+  chooseEmployee(code: string): void {
+    const employee = this.employees().find((e) => e.code === code);
+    if (employee) {
+      this.draft.employeeNumber = employee.code;
+      this.draft.name = employee.name;
+      this.draft.email = employee.email || '';
+      this.draft.phone = employee.phone || '';
+      this.draft.details = { ...this.draft.details, employeeId: employee.id };
+    }
+  }
+
   ngOnInit(): void {
+    this.masterFacade.settings().subscribe({
+      next: (s) => {
+        this.sharedPeople.set(s.sharedMasters);
+        if (s.sharedMasters) this.loadEmployees();
+      },
+      error: (e) => this.fail(e),
+    });
     this.load();
   }
   load(): void {

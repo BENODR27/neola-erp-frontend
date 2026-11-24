@@ -1,6 +1,18 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const {
+  coversHierarchyPermission,
+} = require('../src/app/shared/services/masters/masters-permissions.ts');
+test('existing Masters sessions recognize finite hierarchy bundles without widening page grants', () => {
+  assert.ok(coversHierarchyPermission(['MASTERS-READ'], 'MASTERS-FACTORIES-READ'));
+  assert.ok(coversHierarchyPermission(['MASTERS-MANAGE'], 'MASTERS-FLOORS-MANAGE'));
+  assert.ok(coversHierarchyPermission(['MASTERS-ADMIN'], 'MASTERS-COMPANIES-MANAGE'));
+  assert.ok(!coversHierarchyPermission(['MASTERS-MANAGE'], 'MASTERS-COMPANIES-MANAGE'));
+  assert.ok(!coversHierarchyPermission(['MASTERS-DEPARTMENTS-READ'], 'MASTERS-FACTORIES-READ'));
+  assert.ok(!coversHierarchyPermission(['MASTERS-READ'], 'MASTERS-UNKNOWN-READ'));
+  assert.ok(!coversHierarchyPermission(['MASTERS-READ'], 'MASTERS-FACTORIES-MANAGE'));
+});
+const {
   navigationForUrl,
 } = require('../src/app/shared/services/shared-service/workspace-navigation.ts');
 test('navigation comes solely from permitted IAM records across reloads and app switches', () => {
