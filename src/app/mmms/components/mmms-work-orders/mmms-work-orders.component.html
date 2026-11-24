@@ -3,14 +3,15 @@
     <div>
       <h1>Work orders</h1>
       <p>
-        {{ openCount() }} open orders · assignments, repair execution and supervisor verification
+        {{ openCount() }} open orders on this page · assignments, repair execution and supervisor
+        verification
       </p>
     </div>
     <button type="button" class="primary-action" (click)="edit()">Create work order</button>
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
   <div class="card-toolbar">
-    <label>Search<input #query (input)="search.set(query.value); pagination.reset()" /></label
+    <label>Search<input #query (input)="search.set(query.value); pagination.filter()" /></label
     ><label
       >Status<select #status (change)="statusFilter.set(status.value); pagination.reset()">
         <option value="">All statuses</option>
@@ -36,7 +37,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="visibleOrders().length"
+      [total]="pagination.total()"
       label="Work orders"
     ></app-mmms-pagination>
   </section>
@@ -254,7 +255,7 @@
       </ol>
       <app-mmms-pagination
         [pager]="historyPagination"
-        [total]="history().length"
+        [total]="historyPagination.total()"
         label="History events"
       ></app-mmms-pagination>
 

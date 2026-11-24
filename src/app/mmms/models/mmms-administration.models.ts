@@ -42,6 +42,11 @@ export interface MaintenanceNotification {
   delivery?: Record<string, { status: string; attempts: number }>;
 }
 export interface MaintenanceReport {
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+  availableColumns?: string[];
   title: string;
   generatedAt: string;
   from: string;

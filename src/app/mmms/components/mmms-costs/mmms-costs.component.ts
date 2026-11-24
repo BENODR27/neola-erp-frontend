@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { MachineSummary } from '../../models/mmms.models';
@@ -12,7 +19,10 @@ import { MaintenanceExpense } from '../../models/mmms-administration.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsCostsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   private readonly facade = inject(MmmsFacadeService);
   readonly rows = signal<MaintenanceExpense[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
@@ -43,10 +53,12 @@ export class MmmsCostsComponent implements OnInit {
     });
   }
   load(): void {
-    this.facade.getExpenses().subscribe({
-      next: (rows) => this.rows.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(this.facade.getPage<MaintenanceExpense>('expenses', this.pagination.query({})))
+      .subscribe({
+        next: (rows) => this.rows.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   create(): void {
     this.draft = {

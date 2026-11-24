@@ -6,8 +6,9 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
-import { finalize } from 'rxjs';
+import { finalize, map } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { MaintenanceAnalytics } from '../../models/mmms-analytics.models';
 @Component({
@@ -18,7 +19,10 @@ import { MaintenanceAnalytics } from '../../models/mmms-analytics.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsDashboardComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly data = signal<MaintenanceAnalytics | null>(null);
   readonly loading = signal(false);
   readonly error = signal('');
@@ -84,18 +88,28 @@ export class MmmsDashboardComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.facade
-      .getAnalytics(this.view())
+    this.pagination
+      .read(
+        this.facade.getAnalytics(this.view(), this.pagination.query()).pipe(
+          map((data) => ({
+            result: [data],
+            total: data.taskTotal,
+            page: this.pagination.page(),
+            pageSize: this.pagination.pageSize(),
+            totalPages: Math.max(1, Math.ceil(data.taskTotal / this.pagination.pageSize())),
+          })),
+        ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (data) => this.data.set(data),
+        next: ([data]) => this.data.set(data),
         error: () =>
           this.error.set('Analytics could not be loaded. Check the API connection and retry.'),
       });
   }
   setPeriod(value: '7d' | '30d' | '90d'): void {
     this.period.set(value);
-    this.load();
+    this.pagination.reset();
   }
   value(key: string): string {
     const value = this.data()?.kpis[key];

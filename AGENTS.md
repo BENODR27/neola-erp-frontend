@@ -16,5 +16,6 @@ This Angular app hosts MMMS, WMS, Admin v2 and the shared shell. Preserve the ex
 - Share attachments through storage-service; keep maintenance rules in mmms-backend.
 - Use shared ThemeService and --app-* tokens for fonts, text, surfaces, borders and navigation. Keep screen layouts scoped. Never restore universal font weights or descendant color overrides in styles.css. Shared vendor/customer branding belongs to IAM appearance accounts; it does not grant data access. See ../docs/PLATFORM-APPEARANCE.md.
 - Reuse MmmsPagination for long operational lists, reset pages when filters change, and keep the how-to page aligned with accepted server workflows.
+- Operational lists use facade.getPage and server totals, never a downloaded collection sliced in the browser. Keep relationship selectors independent, preserve full exports and dispose pager requests through DestroyRef. Device-only queues retain local slicing. See ../docs/MMMS-PAGINATION.md.
 - npm start runs the UI; npm run validate runs formatting, lint, architecture and production build. Add focused tests for changed business behavior.
 - Update ../docs/MMMS-REQUIREMENTS-COVERAGE.md with verified coverage and remaining gaps. A screen alone does not complete a workflow.

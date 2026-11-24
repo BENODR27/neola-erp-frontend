@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
@@ -23,8 +24,12 @@ import { WorkOrderSummary } from '../../models/mmms.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsSparePartsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
-  readonly historyPagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+    this.historyPagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
+  readonly historyPagination = new MmmsPagination(() => this.loadHistoryPage());
   readonly parts = signal<InventoryPart[]>([]);
   readonly destinations = signal<InventoryPart[]>([]);
   readonly orders = signal<WorkOrderSummary[]>([]);
@@ -36,15 +41,7 @@ export class MmmsSparePartsComponent implements OnInit {
   readonly search = signal('');
   readonly editorOpen = signal(false);
   readonly editingId = signal<string | null>(null);
-  readonly visible = computed(() =>
-    this.parts().filter((part) =>
-      [part.name, part.category, part.details.partCode].some((value) =>
-        String(value || '')
-          .toLowerCase()
-          .includes(this.search().toLowerCase()),
-      ),
-    ),
-  );
+  readonly visible = computed(() => this.parts());
   readonly lowStock = computed(
     () =>
       this.parts().filter((part) => part.stockQuantity - part.reservedQuantity <= part.reorderLevel)
@@ -76,8 +73,13 @@ export class MmmsSparePartsComponent implements OnInit {
   }
   load(): void {
     this.loading.set(true);
-    this.facade
-      .getInventoryParts()
+    this.pagination
+      .read(
+        this.facade.getPage<InventoryPart>(
+          'spare-parts',
+          this.pagination.query({ search: this.search() }),
+        ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (rows) => this.parts.set(rows),
@@ -114,12 +116,20 @@ export class MmmsSparePartsComponent implements OnInit {
       });
   }
   view(part: InventoryPart): void {
+    this.historyPagination.page.set(1);
     this.selected.set(part);
     this.transaction = this.newTransaction();
-    this.facade.getStockTransactions(part.id).subscribe({
-      next: (rows) => this.transactions.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.historyPagination
+      .read(
+        this.facade.getPage<StockTransaction>(
+          `spare-parts/${part.id}/transactions`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.transactions.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   post(): void {
     const part = this.selected();
@@ -140,6 +150,21 @@ export class MmmsSparePartsComponent implements OnInit {
   }
   private newTransaction(): StockTransactionDraft {
     return { requestId: crypto.randomUUID(), type: 'Receipt', quantity: 1, reason: '' };
+  }
+  loadHistoryPage(): void {
+    const id = this.selected()?.id;
+    if (!id) return;
+    this.historyPagination
+      .read(
+        this.facade.getPage<StockTransaction>(
+          `spare-parts/${id}/transactions`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.transactions.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   private fail(error: unknown): void {
     this.error.set(

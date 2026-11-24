@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
@@ -18,20 +19,17 @@ import { MechanicRecord } from '../../models/mmms-mechanic.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsTechniciansComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly rows = signal<MechanicRecord[]>([]);
   readonly search = signal('');
   readonly saving = signal(false);
   readonly error = signal('');
   readonly editorOpen = signal(false);
   readonly selectedId = signal<string | null>(null);
-  readonly visible = computed(() =>
-    this.rows().filter((row) =>
-      [row.name, row.employeeNumber, ...row.skillCategories].some((value) =>
-        value.toLowerCase().includes(this.search().toLowerCase()),
-      ),
-    ),
-  );
+  readonly visible = computed(() => this.rows());
   draft: Partial<MechanicRecord> = {};
   skills = '';
   private readonly facade = inject(MmmsFacadeService);
@@ -39,10 +37,17 @@ export class MmmsTechniciansComponent implements OnInit {
     this.load();
   }
   load(): void {
-    this.facade.getMechanicRecords().subscribe({
-      next: (rows) => this.rows.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(
+        this.facade.getPage<MechanicRecord>(
+          'technicians',
+          this.pagination.query({ search: this.search() }),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.rows.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   edit(row?: MechanicRecord): void {
     this.selectedId.set(row?.id || null);

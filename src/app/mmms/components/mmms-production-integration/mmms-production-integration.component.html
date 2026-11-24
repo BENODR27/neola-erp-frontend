@@ -11,7 +11,7 @@
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
   <p role="status" *ngIf="loading()">Loading production impact…</p>
-  <label>Search<input #search (input)="query.set(search.value); pagination.reset()" /></label>
+  <label>Search<input #search (input)="query.set(search.value); pagination.filter()" /></label>
   <section class="module-card table-scroll">
     <table>
       <thead>
@@ -45,7 +45,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="visible().length"
+      [total]="pagination.total()"
       label="Production records"
     ></app-mmms-pagination>
   </section>

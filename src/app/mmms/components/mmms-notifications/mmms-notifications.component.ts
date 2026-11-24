@@ -19,7 +19,10 @@ import { MaintenanceNotification } from '../../models/mmms-administration.models
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsNotificationsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   private readonly facade = inject(MmmsFacadeService);
   readonly rows = signal<MaintenanceNotification[]>([]);
   readonly error = signal('');
@@ -32,10 +35,17 @@ export class MmmsNotificationsComponent implements OnInit {
       .subscribe(() => this.load());
   }
   load(): void {
-    this.facade.getNotifications().subscribe({
-      next: (rows) => this.rows.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(
+        this.facade.getPage<MaintenanceNotification>(
+          'master-data/notifications',
+          this.pagination.query({}),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.rows.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   markRead(row: MaintenanceNotification): void {
     this.facade

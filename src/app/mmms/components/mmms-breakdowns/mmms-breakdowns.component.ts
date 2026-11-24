@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
@@ -14,7 +21,10 @@ import { MachineSummary } from '../../models/mmms.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsBreakdownsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly records = signal<BreakdownRecord[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
   readonly error = signal('');
@@ -58,10 +68,12 @@ export class MmmsBreakdownsComponent implements OnInit {
     if (this.route.snapshot.queryParamMap.has('machineId')) this.create();
   }
   load(): void {
-    this.facade.getBreakdownRecords().subscribe({
-      next: (rows) => this.records.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(this.facade.getPage<BreakdownRecord>('breakdowns', this.pagination.query({})))
+      .subscribe({
+        next: (rows) => this.records.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   create(): void {
     this.pendingFiles = [];

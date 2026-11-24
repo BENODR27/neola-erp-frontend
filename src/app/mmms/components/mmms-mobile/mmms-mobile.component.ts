@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { MmmsOfflineService } from '../../services/mmms-offline.service';
 import { WorkOrderRecord } from '../../models/mmms-work-order.models';
@@ -11,7 +18,10 @@ import { WorkOrderRecord } from '../../models/mmms-work-order.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsMobileComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.loadTasks());
   readonly queuePagination = new MmmsPagination();
   readonly offline = inject(MmmsOfflineService);
   readonly tasks = signal<WorkOrderRecord[]>([]);
@@ -23,15 +33,22 @@ export class MmmsMobileComponent implements OnInit {
   }
   loadTasks(): void {
     this.error.set('');
-    this.facade.getWorkOrderRecords(true).subscribe({
-      next: (rows) => {
-        this.error.set('');
-        this.tasks.set(rows.filter((row) => !['Closed', 'Cancelled'].includes(row.status)));
-      },
-      error: () =>
-        this.error.set(
-          'Live tasks are unavailable. Saved device submissions remain available below.',
+    this.pagination
+      .read(
+        this.facade.getPage<WorkOrderRecord>(
+          'work-orders',
+          this.pagination.query({ personal: 'true', activeTasks: 'true' }),
         ),
-    });
+      )
+      .subscribe({
+        next: (rows) => {
+          this.error.set('');
+          this.tasks.set(rows);
+        },
+        error: () =>
+          this.error.set(
+            'Live tasks are unavailable. Saved device submissions remain available below.',
+          ),
+      });
   }
 }

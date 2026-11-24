@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { MaintenancePlanRecord, MaintenanceOccurrence } from '../../models/mmms-maintenance.models';
@@ -12,8 +19,12 @@ import { MachineSummary } from '../../models/mmms.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsPreventiveMaintenanceComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
-  readonly historyPagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+    this.historyPagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
+  readonly historyPagination = new MmmsPagination(() => this.loadHistoryPage());
   readonly plans = signal<MaintenancePlanRecord[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
   readonly occurrences = signal<MaintenanceOccurrence[]>([]);
@@ -57,10 +68,17 @@ export class MmmsPreventiveMaintenanceComponent implements OnInit {
     });
   }
   load(): void {
-    this.facade.getMaintenancePlans().subscribe({
-      next: (rows) => this.plans.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(
+        this.facade.getPage<MaintenancePlanRecord>(
+          'preventive-maintenance',
+          this.pagination.query({}),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.plans.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   edit(plan?: MaintenancePlanRecord): void {
     this.selectedId.set(plan?.id || null);
@@ -113,12 +131,37 @@ export class MmmsPreventiveMaintenanceComponent implements OnInit {
         error: (error: unknown) => this.fail(error),
       });
   }
+  private historyPlanId = '';
   history(plan: MaintenancePlanRecord): void {
+    this.historyPlanId = plan.id;
+    this.historyPagination.page.set(1);
     this.historyOpen.set(true);
-    this.facade.getMaintenanceOccurrences(plan.id).subscribe({
-      next: (rows) => this.occurrences.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.historyPagination
+      .read(
+        this.facade.getPage<MaintenanceOccurrence>(
+          `preventive-maintenance/${plan.id}/occurrences`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.occurrences.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
+  }
+  loadHistoryPage(): void {
+    const id = this.historyPlanId;
+    if (!id) return;
+    this.historyPagination
+      .read(
+        this.facade.getPage<MaintenanceOccurrence>(
+          `preventive-maintenance/${id}/occurrences`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.occurrences.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   private fail(error: unknown): void {
     this.error.set(

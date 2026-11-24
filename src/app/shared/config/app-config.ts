@@ -1,11 +1,13 @@
 import { environment } from '../environments/environment';
+import { PRODUCT_STORY } from './app-branding';
 
 /**
  * Application-wide product metadata and branding.
- * Change the environment metadata to rebrand the application without hunting
- * through individual components and templates.
+ * Change app-branding.ts for the default identity; environment metadata can
+ * override it for a deployment without changing individual components.
  */
 export interface AppConfig {
+  brandStory: typeof PRODUCT_STORY;
   name: string;
   shortName: string;
   description: string;
@@ -19,6 +21,7 @@ export interface AppConfig {
 }
 
 export const APP_CONFIG: Readonly<AppConfig> = Object.freeze({
+  brandStory: PRODUCT_STORY,
   name: environment.appName,
   shortName: environment.appShortName,
   description: environment.appDescription,

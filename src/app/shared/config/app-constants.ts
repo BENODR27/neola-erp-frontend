@@ -1,3 +1,4 @@
+import { PRODUCT_BRANDING } from './app-branding';
 export const APP_CONSTANTS = Object.freeze({
   storage: Object.freeze({
     authSession: 'auth_session',
@@ -13,7 +14,7 @@ export const APP_CONSTANTS = Object.freeze({
     warehouse: '/wms/dashboard',
   }),
   assets: Object.freeze({
-    logo: '/assets/styxlogo.png',
-    companyLogo: '/assets/cflogo.png',
+    logo: PRODUCT_BRANDING.logoPath,
+    companyLogo: PRODUCT_BRANDING.logoPath,
   }),
 } as const);

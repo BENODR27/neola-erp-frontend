@@ -13,11 +13,14 @@
       <i class="bi bi-plus-lg"></i> Add {{ page().singular }}
     </button>
   </header>
+  <p role="alert" *ngIf="error()">
+    {{ error() }} <button type="button" (click)="loadMachineCategories()">Retry</button>
+  </p>
   <section class="summary">
     <div>
       <span class="icon"><i class="bi" [ngClass]="page().icon"></i></span>
       <div>
-        <strong>{{ records().length }}</strong
+        <strong>{{ pagination.total() }}</strong
         ><small>records in this workspace</small>
       </div>
     </div>
@@ -62,7 +65,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="filtered.length"
+      [total]="pagination.total()"
       label="Categories"
     ></app-mmms-pagination>
   </section>

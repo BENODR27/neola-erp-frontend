@@ -1,4 +1,5 @@
 export interface MaintenanceAnalytics {
+  taskTotal: number;
   generatedAt: string;
   from: string;
   to: string;

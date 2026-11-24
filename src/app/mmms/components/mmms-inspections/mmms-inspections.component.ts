@@ -1,6 +1,13 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
 import { MmmsStoredFile } from '../../models/mmms-file.models';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { InspectionRecord } from '../../models/mmms-maintenance.models';
@@ -13,7 +20,10 @@ import { MachineSummary } from '../../models/mmms.models';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsInspectionsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly records = signal<InspectionRecord[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
   readonly error = signal('');
@@ -42,10 +52,14 @@ export class MmmsInspectionsComponent implements OnInit {
     });
   }
   load(): void {
-    this.facade.getInspections().subscribe({
-      next: (rows) => this.records.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(
+        this.facade.getPage<InspectionRecord>('master-data/inspections', this.pagination.query({})),
+      )
+      .subscribe({
+        next: (rows) => this.records.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   create(): void {
     this.draft = {

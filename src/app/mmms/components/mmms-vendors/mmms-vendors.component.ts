@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { SharedVendor, VendorProfile, VendorService } from '../../models/mmms-vendor.models';
@@ -13,9 +20,14 @@ import { AuthService } from '../../../auth/services/auth.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsVendorsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
-  readonly servicePagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+    this.servicePagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.loadVendors());
+  readonly servicePagination = new MmmsPagination(() => this.loadServices());
   readonly vendors = signal<SharedVendor[]>([]);
+  readonly vendorOptions = signal<SharedVendor[]>([]);
   readonly profiles = signal<VendorProfile[]>([]);
   readonly services = signal<VendorService[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
@@ -37,17 +49,29 @@ export class MmmsVendorsComponent implements OnInit {
   }
   load(): void {
     this.facade.getSharedVendors().subscribe({
-      next: (rows) => this.vendors.set(rows),
+      next: (rows) => this.vendorOptions.set(rows),
       error: (error: unknown) => this.fail(error),
     });
+    this.loadVendors();
     this.facade.getVendorProfiles().subscribe({
       next: (rows) => this.profiles.set(rows),
       error: (error: unknown) => this.fail(error),
     });
-    this.facade.getVendorServices().subscribe({
-      next: (rows) => this.services.set(rows),
+    this.loadServices();
+  }
+  loadVendors(): void {
+    this.pagination.read(this.facade.getSharedVendorPage(this.pagination.query())).subscribe({
+      next: (rows) => this.vendors.set(rows),
       error: (error: unknown) => this.fail(error),
     });
+  }
+  loadServices(): void {
+    this.servicePagination
+      .read(this.facade.getPage<VendorService>('vendor-services', this.servicePagination.query()))
+      .subscribe({
+        next: (rows) => this.services.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   catalog(vendor?: SharedVendor): void {
     this.selectedId.set(vendor?.id || null);

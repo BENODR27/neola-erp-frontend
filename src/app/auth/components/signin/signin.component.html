@@ -3,48 +3,115 @@
   <div class="signin-layout">
     <aside class="signin-visual">
       <div class="brand-block">
-        <div class="brand-badge">ERP</div>
-        <img src="/assets/cflogo.png" alt="CF admin" class="brand-logo-lg" />
+        <img [src]="appConfig.logo" [alt]="appConfig.name" class="brand-logo-lg" />
+        <span class="brand-wordmark">{{ appConfig.name }}</span>
       </div>
       <div class="visual-copy">
-        <p class="eyebrow">Intelligent operations</p>
-        <h2>Empowering Garment Excellence Through Digital Innovation.</h2>
-        <p>Connect people, production, and compliance in one unified operational workspace.</p>
+        <p class="eyebrow">{{ appConfig.brandStory.platform }}</p>
+        <h2>
+          {{ appConfig.brandStory.introduction }}<br /><span
+            >{{ appConfig.brandStory.industry }}.</span
+          >
+        </h2>
+        <p>
+          Bring your apparel and textile value chain together. One ERP workspace for the people,
+          processes and operations behind every thread.
+        </p>
       </div>
-      <div class="production-scene" aria-label="Apparel production workflow">
+      <div class="production-scene" aria-label="Loom and apparel journey">
         <div class="production-flow">
-          <div class="production-step"><span class="scene-icon">⌁</span><span>Pattern</span></div>
-          <div class="production-step"><span class="scene-icon">✂</span><span>Cut</span></div>
-          <div class="production-step"><span class="scene-icon">⌁</span><span>Trim</span></div>
-          <div class="production-step"><span class="scene-icon">⌑</span><span>Stitch</span></div>
-          <div class="production-step"><span class="scene-icon">□</span><span>Pack</span></div>
+          <div class="production-step">
+            <span class="scene-icon"><i class="bi bi-pencil-square" aria-hidden="true"></i></span
+            ><span>Design</span>
+          </div>
+          <div class="production-step">
+            <span class="scene-icon"><i class="bi bi-grid-3x3" aria-hidden="true"></i></span
+            ><span>Weave</span>
+          </div>
+          <div class="production-step">
+            <span class="scene-icon"><i class="bi bi-scissors" aria-hidden="true"></i></span
+            ><span>Cut</span>
+          </div>
+          <div class="production-step">
+            <span class="scene-icon"><i class="bi bi-bezier2" aria-hidden="true"></i></span
+            ><span>Stitch</span>
+          </div>
+          <div class="production-step">
+            <span class="scene-icon"><i class="bi bi-box-seam" aria-hidden="true"></i></span
+            ><span>Deliver</span>
+          </div>
         </div>
       </div>
     </aside>
     <main class="signin-panel">
       <div class="signin-card">
-        <div class="brand-header"><img [src]="appConfig.logo" [alt]="appConfig.name" class="brand-logo-sm" /></div>
+        <div class="brand-header">
+          <img [src]="appConfig.logo" alt="" class="brand-logo-sm" /><span class="brand-wordmark">{{
+            appConfig.name
+          }}</span>
+        </div>
+        <p class="brand-meaning">{{ appConfig.brandStory.meaning }}</p>
+        <p class="platform-label">{{ appConfig.brandStory.platform }}</p>
         <div class="welcome-copy">
           <p class="eyebrow dark">Welcome back</p>
-          <h1>Sign in to your workspace</h1>
+          <h1>Log in to your workspace</h1>
         </div>
         <form [formGroup]="form" (ngSubmit)="submit()" class="signin-form" novalidate>
           <div class="field-group">
-            <label for="employeeCode">Employee code</label>
-            <input id="employeeCode" formControlName="employeeCode" type="text" autocomplete="username" placeholder="Enter employee code" />
-            <small *ngIf="form.controls.employeeCode.touched && form.controls.employeeCode.invalid">Employee code is required.</small>
+            <label for="username">Username</label>
+            <input
+              id="username"
+              formControlName="username"
+              type="text"
+              autocomplete="username"
+              placeholder="Enter username"
+            />
+            <small *ngIf="form.controls.username.touched && form.controls.username.invalid"
+              >Username is required.</small
+            >
           </div>
           <div class="field-group">
-            <label for="authCode">Security code</label>
-            <input id="authCode" formControlName="authCode" type="password" autocomplete="current-password" placeholder="Enter security code" />
-            <small *ngIf="form.controls.authCode.touched && form.controls.authCode.invalid">Security code is required.</small>
+            <label for="password">Password</label>
+            <div class="password-input">
+              <input
+                id="password"
+                formControlName="password"
+                [type]="showPassword() ? 'text' : 'password'"
+                autocomplete="current-password"
+                placeholder="Enter password"
+                (keydown.escape)="showPassword.set(false)"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                [attr.aria-label]="showPassword() ? 'Hide password' : 'Show password'"
+                [attr.aria-pressed]="showPassword()"
+                aria-controls="password"
+                [title]="showPassword() ? 'Hide password' : 'Show password'"
+                (click)="showPassword.set(!showPassword())"
+              >
+                <i
+                  class="bi"
+                  [class.bi-eye]="!showPassword()"
+                  [class.bi-eye-slash]="showPassword()"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </div>
+            <small *ngIf="form.controls.password.touched && form.controls.password.invalid"
+              >Password is required.</small
+            >
           </div>
           <div class="form-meta">
-            <label class="remember-me"><input type="checkbox" /> <span>Remember me</span></label>
-            <a routerLink="/auth/login">V1 Login</a>
+            <label class="remember-me"
+              ><input type="checkbox" formControlName="rememberMe" />
+              <span>Remember me</span></label
+            >
           </div>
           <p class="error" *ngIf="errorMessage()" role="alert">{{ errorMessage() }}</p>
-          <button type="submit" [disabled]="isSubmitting()" class="login-button">{{ isSubmitting() ? 'Signing in…' : 'Sign in' }}</button>
+          <button type="submit" [disabled]="isSubmitting()" class="login-button">
+            {{ isSubmitting() ? 'Logging in…' : 'Log in' }}
+          </button>
         </form>
       </div>
     </main>

@@ -211,6 +211,7 @@ export const MMMS_GUIDE: readonly MmmsGuideSection[] = [
       'In Reports choose the report and date range. Company/factory comes from Data scope; add machine, department, floor or category filters.',
       'Generate report, choose columns and use column headings to sort.',
       'Use Rows per page and first/previous/next/last controls. Filtering occurs before paging; exports include the complete filtered report, not only the visible page.',
+      'Operational lists load one page from the server. Search resets to page one; matching totals respect your company/factory access. Histories have independent page controls, while unsynced device submissions remain local.',
       'Use Download Excel or Download PDF with export permission. A generated download link lets you retry saving the file.',
     ],
     note: 'Availability uses observed calendar hours and merged incident downtime. Unmeasured production loss is not estimated.',

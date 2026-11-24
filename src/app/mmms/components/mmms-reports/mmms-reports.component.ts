@@ -7,8 +7,9 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
-import { finalize, firstValueFrom } from 'rxjs';
+import { finalize, firstValueFrom, map } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { MaintenanceReport, ReportFilter } from '../../models/mmms-administration.models';
@@ -20,7 +21,10 @@ import { MaintenanceReport, ReportFilter } from '../../models/mmms-administratio
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsReportsComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly catalog = signal<{ id: string; title: string }[]>([]);
   readonly report = signal<MaintenanceReport | null>(null);
   readonly loading = signal(false);
@@ -30,19 +34,11 @@ export class MmmsReportsComponent implements OnInit {
   readonly descending = signal(false);
   readonly columns = signal<string[]>([]);
   readonly allColumns = computed(() => [
-    ...new Set((this.report()?.rows || []).flatMap((row) => Object.keys(row))),
+    ...(this.report()?.availableColumns || [
+      ...new Set((this.report()?.rows || []).flatMap((row) => Object.keys(row))),
+    ]),
   ]);
-  readonly sortedRows = computed(() => {
-    const rows = [...(this.report()?.rows || [])];
-    const key = this.sortColumn();
-    return key
-      ? rows.sort(
-          (a, b) =>
-            this.cell(a[key]).localeCompare(this.cell(b[key]), undefined, { numeric: true }) *
-            (this.descending() ? -1 : 1),
-        )
-      : rows;
-  });
+  readonly sortedRows = computed(() => this.report()?.rows || []);
   readonly visible = computed(() => this.pagination.slice(this.sortedRows()));
   readonly exportFile = signal<{ url: string; name: string } | null>(null);
   readonly auth = inject(AuthService);
@@ -66,16 +62,37 @@ export class MmmsReportsComponent implements OnInit {
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    this.facade
-      .getReport(this.reportName, this.filter)
+    this.pagination
+      .read(
+        this.facade
+          .getReport(
+            this.reportName,
+            this.filter,
+            false,
+            this.pagination.query({
+              sortBy: this.sortColumn(),
+              sortDirection: this.descending() ? 'desc' : 'asc',
+            }),
+          )
+          .pipe(
+            map((report) => ({
+              result: [report],
+              total: report.total ?? report.rows.length,
+              page: report.page ?? 1,
+              pageSize: report.pageSize ?? 25,
+              totalPages: report.totalPages ?? 1,
+            })),
+          ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: (report) => {
+        next: ([report]) => {
           this.report.set(report);
-          this.pagination.reset();
-          this.columns.set(
-            [...new Set(report.rows.flatMap((row) => Object.keys(row)))].slice(0, 10),
-          );
+          if (
+            !this.columns().length ||
+            !this.columns().every((column) => this.allColumns().includes(column))
+          )
+            this.columns.set(this.allColumns().slice(0, 10));
         },
         error: (error: unknown) => this.fail(error),
       });
@@ -95,6 +112,7 @@ export class MmmsReportsComponent implements OnInit {
   sort(column: string): void {
     this.descending.set(this.sortColumn() === column ? !this.descending() : false);
     this.sortColumn.set(column);
+    this.pagination.reset();
   }
   async download(format: 'xlsx' | 'pdf'): Promise<void> {
     if (this.loading()) return;
@@ -102,7 +120,10 @@ export class MmmsReportsComponent implements OnInit {
     this.error.set('');
     try {
       const report = await firstValueFrom(
-        this.facade.getReport(this.reportName, this.filter, true),
+        this.facade.getReport(this.reportName, this.filter, true, {
+          sortBy: this.sortColumn(),
+          sortDirection: this.descending() ? 'desc' : 'asc',
+        }),
       );
       const columns = this.columns();
       const rows = report.rows.map((row) => columns.map((column) => this.cell(row[column])));

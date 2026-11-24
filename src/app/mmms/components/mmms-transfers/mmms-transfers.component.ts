@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { finalize, forkJoin } from 'rxjs';
 import { AuthService } from '../../../auth/services/auth.service';
@@ -28,7 +29,10 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsTransfersComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   readonly module = 'transfers' as const;
   readonly title = 'Machine transfers';
   readonly records = signal<MachineMovement[]>([]);
@@ -49,15 +53,7 @@ export class MmmsTransfersComponent implements OnInit {
   readonly search = signal('');
   readonly editorOpen = signal(false);
   readonly selected = signal<MachineMovement | null>(null);
-  readonly visible = computed(() =>
-    this.records().filter((row) =>
-      [row.machine, row.machineCode, row.status, row.reason].some((value) =>
-        String(value || '')
-          .toLowerCase()
-          .includes(this.search().toLowerCase()),
-      ),
-    ),
-  );
+  readonly visible = computed(() => this.records());
   draft: MovementDraft = this.emptyDraft();
   actionReason = '';
   private readonly facade = inject(MmmsFacadeService);
@@ -65,27 +61,39 @@ export class MmmsTransfersComponent implements OnInit {
   private readonly context = inject(MmmsContextService);
 
   ngOnInit(): void {
+    this.loadOptions();
     this.load();
+  }
+  loadOptions(): void {
+    forkJoin({
+      machines: this.facade.getMachines(),
+      factories: this.facade.getMovementDestinations(),
+    }).subscribe({
+      next: ({ machines, factories }) => {
+        this.machines.set(machines);
+        this.units.set(factories);
+      },
+      error: (error: unknown) => this.error.set(this.message(error)),
+    });
   }
   load(): void {
     this.loading.set(true);
     this.error.set('');
-    forkJoin({
-      rows: this.facade.getMovements(this.module),
-      machines: this.facade.getMachines(),
-      factories: this.facade.getMovementDestinations(),
-    })
+    this.pagination
+      .read(
+        this.facade.getPage<MachineMovement>(
+          `master-data/${this.module}`,
+          this.pagination.query({ search: this.search() }),
+        ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
-        next: ({ rows, machines, factories }) => {
-          this.records.set(rows);
-          this.machines.set(machines);
-          this.units.set(factories);
-        },
+        next: (rows) => this.records.set(rows),
         error: (error: unknown) => this.error.set(this.message(error)),
       });
   }
   openCreate(): void {
+    this.loadOptions();
     this.selected.set(null);
     this.draft = this.emptyDraft();
     this.draft.destination.factoryId = this.context.context().factoryId || '';

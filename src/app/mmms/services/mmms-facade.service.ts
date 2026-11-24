@@ -1,4 +1,5 @@
 import type { NavbarItem } from '../../shared/services/shared-service/shared-service.service';
+import type { MmmsPage, MmmsPageQuery } from '../models/mmms-page.models';
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { MmmsStoredFile } from '../models/mmms-file.models';
@@ -116,6 +117,32 @@ export interface MmmsMasterRecord {
 /** Typed workspace boundary for live MMMS APIs and response mapping. */
 @Injectable({ providedIn: 'root' })
 export class MmmsFacadeService {
+  getSharedVendorPage(query: MmmsPageQuery): Observable<MmmsPage<SharedVendor>> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query))
+      if (value !== undefined && value !== '') params.set(key, String(value));
+    return this.http.get<MmmsPage<SharedVendor>>(
+      `${environment.authv2ApiUrl}/api/auth/vendors?${params}`,
+    );
+  }
+  getRecord<T>(resource: string): Observable<T> {
+    return this.http
+      .get<{ result: T }>(this.scopedUrl(`${environment.MMMS_API_URL}/${resource}`))
+      .pipe(map((response) => response.result));
+  }
+  getPage<T>(
+    resource: string,
+    query: MmmsPageQuery,
+    includeFactory = true,
+  ): Observable<MmmsPage<T>> {
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (value !== undefined && value !== '') params.set(key, String(value));
+    }
+    return this.http.get<MmmsPage<T>>(
+      this.scopedUrl(`${environment.MMMS_API_URL}/${resource}?${params}`, includeFactory),
+    );
+  }
   readonly selectedPeriod = signal<'7d' | '30d' | '90d'>('30d');
   private readonly http = inject(HttpClient);
   getSharedVendors(): Observable<SharedVendor[]> {
@@ -189,13 +216,15 @@ export class MmmsFacadeService {
     );
     return id ? this.api.putAtUrl(url, payload) : this.api.addData(payload, url);
   }
-  getAnalytics(view: string): Observable<MaintenanceAnalytics> {
+  getAnalytics(view: string, page: MmmsPageQuery = {}): Observable<MaintenanceAnalytics> {
     const days = Number(this.selectedPeriod().replace('d', ''));
     const query = new URLSearchParams({
       view,
       from: new Date(Date.now() - days * 86400000).toISOString(),
       to: new Date().toISOString(),
     });
+    for (const [key, value] of Object.entries(page))
+      if (value !== undefined) query.set(key, String(value));
     return this.api
       .getDatas(this.scopedUrl(`${environment.MMMS_API_URL}/analytics?${query}`))
       .pipe(map((response) => response.result as MaintenanceAnalytics));
@@ -316,8 +345,15 @@ export class MmmsFacadeService {
   getReportCatalog(): Observable<{ id: string; title: string }[]> {
     return this.readRecords<{ id: string; title: string }>('reports/catalog');
   }
-  getReport(name: string, filter: ReportFilter, exporting = false): Observable<MaintenanceReport> {
+  getReport(
+    name: string,
+    filter: ReportFilter,
+    exporting = false,
+    page: MmmsPageQuery = {},
+  ): Observable<MaintenanceReport> {
     const query = new URLSearchParams(Object.entries(filter).filter(([, value]) => !!value));
+    for (const [key, value] of Object.entries(page))
+      if (value !== undefined && value !== '') query.set(key, String(value));
     if (exporting) query.set('export', 'true');
     return this.api
       .getDatas(

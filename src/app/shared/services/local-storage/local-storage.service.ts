@@ -18,17 +18,20 @@ export class LocalStorageService {
     return this.encryptionEnabled;
   }
 
-  setItem(key: string, value: unknown): void {
+  setItem(key: string, value: unknown, location: 'local' | 'session' = 'local'): void {
     const serializedValue = JSON.stringify(value);
     const storedValue = this.encryptionEnabled
       ? CryptoJS.AES.encrypt(serializedValue, this.encryptionKey).toString()
       : serializedValue;
 
-    localStorage.setItem(key, storedValue);
+    const target = location === 'session' ? sessionStorage : localStorage;
+    const other = location === 'session' ? localStorage : sessionStorage;
+    other.removeItem(key);
+    target.setItem(key, storedValue);
   }
 
   getItem<T>(key: string): T | null {
-    const storedValue = localStorage.getItem(key);
+    const storedValue = sessionStorage.getItem(key) ?? localStorage.getItem(key);
     if (storedValue === null) {
       return null;
     }
@@ -43,10 +46,12 @@ export class LocalStorageService {
 
   removeItem(key: string): void {
     localStorage.removeItem(key);
+    sessionStorage.removeItem(key);
   }
 
   clearAll(): void {
     localStorage.clear();
+    sessionStorage.clear();
   }
 
   private parseStoredValue<T>(storedValue: string): T {

@@ -7,7 +7,7 @@
     <button type="button" class="primary-action" (click)="edit()">Add mechanic</button>
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
-  <label>Search<input #query (input)="search.set(query.value); pagination.reset()" /></label>
+  <label>Search<input #query (input)="search.set(query.value); pagination.filter()" /></label>
   <section class="module-card table-scroll">
     <table>
       <thead>
@@ -39,7 +39,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="visible().length"
+      [total]="pagination.total()"
       label="Mechanics"
     ></app-mmms-pagination>
   </section>

@@ -8,9 +8,9 @@
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
   <div class="card-toolbar">
-    <span>{{ lowStock() }} low-stock alerts</span
+    <span>{{ lowStock() }} low-stock items on this page</span
     ><label
-      >Search<input #searchBox (input)="search.set(searchBox.value); pagination.reset()" /></label
+      >Search<input #searchBox (input)="search.set(searchBox.value); pagination.filter()" /></label
     ><button type="button" (click)="load()">Refresh</button>
   </div>
   <p *ngIf="loading()" role="status">Loading inventory…</p>
@@ -48,7 +48,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="visible().length"
+      [total]="pagination.total()"
       label="Parts"
     ></app-mmms-pagination>
   </section>
@@ -240,7 +240,7 @@
       </ol>
       <app-mmms-pagination
         [pager]="historyPagination"
-        [total]="transactions().length"
+        [total]="historyPagination.total()"
         label="Stock transactions"
       ></app-mmms-pagination>
 

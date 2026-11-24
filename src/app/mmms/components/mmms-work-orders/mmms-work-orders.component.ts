@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -21,8 +22,12 @@ import { MmmsFacadeService } from '../../services/mmms-facade.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsWorkOrdersComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
-  readonly historyPagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+    this.historyPagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
+  readonly historyPagination = new MmmsPagination(() => this.loadHistoryPage());
   readonly orders = signal<WorkOrderRecord[]>([]);
   readonly machines = signal<MachineSummary[]>([]);
   readonly technicians = signal<TechnicianSummary[]>([]);
@@ -34,18 +39,8 @@ export class MmmsWorkOrdersComponent implements OnInit {
   readonly statusFilter = signal('');
   readonly editorOpen = signal(false);
   readonly editingId = signal<string | null>(null);
-  readonly visibleOrders = computed(() =>
-    this.orders().filter(
-      (row) =>
-        (!this.statusFilter() || row.status === this.statusFilter()) &&
-        [row.id, row.issue, row.machine?.name, row.technicianName].some((value) =>
-          String(value || '')
-            .toLowerCase()
-            .includes(this.search().toLowerCase()),
-        ),
-    ),
-  );
-  readonly statuses = computed(() => [...new Set(this.orders().map((row) => row.status))]);
+  readonly visibleOrders = computed(() => this.orders());
+  readonly statuses = computed(() => Object.keys(WORK_ORDER_TRANSITIONS));
   readonly openCount = computed(
     () => this.orders().filter((row) => !['Closed', 'Cancelled'].includes(row.status)).length,
   );
@@ -66,6 +61,11 @@ export class MmmsWorkOrdersComponent implements OnInit {
   private readonly auth = inject(AuthService);
   private readonly route = inject(ActivatedRoute);
   ngOnInit(): void {
+    const target = this.route.snapshot.queryParamMap.get('orderId');
+    if (target)
+      this.facade
+        .getRecord<WorkOrderRecord>(`work-orders/${encodeURIComponent(target)}`)
+        .subscribe({ next: (row) => this.edit(row), error: (error: unknown) => this.fail(error) });
     this.facade
       .getSettings()
       .subscribe({ next: (settings) => (this.types = settings.workOrderTypes) });
@@ -81,15 +81,17 @@ export class MmmsWorkOrdersComponent implements OnInit {
   }
   load(): void {
     this.loading.set(true);
-    this.facade
-      .getWorkOrderRecords()
+    this.pagination
+      .read(
+        this.facade.getPage<WorkOrderRecord>(
+          'work-orders',
+          this.pagination.query({ search: this.search(), status: this.statusFilter() }),
+        ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (rows) => {
           this.orders.set(rows);
-          const id = this.route.snapshot.queryParamMap.get('orderId');
-          const row = rows.find((item) => item.id === id);
-          if (row && !this.editorOpen()) this.edit(row);
         },
         error: (error: unknown) => this.fail(error),
       });
@@ -116,13 +118,21 @@ export class MmmsWorkOrdersComponent implements OnInit {
       ? new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16)
       : '';
     this.error.set('');
+    this.historyPagination.page.set(1);
     this.history.set([]);
     this.requiredPartsInput = (this.draft.details?.requiredParts || []).join('\n');
     if (order)
-      this.facade.getWorkOrderHistory(order.id).subscribe({
-        next: (rows) => this.history.set(rows),
-        error: (error: unknown) => this.fail(error),
-      });
+      this.historyPagination
+        .read(
+          this.facade.getPage<MachineHistorySummary>(
+            `work-orders/${order.id}/history`,
+            this.historyPagination.query(),
+          ),
+        )
+        .subscribe({
+          next: (rows) => this.history.set(rows),
+          error: (error: unknown) => this.fail(error),
+        });
     this.editorOpen.set(true);
   }
   allowedStatuses(): string[] {
@@ -175,6 +185,21 @@ export class MmmsWorkOrdersComponent implements OnInit {
           this.editorOpen.set(false);
           this.load();
         },
+        error: (error: unknown) => this.fail(error),
+      });
+  }
+  loadHistoryPage(): void {
+    const id = this.editingId();
+    if (!id) return;
+    this.historyPagination
+      .read(
+        this.facade.getPage<MachineHistorySummary>(
+          `work-orders/${id}/history`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.history.set(rows),
         error: (error: unknown) => this.fail(error),
       });
   }

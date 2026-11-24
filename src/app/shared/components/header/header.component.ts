@@ -99,7 +99,7 @@ export class HeaderComponent {
       .subscribe((title) => {
         this.refreshCurrentEmployeeName();
         this.pageTitle = title;
-        this.titleService.setTitle(title); // Change browser title
+        this.titleService.setTitle(`${title} · ${APP_CONFIG.name}`);
       });
   }
 

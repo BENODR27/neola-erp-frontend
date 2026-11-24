@@ -1,17 +1,12 @@
+import { PRODUCT_BRANDING } from '../config/app-branding';
 import type { Environment } from './environment.model';
 // Same-origin Docker gateway; no external API endpoints.
 export const environment = {
+  ...PRODUCT_BRANDING,
   production: true,
   enableVersionCheck: false,
-  appName: 'Platform',
-  appShortName: 'Platform',
-  appDescription: 'Enterprise operations platform',
   companyName: 'Platform',
   appVersion: '2.0.0',
-  logoPath: '/assets/cflogo.png',
-  logoCompactPath: '/assets/cflogo.png',
-  faviconPath: '',
-  defaultTitle: 'Platform',
   supportEmail: '',
   apiUrl: '',
   apiServiceUrl: '',

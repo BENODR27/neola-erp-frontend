@@ -8,7 +8,7 @@
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
   <div class="card-toolbar">
-    <label>Search<input #search (input)="query.set(search.value); pagination.reset()" /></label
+    <label>Search<input #search (input)="query.set(search.value); pagination.filter()" /></label
     ><label
       >Import CSV / Excel<input
         type="file"
@@ -51,7 +51,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="filtered().length"
+      [total]="pagination.total()"
       label="Machines"
     ></app-mmms-pagination>
   </section>
@@ -198,7 +198,7 @@
       </ol>
       <app-mmms-pagination
         [pager]="historyPagination"
-        [total]="history().length"
+        [total]="historyPagination.total()"
         label="History events"
       ></app-mmms-pagination>
 

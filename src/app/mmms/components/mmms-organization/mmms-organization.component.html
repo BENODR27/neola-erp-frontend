@@ -10,7 +10,7 @@
     <button type="button" class="primary-action" (click)="edit()">Add unit</button>
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
-  <label>Search<input #query (input)="search.set(query.value); pagination.reset()" /></label>
+  <label>Search<input #query (input)="search.set(query.value); pagination.filter()" /></label>
   <section class="table-card table-scroll">
     <table>
       <thead>
@@ -40,7 +40,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="visible().length"
+      [total]="pagination.total()"
       label="Units"
     ></app-mmms-pagination>
   </section>

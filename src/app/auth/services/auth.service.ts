@@ -2,8 +2,25 @@ import { Injectable, computed, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { AuthSession, AuthUser } from '../models/auth.models';
 import { APP_CONSTANTS } from '../../shared/config/app-constants';
+import { LocalStorageService } from '../../shared/services/local-storage/local-storage.service';
+import {
+  clearAuthStorage,
+  readAuthSession,
+  sessionIsCurrent,
+  writeAuthSession,
+} from './auth-session.persistence';
 
 const SESSION_KEY = APP_CONSTANTS.storage.authSession;
+const SESSION_CONTEXT_KEYS = [
+  'loginvia',
+  'currentEmpName',
+  'currentEmpId',
+  'username',
+  'userId',
+  'token',
+  'roles',
+  'permissions',
+];
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,19 +29,37 @@ export class AuthService {
   readonly isAuthenticated = computed(() => Boolean(this.session()?.accessToken));
   readonly permissions = computed(() => this.getPermissions(this.currentUser()));
 
-  constructor(private readonly router: Router) {}
+  constructor(
+    private readonly router: Router,
+    private readonly storage: LocalStorageService,
+  ) {}
 
   isLoggedIn(): boolean {
-    return this.isAuthenticated();
+    return Boolean(this.getToken());
   }
 
   getToken(): string | null {
+    if (this.session() && !sessionIsCurrent(this.session())) this.clearSession();
     return this.session()?.accessToken ?? null;
   }
 
-  setSession(session: AuthSession): void {
+  setSession(session: AuthSession, rememberMe = false): void {
+    writeAuthSession(
+      session,
+      rememberMe,
+      localStorage,
+      sessionStorage,
+      SESSION_KEY,
+      SESSION_CONTEXT_KEYS,
+    );
+    const location = rememberMe ? 'local' : 'session';
+    const user = session.user;
+    this.storage.setItem('loginvia', '/signin', location);
+    this.storage.setItem('currentEmpName', user?.name ?? user?.['employeeName'] ?? '', location);
+    this.storage.setItem('currentEmpId', user?.username ?? user?.['employeeCode'] ?? '', location);
+    this.storage.setItem('username', user?.username ?? user?.['employeeCode'] ?? '', location);
+    this.storage.setItem('userId', user?.id, location);
     this.session.set(session);
-    this.persistSession(session);
   }
 
   hasPermission(permission: string | null | undefined): boolean {
@@ -38,8 +73,7 @@ export class AuthService {
   }
 
   async logout(): Promise<void> {
-    this.session.set(null);
-    localStorage.removeItem(SESSION_KEY);
+    this.clearSession();
     await this.router.navigate(['/signin']);
   }
 
@@ -48,16 +82,11 @@ export class AuthService {
   }
 
   private readSession(): AuthSession | null {
-    try {
-      const raw = localStorage.getItem(SESSION_KEY);
-      return raw ? (JSON.parse(raw) as AuthSession) : null;
-    } catch {
-      localStorage.removeItem(SESSION_KEY);
-      return null;
-    }
+    return readAuthSession(localStorage, sessionStorage, SESSION_KEY, SESSION_CONTEXT_KEYS);
   }
 
-  private persistSession(session: AuthSession): void {
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+  private clearSession(): void {
+    this.session.set(null);
+    clearAuthStorage(localStorage, sessionStorage, SESSION_KEY, SESSION_CONTEXT_KEYS);
   }
 }

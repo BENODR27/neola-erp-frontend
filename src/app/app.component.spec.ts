@@ -14,10 +14,10 @@ describe('AppComponent', () => {
     expect(app).toBeTruthy();
   });
 
-  it(`should have the 'frontend' title`, () => {
+  it(`should use the NeoLA product title`, () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
-    expect(app.appConfig.defaultTitle).toEqual('ADMIN');
+    expect(app.appConfig.defaultTitle).toEqual('NeoLA');
   });
 
   it('should render the application outlets', () => {

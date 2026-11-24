@@ -5,7 +5,10 @@
       <p>Permanent machine links remain valid across factory transfers.</p>
     </div>
     <button type="button" class="primary-action" (click)="print()" [disabled]="!machines().length">
-      Print all labels
+      Print this page
+    </button>
+    <button type="button" (click)="printAll()" [disabled]="!pagination.total()">
+      Print all permitted labels
     </button>
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
@@ -38,7 +41,7 @@
     </ol>
     <app-mmms-pagination
       [pager]="historyPagination"
-      [total]="history().length"
+      [total]="historyPagination.total()"
       label="History events"
     ></app-mmms-pagination>
   </section>
@@ -53,7 +56,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="machines().length"
+      [total]="pagination.total()"
       label="Machine labels"
     ></app-mmms-pagination>
   </section>

@@ -6,9 +6,13 @@
     </div>
   </header>
   <p role="alert" *ngIf="error()">{{ error() }}</p>
-  <form class="module-card form-grid" (ngSubmit)="load()">
+  <form class="module-card form-grid" (ngSubmit)="pagination.reset()">
     <label
-      >Report<select name="report" [(ngModel)]="reportName">
+      >Report<select
+        name="report"
+        [(ngModel)]="reportName"
+        (ngModelChange)="sortColumn.set(''); columns.set([]); pagination.page.set(1)"
+      >
         <option *ngFor="let item of catalog()" [value]="item.id">{{ item.title }}</option>
       </select></label
     ><label>From<input name="from" type="date" [(ngModel)]="filter.from" /></label
@@ -21,7 +25,10 @@
   </form>
   <section class="module-card" *ngIf="report() as data">
     <h2>{{ data.title }}</h2>
-    <p>{{ data.rows.length }} rows · generated {{ data.generatedAt | date: 'medium' }}</p>
+    <p>
+      {{ data.total ?? data.rows.length }} matching records · generated
+      {{ data.generatedAt | date: 'medium' }}
+    </p>
     <details>
       <summary>Select columns</summary>
       <label *ngFor="let column of allColumns()"
@@ -73,7 +80,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="sortedRows().length"
+      [total]="pagination.total()"
       label="Report rows"
     ></app-mmms-pagination>
   </section>

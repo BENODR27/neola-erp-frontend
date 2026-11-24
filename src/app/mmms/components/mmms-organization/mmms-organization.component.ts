@@ -8,6 +8,7 @@ import {
   Input,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { finalize } from 'rxjs';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
@@ -20,7 +21,10 @@ import { OrganizationUnit, ORGANIZATION_PARENTS } from '../../models/mmms-organi
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsOrganizationComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
   private readonly selectedTypes = signal<string[]>([]);
   @Input() set unitTypes(value: string[]) {
     this.selectedTypes.set(value);
@@ -30,39 +34,39 @@ export class MmmsOrganizationComponent implements OnInit {
   }
   private readonly context = inject(MmmsContextService);
   readonly rows = signal<OrganizationUnit[]>([]);
+  readonly parents = signal<OrganizationUnit[]>([]);
   readonly search = signal('');
   readonly error = signal('');
   readonly saving = signal(false);
   readonly editorOpen = signal(false);
   readonly selectedId = signal<string | null>(null);
   readonly types = Object.keys(ORGANIZATION_PARENTS);
-  readonly visible = computed(() =>
-    this.rows().filter(
-      (row) =>
-        (!this.unitTypes.length || this.unitTypes.includes(row.unitType)) &&
-        (!this.context.context().organizationId ||
-          row.organizationId === this.context.context().organizationId) &&
-        (!this.context.context().factoryId ||
-          this.unitTypes.includes('Factory') ||
-          !row.factoryId ||
-          row.factoryId === this.context.context().factoryId) &&
-        [row.name, row.code, row.unitType, row.manager].some((value) =>
-          String(value || '')
-            .toLowerCase()
-            .includes(this.search().toLowerCase()),
-        ),
-    ),
-  );
+  readonly visible = computed(() => this.rows());
   draft: Partial<OrganizationUnit> = {};
   private readonly facade = inject(MmmsFacadeService);
+  loadParents(): void {
+    this.facade.getOrganizationHierarchy().subscribe({
+      next: (rows) => this.parents.set(rows),
+      error: (error: unknown) => this.fail(error),
+    });
+  }
   ngOnInit(): void {
+    this.loadParents();
     this.load();
   }
   load(): void {
-    this.facade.getOrganizationHierarchy().subscribe({
-      next: (rows) => this.rows.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.pagination
+      .read(
+        this.facade.getPage<OrganizationUnit>(
+          'hierarchy',
+          this.pagination.query({ search: this.search(), unitTypes: this.unitTypes.join(',') }),
+          !this.unitTypes.includes('Factory'),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.rows.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   edit(unit?: OrganizationUnit): void {
     this.selectedId.set(unit?.id || null);
@@ -81,7 +85,7 @@ export class MmmsOrganizationComponent implements OnInit {
     this.editorOpen.set(true);
   }
   parentOptions(): OrganizationUnit[] {
-    return this.rows().filter(
+    return this.parents().filter(
       (row) =>
         row.id !== this.selectedId() &&
         (ORGANIZATION_PARENTS[this.draft.unitType || ''] || []).includes(row.unitType) &&
@@ -89,7 +93,7 @@ export class MmmsOrganizationComponent implements OnInit {
     );
   }
   parentName(id: string | null): string {
-    return this.rows().find((row) => row.id === id)?.name || '—';
+    return this.parents().find((row) => row.id === id)?.name || '—';
   }
   save(): void {
     if (this.saving()) return;
@@ -101,6 +105,7 @@ export class MmmsOrganizationComponent implements OnInit {
       .subscribe({
         next: () => {
           this.editorOpen.set(false);
+          this.loadParents();
           this.load();
         },
         error: (error: unknown) => this.fail(error),

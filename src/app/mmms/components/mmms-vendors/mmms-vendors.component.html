@@ -50,7 +50,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="vendors().length"
+      [total]="pagination.total()"
       label="Vendors"
     ></app-mmms-pagination>
   </section>
@@ -83,7 +83,7 @@
     </table>
     <app-mmms-pagination
       [pager]="servicePagination"
-      [total]="services().length"
+      [total]="servicePagination.total()"
       label="Vendor services"
     ></app-mmms-pagination>
   </section>
@@ -150,7 +150,7 @@
               required
             >
               <option value="">Select vendor</option>
-              <option *ngFor="let vendor of vendors()" [value]="vendor.id">
+              <option *ngFor="let vendor of vendorOptions()" [value]="vendor.id">
                 {{ vendor.name }}
               </option>
             </select></label

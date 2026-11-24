@@ -1,5 +1,9 @@
 # Platform Delivery Roadmap
 
+NeoLA's product direction is an end-to-end **Apparel & Textiles ERP**. The woven-thread brand is shared across the application. Future ERP domains should retain independent feature/API ownership and shared IAM/storage boundaries; enabled modules and verified functional coverage remain the source of truth for available capabilities.
+
+MMMS operational lists now use [server pagination](../../docs/MMMS-PAGINATION.md), including independent histories, shared vendors, report rows and dashboard tasks.
+
 Shared appearance now provides Light, Dark, System and account defaults, with explicit vendor/customer branding membership in IAM. Components consume shared CSS tokens; see [appearance contracts](../../docs/PLATFORM-APPEARANCE.md). MMMS lists use a common pager, and its searchable How to use page follows the accepted server workflows.
 
 MMMS now has connected workflows across the five maintenance phases. See [workflow tests](../../docs/MMMS-TESTING.md) and [customization](../../docs/MMMS-CUSTOMIZATION.md). The unchecked items below concern the wider shared platform; MMMS acceptance evidence is recorded in its coverage guide.

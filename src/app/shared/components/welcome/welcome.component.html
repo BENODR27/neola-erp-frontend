@@ -1,34 +1,96 @@
 <main class="platform-home">
-  <header class="home-intro">
-    <span class="eyebrow">{{ appConfig.shortName }} WORKSPACE</span>
-    <h1>Your workspace</h1>
-    <p>
-      Welcome{{ employeeName() ? ', ' + employeeName() : '' }}. Choose an application to get
-      started.
-    </p>
-  </header>
-  <section class="home-destinations" aria-label="Workspace destinations">
-    <a class="destination" routerLink="/applications"
-      ><span class="destination-icon"><i class="bi bi-grid-1x2" aria-hidden="true"></i></span>
-      <div>
-        <h2>Applications</h2>
-        <p>Open the applications available to your account.</p>
-        <span class="destination-action"
-          >Explore applications <i class="bi bi-arrow-up-right" aria-hidden="true"></i
-        ></span></div
-    ></a>
-    <a class="destination" routerLink="/appearance"
-      ><span class="destination-icon"><i class="bi bi-palette" aria-hidden="true"></i></span>
-      <div>
-        <h2>Make it yours</h2>
-        <p>Choose light, dark or system mode and manage your display preferences.</p>
-        <span class="destination-action"
-          >Appearance <i class="bi bi-arrow-up-right" aria-hidden="true"></i
-        ></span></div
-    ></a>
+  <section class="home-hero" aria-labelledby="home-title">
+    <div class="hero-copy">
+      <span class="eyebrow"
+        ><span class="eyebrow-line" aria-hidden="true"></span>
+        {{ appConfig.brandStory.platform }}</span
+      >
+      <p class="greeting">Welcome back{{ employeeName() ? ', ' + employeeName() : '' }}.</p>
+      <h1 id="home-title">
+        {{ appConfig.brandStory.introduction }}<br /><span
+          >{{ appConfig.brandStory.industry }}.</span
+        >
+      </h1>
+      <p class="hero-description">
+        Bring your apparel and textile value chain together—from planning and sourcing to production
+        and delivery. One connected ERP workspace.
+      </p>
+      <a class="hero-action" routerLink="/applications"
+        >Explore your applications <i class="bi bi-arrow-up-right" aria-hidden="true"></i
+      ></a>
+      <div class="hero-caption">
+        <i class="bi bi-intersect" aria-hidden="true"></i> {{ appConfig.brandStory.meaning }}
+      </div>
+    </div>
+    <div class="workspace-art" aria-hidden="true">
+      <div class="art-glow"></div>
+      <div class="orbit orbit-outer"><span class="orbit-dot"></span></div>
+      <div class="orbit orbit-inner"></div>
+      <div class="brand-core">
+        <img [src]="appConfig.logo" alt="" width="116" height="116" /><span>{{
+          appConfig.name
+        }}</span>
+      </div>
+      <div class="orbit-card orbit-card-apps">
+        <span class="art-icon"><i class="bi bi-grid-3x3"></i></span
+        ><span>Loom<small>Where every thread begins</small></span>
+      </div>
+      <div class="orbit-card orbit-card-people">
+        <span class="art-icon"><i class="bi bi-scissors"></i></span
+        ><span>Apparel<small>Made to move forward</small></span>
+      </div>
+      <div class="orbit-card orbit-card-ideas">
+        <span class="art-icon"><i class="bi bi-gear"></i></span
+        ><span>Operations<small>People. Machines. Possibilities.</small></span>
+      </div>
+      <span class="art-spark spark-one"></span><span class="art-spark spark-two"></span>
+    </div>
   </section>
-  <p class="access-note">
-    <i class="bi bi-shield-check" aria-hidden="true"></i> Your applications and actions follow the
-    access assigned to your account.
-  </p>
+  <section class="workspace-section" aria-label="Workspace destinations">
+    <div class="section-heading">
+      <div>
+        <span class="section-kicker">FROM THREAD TO WHAT’S NEXT</span>
+        <h2>Your operations, connected.</h2>
+      </div>
+      <span class="section-caption">Built for loom &amp; apparel teams</span>
+    </div>
+    <div class="home-destinations">
+      <a class="destination destination-apps" routerLink="/applications">
+        <div class="destination-top">
+          <span class="destination-icon"><i class="bi bi-grid-1x2" aria-hidden="true"></i></span
+          ><span class="destination-arrow"
+            ><i class="bi bi-arrow-up-right" aria-hidden="true"></i
+          ></span>
+        </div>
+        <span class="destination-label">YOUR APPLICATIONS</span>
+        <h3>Keep your day moving.</h3>
+        <p>Open the applications your team uses to keep everyday operations moving.</p>
+        <span class="destination-action"
+          >Open applications <i class="bi bi-arrow-right" aria-hidden="true"></i
+        ></span>
+      </a>
+      <a class="destination destination-appearance" routerLink="/appearance">
+        <div class="destination-top">
+          <span class="destination-icon"><i class="bi bi-palette" aria-hidden="true"></i></span
+          ><span class="destination-arrow"
+            ><i class="bi bi-arrow-up-right" aria-hidden="true"></i
+          ></span>
+        </div>
+        <span class="destination-label">MAKE IT YOURS</span>
+        <h3>Made to fit your day.</h3>
+        <p>Go light, go dark, or follow your system. Create a workspace that feels right.</p>
+        <span class="destination-action"
+          >Personalize appearance <i class="bi bi-arrow-right" aria-hidden="true"></i
+        ></span>
+      </a>
+    </div>
+  </section>
+  <footer class="home-footer">
+    <span class="footer-brand"
+      >{{ appConfig.name }}<span class="footer-dot">·</span>{{ appConfig.brandStory.industry }},
+      connected.</span
+    ><span class="access-note"
+      ><i class="bi bi-shield-check" aria-hidden="true"></i> Access tailored to your account.</span
+    >
+  </footer>
 </main>

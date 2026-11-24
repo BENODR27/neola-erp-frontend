@@ -21,6 +21,6 @@ export class MmmsPaginationComponent {
     return Math.min(this.total, this.pager.currentPage(this.total) * this.pager.pageSize());
   }
   go(page: number): void {
-    this.pager.page.set(Math.max(1, Math.min(page, this.pager.pageCount(this.total))));
+    this.pager.go(page, this.total);
   }
 }

@@ -1,18 +1,13 @@
+import { PRODUCT_BRANDING } from '../config/app-branding';
 import type { Environment } from './environment.model';
 
 // Local integration configuration; shared developer endpoints remain unchanged.
 export const environment = {
+  ...PRODUCT_BRANDING,
   production: false,
   enableVersionCheck: false,
-  appName: 'MMMS',
-  appShortName: 'MMMS',
-  appDescription: 'Machine Maintenance Management System',
   companyName: 'Local workflow test',
   appVersion: '1.0.0',
-  logoPath: '/assets/cflogo.png',
-  logoCompactPath: '/assets/cflogo.png',
-  faviconPath: '',
-  defaultTitle: 'MMMS',
   supportEmail: '',
   apiUrl: 'http://localhost:3000',
   apiServiceUrl: '',

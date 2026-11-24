@@ -1,5 +1,12 @@
 import { MmmsPagination } from '../mmms-pagination/mmms-pagination';
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnInit,
+  signal,
+  DestroyRef,
+} from '@angular/core';
 import { MmmsFacadeService } from '../../services/mmms-facade.service';
 import { NotificationService } from '../../../shared/services/notification/notification.service';
 
@@ -22,7 +29,10 @@ type MasterRecord = Record<string, string | number> & { id: string | number; sta
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsMachineCategoriesComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.loadMachineCategories());
   readonly pageCode = 'MMMS-MACHINE-CATEGORIES';
   readonly apiResource = 'master-data/machine-categories';
   readonly moduleCode = 'machine-categories';
@@ -51,6 +61,7 @@ export class MmmsMachineCategoriesComponent implements OnInit {
   readonly relationOptions = signal<Record<string, string[]>>({});
   readonly relationSearch = signal<Record<string, string>>({});
   readonly query = signal('');
+  readonly error = signal('');
   readonly editorOpen = signal(false);
   readonly editingId = signal<string | number | null>(null);
   draft: MasterRecord = { id: '0', module: 'machine-categories', name: '', status: 'Active' };
@@ -68,18 +79,23 @@ export class MmmsMachineCategoriesComponent implements OnInit {
   }
 
   get filtered(): MasterRecord[] {
-    const value = this.query().toLowerCase().trim();
-    return this.records().filter(
-      (record) =>
-        !value || Object.values(record).some((item) => String(item).toLowerCase().includes(value)),
-    );
+    return this.records();
   }
 
   loadMachineCategories(): void {
-    this.facade.getMasterRecords(this.moduleCode).subscribe({
-      next: (rows) => this.records.set(rows as MasterRecord[]),
-      error: () => this.records.set([]),
-    });
+    this.error.set('');
+    this.pagination
+      .read(
+        this.facade.getPage<MasterRecord>(
+          'master-data/machine-categories',
+          this.pagination.query({ search: this.query() }),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.records.set(rows as MasterRecord[]),
+        error: () =>
+          this.error.set('Categories could not be loaded. Retry or check your connection.'),
+      });
   }
 
   loadRelations(): void {
@@ -111,6 +127,7 @@ export class MmmsMachineCategoriesComponent implements OnInit {
 
   updateQuery(value: string): void {
     this.query.set(value);
+    this.pagination.filter();
   }
 
   openCreate(): void {
@@ -145,11 +162,8 @@ export class MmmsMachineCategoriesComponent implements OnInit {
       status: this.draft.status || 'Active',
     };
     this.facade.saveMasterRecord(this.moduleCode, id, payload).subscribe({
-      next: (response) => {
-        const saved = ((response as { result?: MasterRecord })?.result ?? payload) as MasterRecord;
-        this.records.update((rows) =>
-          id ? rows.map((row) => (String(row.id) === id ? saved : row)) : [saved, ...rows],
-        );
+      next: () => {
+        this.loadMachineCategories();
         this.closeEditor();
         this.notifications.success(
           id ? 'Category updated' : 'Category created',
@@ -167,9 +181,7 @@ export class MmmsMachineCategoriesComponent implements OnInit {
         if (!result.isConfirmed) return;
         this.facade.deleteMasterRecord(this.moduleCode, String(record.id)).subscribe({
           next: () => {
-            this.records.update((rows) =>
-              rows.filter((row) => String(row.id) !== String(record.id)),
-            );
+            this.loadMachineCategories();
             this.notifications.success('Category removed', 'The machine category was removed.');
           },
           error: (error) => this.notifications.handleError(error, 'Could not remove category'),

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterModule } from '@angular/router';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { AuthSession } from '../../models/auth.models';
 import { AuthService } from '../../services/auth.service';
@@ -10,7 +10,6 @@ import { environment } from '../../../shared/environments/environment';
 import { APP_CONFIG } from '../../../shared/config/app-config';
 import { APP_CONSTANTS } from '../../../shared/config/app-constants';
 import { LocalStorageService } from '../../../shared/services/local-storage/local-storage.service';
-import Swal from 'sweetalert2';
 
 interface LoginResponse {
   status?: number;
@@ -28,7 +27,7 @@ interface LoginResponse {
 @Component({
   selector: 'app-signin',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, RouterModule],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.css',
 })
@@ -36,6 +35,7 @@ export class SigninComponent {
   readonly appConfig = APP_CONFIG;
   readonly isSubmitting = signal(false);
   readonly errorMessage = signal('');
+  readonly showPassword = signal(false);
 
   private readonly formBuilder = inject(FormBuilder);
   private readonly http = inject(HttpService);
@@ -46,17 +46,20 @@ export class SigninComponent {
   readonly facility = 'Digital Transformation';
 
   readonly form = this.formBuilder.nonNullable.group({
-    employeeCode: ['', Validators.required],
-    authCode: ['', Validators.required],
+    username: ['', [Validators.required, Validators.pattern(/\S/)]],
+    password: ['', Validators.required],
+    rememberMe: [false],
   });
 
   submit(): void {
     this.errorMessage.set('');
     this.form.markAllAsTouched();
     if (this.form.invalid || this.isSubmitting()) return;
+    this.showPassword.set(false);
 
-    const credentials = this.form.getRawValue();
-    credentials.employeeCode = credentials.employeeCode.replace(/^0+/, '');
+    const { username, password, rememberMe } = this.form.getRawValue();
+    // Keep the existing IAM contract; the UI uses familiar login terminology.
+    const credentials = { employeeCode: username.trim(), authCode: password };
     this.isSubmitting.set(true);
 
     this.http
@@ -100,43 +103,35 @@ export class SigninComponent {
             (result as { employeeName?: string; name?: string }).employeeName ??
             (result as { name?: string }).name ??
             '';
-          const employeeId = (result as { id?: string | number }).id;
           const user = {
             ...result,
+            username: credentials.employeeCode,
+            name: employeeName,
             roles: userRoles,
             permissions: userPermissions,
           };
 
-          this.localStorageService.setItem('loginvia', '/auth/signin');
-          this.localStorageService.setItem('currentEmpName', employeeName);
-          this.localStorageService.setItem('currentEmpId', credentials.employeeCode);
-          this.localStorageService.setItem('selectedFacility', this.facility);
-          this.localStorageService.setItem('username', credentials.employeeCode);
-          this.localStorageService.setItem('userId', employeeId);
-          this.localStorageService.setItem('token', accessToken);
-          this.localStorageService.setItem('roles', JSON.stringify(userRoles));
-          this.localStorageService.setItem('permissions', JSON.stringify(userPermissions));
-
-          this.authService.setSession({
-            accessToken,
-            refreshToken: payload.refreshToken,
-            user,
-          });
-
-          void Swal.fire({
-            title: 'Success',
-            timer: 1000,
-            text: `Welcome to ADMIN ${employeeName}`,
-            icon: 'success',
-            showConfirmButton: false,
-          });
+          try {
+            this.authService.setSession(
+              { accessToken, refreshToken: payload.refreshToken, user },
+              rememberMe,
+            );
+            this.localStorageService.setItem('selectedFacility', this.facility);
+          } catch {
+            this.errorMessage.set(
+              'Your browser could not save the session. Allow site storage and try again.',
+            );
+            return;
+          }
           void this.router.navigateByUrl(APP_CONSTANTS.routes.home);
         },
-        error: (error: { error?: LoginResponse; message?: string }) => {
+        error: (error: { status?: number; error?: LoginResponse; message?: string }) => {
           this.errorMessage.set(
-            error.error?.message ??
-              error.message ??
-              'Unable to sign in. Check your credentials and try again.',
+            error.status === 401
+              ? 'Incorrect username or password.'
+              : (error.error?.message ??
+                  error.message ??
+                  'Unable to sign in. Check your credentials and try again.'),
           );
         },
       });

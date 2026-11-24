@@ -10,10 +10,15 @@
     <i class="bi bi-list" aria-hidden="true"></i>
   </button>
   <a class="brand" [routerLink]="appRoutes.home" [attr.aria-label]="appConfig.shortName + ' home'"
-    ><img [src]="appConfig.logo" [alt]="workspaceBrand" class="brand-logo" width="42" height="42"
-  /></a>
+    ><img [src]="appConfig.logo" alt="" class="brand-logo" width="42" height="42" /><span
+      class="brand-wordmark"
+      >{{ appConfig.name }}</span
+    ></a
+  >
   <div class="header-heading">
-    <span class="workspace-name">{{ workspaceBrand }}</span
+    <span class="workspace-name" [hidden]="workspaceBrand === appConfig.name">{{
+      workspaceBrand
+    }}</span
     ><span class="page-title">{{ pageTitle }}</span>
   </div>
   <app-second-navbar></app-second-navbar>

@@ -17,7 +17,7 @@
       >Dashboard<select
         #perspective
         [value]="view()"
-        (change)="view.set(perspective.value); load()"
+        (change)="view.set(perspective.value); pagination.reset()"
       >
         <option value="management">Management</option>
         <option value="supervisor">Maintenance supervisor</option>
@@ -118,7 +118,7 @@
 
       <app-mmms-pagination
         [pager]="pagination"
-        [total]="analytics.tasks.length"
+        [total]="pagination.total()"
         label="Tasks"
       ></app-mmms-pagination>
     </section>

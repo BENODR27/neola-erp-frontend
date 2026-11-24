@@ -1,17 +1,12 @@
+import { PRODUCT_BRANDING } from '../config/app-branding';
 import type { Environment } from './environment.model';
 // Ordinary local databases, with same-origin development proxies. No test fixtures.
 export const environment = {
+  ...PRODUCT_BRANDING,
   production: false,
   enableVersionCheck: false,
-  appName: 'Platform',
-  appShortName: 'Platform',
-  appDescription: 'Enterprise operations platform',
   companyName: 'Local development',
   appVersion: '2.0.0',
-  logoPath: '/assets/cflogo.png',
-  logoCompactPath: '/assets/cflogo.png',
-  faviconPath: '',
-  defaultTitle: 'Platform',
   supportEmail: '',
   apiUrl: '',
   apiServiceUrl: '',

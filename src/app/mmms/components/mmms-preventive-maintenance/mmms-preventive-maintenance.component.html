@@ -44,7 +44,7 @@
 
     <app-mmms-pagination
       [pager]="pagination"
-      [total]="plans().length"
+      [total]="pagination.total()"
       label="Plans"
     ></app-mmms-pagination>
   </section>
@@ -174,7 +174,7 @@
       </ol>
       <app-mmms-pagination
         [pager]="historyPagination"
-        [total]="occurrences().length"
+        [total]="historyPagination.total()"
         label="Occurrences"
       ></app-mmms-pagination>
 

@@ -6,6 +6,7 @@ import {
   inject,
   OnInit,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { finalize } from 'rxjs';
@@ -25,8 +26,12 @@ interface MachineField {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MmmsMachinesComponent implements OnInit {
-  readonly pagination = new MmmsPagination();
-  readonly historyPagination = new MmmsPagination();
+  private readonly paginationCleanup = inject(DestroyRef).onDestroy(() => {
+    this.pagination.destroy();
+    this.historyPagination.destroy();
+  });
+  readonly pagination = new MmmsPagination(() => this.load());
+  readonly historyPagination = new MmmsPagination(() => this.loadHistoryPage());
   readonly machines = signal<MachineRecord[]>([]);
   readonly history = signal<MachineHistorySummary[]>([]);
   readonly loading = signal(false);
@@ -36,22 +41,7 @@ export class MmmsMachinesComponent implements OnInit {
 
   readonly editorOpen = signal(false);
   readonly selected = signal<MachineRecord | null>(null);
-  readonly filtered = computed(() =>
-    this.machines().filter((row) =>
-      [
-        row.name,
-        row.machineCode,
-        row.assetNumber,
-        row.category,
-        row.status,
-        row['serialNumber'],
-      ].some((value) =>
-        String(value || '')
-          .toLowerCase()
-          .includes(this.query().toLowerCase()),
-      ),
-    ),
-  );
+  readonly filtered = computed(() => this.machines());
   readonly visible = computed(() => this.pagination.slice(this.filtered()));
   readonly lifecycle = [
     'Requested',
@@ -100,6 +90,12 @@ export class MmmsMachinesComponent implements OnInit {
   private readonly facade = inject(MmmsFacadeService);
   private readonly route = inject(ActivatedRoute);
   ngOnInit(): void {
+    const target = this.route.snapshot.queryParamMap.get('machineId');
+    if (target)
+      this.facade.getRecord<MachineRecord>(`machines/${encodeURIComponent(target)}`).subscribe({
+        next: (row) => this.profile(row),
+        error: (error: unknown) => this.fail(error),
+      });
     this.facade.getSettings().subscribe({
       next: (settings) => {
         this.categories = settings.machineCategories;
@@ -111,15 +107,17 @@ export class MmmsMachinesComponent implements OnInit {
   }
   load(): void {
     this.loading.set(true);
-    this.facade
-      .getMachineRecords()
+    this.pagination
+      .read(
+        this.facade.getPage<MachineRecord>(
+          'machines',
+          this.pagination.query({ search: this.query() }),
+        ),
+      )
       .pipe(finalize(() => this.loading.set(false)))
       .subscribe({
         next: (rows) => {
           this.machines.set(rows);
-          const id = this.route.snapshot.queryParamMap.get('machineId');
-          const row = rows.find((item) => item.id === id);
-          if (row) this.profile(row);
         },
         error: (error: unknown) => this.fail(error),
       });
@@ -170,11 +168,19 @@ export class MmmsMachinesComponent implements OnInit {
       });
   }
   profile(machine: MachineRecord): void {
+    this.historyPagination.page.set(1);
     this.selected.set(machine);
-    this.facade.getMachineHistory(machine.id).subscribe({
-      next: (rows) => this.history.set(rows),
-      error: (error: unknown) => this.fail(error),
-    });
+    this.historyPagination
+      .read(
+        this.facade.getPage<MachineHistorySummary>(
+          `machines/${machine.id}/history`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.history.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   archive(machine: MachineRecord): void {
     if (!window.confirm('Archive this machine and retain its history?')) return;
@@ -255,6 +261,21 @@ export class MmmsMachinesComponent implements OnInit {
     }
     if (quoted) throw new Error('CSV has an unclosed quoted field.');
     return rows;
+  }
+  loadHistoryPage(): void {
+    const id = this.selected()?.id;
+    if (!id) return;
+    this.historyPagination
+      .read(
+        this.facade.getPage<MachineHistorySummary>(
+          `machines/${id}/history`,
+          this.historyPagination.query(),
+        ),
+      )
+      .subscribe({
+        next: (rows) => this.history.set(rows),
+        error: (error: unknown) => this.fail(error),
+      });
   }
   private fail(error: unknown): void {
     this.error.set(

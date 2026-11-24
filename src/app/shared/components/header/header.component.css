@@ -184,3 +184,23 @@ app-second-navbar {
     margin-left: auto;
   }
 }
+
+.brand {
+  gap: 8px;
+  text-decoration: none;
+  color: var(--app-text);
+}
+.brand-wordmark {
+  font-size: 1.45rem;
+  font-weight: 750;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+}
+@media (max-width: 480px) {
+  .brand-wordmark {
+    font-size: 1.1rem;
+  }
+  .brand {
+    gap: 4px;
+  }
+}
