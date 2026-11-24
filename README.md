@@ -121,7 +121,3 @@ Agent rules:
 - Some legacy screens still use NgModules and broad `any` models; they are migration candidates, not blockers for new feature work.
 - The Karma builder is retained for compatibility with the current test suite. A future task should move tests to the Angular 22 application test builder or a Vite-native runner.
 - Existing third-party PDF/export packages produce CommonJS optimization warnings. They should be isolated behind lazy services before tightening bundle budgets.
-
-# frontend-v1
-
-# neola-erp-frontend

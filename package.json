@@ -6,7 +6,6 @@
     "start": "ng serve",
     "start:local": "ng serve --configuration local --proxy-config proxy.local.json --prebundle=false --host=127.0.0.1 --port=4201",
     "start:mmms-test": "ng serve --configuration mmms-test --prebundle=false --proxy-config proxy.mmms-test.json",
-    "start:all": "npm run start",
     "build": "npm run build:production",
     "build:test": "ng build --configuration development --output-path dist/frontend-test",
     "build:production": "ng build --configuration production --output-path dist/frontend-release",
