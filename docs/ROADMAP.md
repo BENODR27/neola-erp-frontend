@@ -7,6 +7,8 @@ sibling startup coupling while retaining existing combined profiles. The confirm
 six-package design intentionally keeps Home, IAM, Masters, MMMS and WMS together
 in this ERP frontend. Each deployable owns its environment templates, deployment
 guide and `docker:*` commands; workspace frontend extraction is outside this scope.
+Independent profiles connect through configured host IPs and published ports
+5001–5006 without requiring a shared external Docker network.
 
 Masters now has separate lazy pages for Organization, Units, Currencies, Employees, Contacts and Vendors. Each owns its component/template/styles and explicit editor; shared request and table controls retain server pagination, theme tokens and IAM permissions. See [page structure and menu migration](../../docs/SHARED-MASTERS.md#dedicated-catalog-pages).
 

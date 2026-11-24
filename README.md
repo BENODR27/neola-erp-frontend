@@ -2,6 +2,9 @@
 
 Independent Docker deployment: [package setup and environment configuration](DEPLOYMENT.md).
 
+Independent containers connect through your configured host IP and ports 5001–5006.
+The independent Compose profiles do not require a shared external Docker network.
+
 MMMS follows [MMMS-NEW.MD](../reqs/MMMS-NEW.MD). See [architecture](../docs/ARCHITECTURE.md), [developer setup](../docs/MMMS-GETTING-STARTED.md) and [coverage and gaps](../docs/MMMS-REQUIREMENTS-COVERAGE.md).
 
 ADMIN is an enterprise operations platform built with Angular 22. The frontend currently contains the warehouse-management and administration workspaces, shared authentication, navigation, reporting, AI/chat, QR scanning, and reusable UI services.
@@ -120,4 +123,5 @@ Agent rules:
 - Existing third-party PDF/export packages produce CommonJS optimization warnings. They should be isolated behind lazy services before tightening bundle budgets.
 
 # frontend-v1
+
 # neola-erp-frontend
