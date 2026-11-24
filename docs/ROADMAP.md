@@ -9,6 +9,9 @@ in this ERP frontend. Each deployable owns its environment templates, deployment
 guide and `docker:*` commands; workspace frontend extraction is outside this scope.
 Independent profiles connect through configured host IPs and published ports
 5001–5006 without requiring a shared external Docker network.
+Production customer APIs have independent signed-policy deployment overlays;
+commercial controls remain on the provider server. The common-db folder supplies
+one isolated PostgreSQL server for tests on port 5433, with separate app databases.
 
 Masters now has separate lazy pages for Organization, Units, Currencies, Employees, Contacts and Vendors. Each owns its component/template/styles and explicit editor; shared request and table controls retain server pagination, theme tokens and IAM permissions. See [page structure and menu migration](../../docs/SHARED-MASTERS.md#dedicated-catalog-pages).
 
